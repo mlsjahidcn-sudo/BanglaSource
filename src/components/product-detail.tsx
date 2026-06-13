@@ -408,7 +408,7 @@ export function ProductDetail({ product }: { product: Product }) {
                     value={fmtBdt(lc.intlBdt)}
                     sub={
                       lc.rateTier
-                        ? `Air at ৳${Math.round((lc.rateTier.rateCnyPerKg * 16.85))}/kg, ${lc.chargeableKg.toFixed(2)} kg chargeable${
+                        ? `${mode === "air" ? "Air" : "Express"} at ৳${lc.rateTier.rateBdtPerKg.toLocaleString()}/kg, ${lc.chargeableKg.toFixed(2)} kg chargeable${
                             lc.volumetricKg > lc.chargeableKg
                               ? ` (volumetric — pack tighter to save)`
                               : ""

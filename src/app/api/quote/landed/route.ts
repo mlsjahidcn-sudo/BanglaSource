@@ -87,7 +87,7 @@ export async function GET(req: NextRequest) {
   }
   if (quote.tooSmallForAir) {
     warnings.push(
-      `Small-parcel premium: at ${quote.chargeableKg.toFixed(2)} kg you're in the air-freight ¥${quote.rateTier?.rateCnyPerKg ?? 80}/kg tier. Order 5+ kg to drop to the ¥50/kg tier and cut shipping ~40% — or use sea LCL for orders under 30 kg.`,
+      `Small-parcel premium: at ${quote.chargeableKg.toFixed(2)} kg you're in the air-freight ৳${(quote.rateTier?.rateBdtPerKg ?? 1348).toLocaleString()}/kg tier. Order 5+ kg to drop to the ৳843/kg tier and cut shipping ~40% — or use sea LCL for orders under 30 kg.`,
     );
   }
   if (
@@ -97,9 +97,8 @@ export async function GET(req: NextRequest) {
     // Volumetric weight is significantly higher than actual —
     // the box is too big for its weight. Suggest better packing.
     const savingsBdt = Math.round(
-      ((quote.volumetricKg - quote.chargeableKg) *
-        (quote.rateTier?.rateCnyPerKg ?? 35) *
-        16.85),
+      (quote.volumetricKg - quote.chargeableKg) *
+        (quote.rateTier?.rateBdtPerKg ?? 590),
     );
     warnings.push(
       `Box is bulky — volumetric weight (${quote.volumetricKg.toFixed(2)} kg) is much higher than actual (${quote.chargeableKg.toFixed(2)} kg). Ask the factory for tighter packaging — could save ~৳${savingsBdt.toLocaleString()} in shipping.`,
