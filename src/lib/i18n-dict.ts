@@ -269,6 +269,52 @@ export const dict: Dict = {
     en: "Live stats from our sourcing network",
     bn: "আমাদের সোর্সিং নেটওয়ার্কের লাইভ পরিসংখ্যান",
   },
+  "footer.why.fact1_title": { en: "Verified factories.", bn: "যাচাইকৃত কারখানা।" },
+  "footer.why.fact1_body": {
+    en: "Every supplier on our platform has a real Chinese business license on file.",
+    bn: "আমাদের প্ল্যাটফর্মের প্রতিটি সরবরাহকারীর একটি প্রকৃত চীনা ব্যবসায়িক লাইসেন্স আছে।",
+  },
+  "footer.why.fact2_title": { en: "70/30 split.", bn: "৭০/৩০ বিভাজন।" },
+  "footer.why.fact2_body": {
+    en: "70% confirms your order, 30% settles in Dhaka on delivery — never all up-front.",
+    bn: "৭০% অর্ডার নিশ্চিত করে, ৩০% ঢাকায় ডেলিভারিতে সমন্বয় হয় — কখনো আগাম পুরোটা নয়।",
+  },
+  "footer.why.fact3_title": { en: "BD + CN support.", bn: "বাংলাদেশ + চীন সাপোর্ট।" },
+  "footer.why.fact3_body": {
+    en: "BD WhatsApp + CN phone — answered in বাংলা, English, 中文.",
+    bn: "বাংলাদেশ হোয়াটসঅ্যাপ + চীনা ফোন — বাংলা, English, 中文-এ উত্তর দেওয়া হয়।",
+  },
+  "footer.why.fact4_title": { en: "Door-to-door.", bn: "ঘরে ঘরে।" },
+  "footer.why.fact4_body": {
+    en: "Guangzhou factory → Dhaka warehouse → your shop. One tracking number.",
+    bn: "গুয়াংজু কারখানা → ঢাকা গুদাম → আপনার দোকান। একটি ট্র্যাকিং নম্বর।",
+  },
+  "footer.credentials.label": { en: "Credentials & operations", bn: "প্রমাণপত্র ও কার্যক্রম" },
+  "footer.credentials.lic_title": { en: "DSCC-licensed", bn: "DSCC লাইসেন্সপ্রাপ্ত" },
+  "footer.credentials.lic_body": {
+    en: "Trade License TRAD/DSCC/023758/2021",
+    bn: "ট্রেড লাইসেন্স TRAD/DSCC/023758/2021",
+  },
+  "footer.credentials.tls_title": { en: "HTTPS everywhere", bn: "সর্বত্র HTTPS" },
+  "footer.credentials.tls_body": {
+    en: "TLS 1.3, HSTS, no third-party trackers on cart or checkout.",
+    bn: "TLS 1.3, HSTS, কার্ট ও চেকআউটে কোনো তৃতীয়-পক্ষ ট্র্যাকার নেই।",
+  },
+  "footer.credentials.dhaka_title": { en: "Dhaka warehouse", bn: "ঢাকা গুদাম" },
+  "footer.credentials.dhaka_body": {
+    en: "Badda, Dhaka — open Sat-Thu 10:00-19:00 BST.",
+    bn: "বাড্ডা, ঢাকা — শনি-বৃহঃ ১০:০০-১৯:০০ BST খোলা।",
+  },
+  "footer.credentials.hours_title": { en: "Replies in <2 hrs", bn: "<২ ঘণ্টায় উত্তর" },
+  "footer.credentials.hours_body": {
+    en: "10:00-22:00 BST, 7 days/week on WhatsApp.",
+    bn: "সপ্তাহে ৭ দিন হোয়াটসঅ্যাপে ১০:০০-২২:০০ BST।",
+  },
+  "footer.credentials.aisearch_title": { en: "AI sourcing", bn: "AI সোর্সিং" },
+  "footer.credentials.aisearch_body": {
+    en: "DeepSeek-powered natural-language search and ops tools.",
+    bn: "DeepSeek-চালিত প্রাকৃতিক ভাষা অনুসন্ধান ও অপস টুলস।",
+  },
 
   // ── Cart drawer ───────────────────────────────────────────────────
   "cart.title": { en: "Order list", bn: "অর্ডার তালিকা" },

@@ -210,6 +210,121 @@ function Icon({
           />
         </svg>
       );
+    case "check-circle":
+      return (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={c}
+        >
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <path d="m22 4-10 10-3-3" />
+        </svg>
+      );
+    case "clock":
+      return (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={c}
+        >
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+      );
+    case "truck":
+      return (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={c}
+        >
+          <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+          <path d="M15 18H9" />
+          <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" />
+          <circle cx="17" cy="18" r="2" />
+          <circle cx="7" cy="18" r="2" />
+        </svg>
+      );
+    case "lock":
+      return (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={c}
+        >
+          <rect width="18" height="11" x="3" y="11" rx="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+      );
+    case "sparkles":
+      return (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={c}
+        >
+          <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z" />
+          <path d="M5 3v4" />
+          <path d="M19 17v4" />
+          <path d="M3 5h4" />
+          <path d="M17 19h4" />
+        </svg>
+      );
+    case "headset":
+      return (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={c}
+        >
+          <path d="M3 14h3v6H3zM21 14h-3v6h3z" />
+          <path d="M3 14a9 9 0 0 1 18 0" />
+          <path d="M21 18a4 4 0 0 1-4 4h-2" />
+        </svg>
+      );
+    case "store":
+      return (
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={c}
+        >
+          <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7" />
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+          <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4" />
+          <path d="M2 7h20" />
+          <path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7" />
+        </svg>
+      );
     default:
       return null;
   }
@@ -366,6 +481,56 @@ export function Footer() {
               <Icon name="shield-check" className="w-3 h-3 text-emerald-600" />
               {t("footer.trade_license")}
             </div>
+
+            {/* Why trust us — 4 micro-bullets that reinforce
+                the trust band above. Each one a single fact
+                buyers can verify on the relevant page. */}
+            <ul className="mt-5 space-y-1.5 text-[12px] text-fg-muted">
+              <li className="flex items-start gap-2">
+                <span className="text-emerald-600 mt-0.5 shrink-0">
+                  <Icon name="check-circle" className="w-3.5 h-3.5" />
+                </span>
+                <span>
+                  <span className="text-fg font-medium">
+                    {t("footer.why.fact1_title")}
+                  </span>{" "}
+                  {t("footer.why.fact1_body")}
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-emerald-600 mt-0.5 shrink-0">
+                  <Icon name="lock" className="w-3.5 h-3.5" />
+                </span>
+                <span>
+                  <span className="text-fg font-medium">
+                    {t("footer.why.fact2_title")}
+                  </span>{" "}
+                  {t("footer.why.fact2_body")}
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-emerald-600 mt-0.5 shrink-0">
+                  <Icon name="headset" className="w-3.5 h-3.5" />
+                </span>
+                <span>
+                  <span className="text-fg font-medium">
+                    {t("footer.why.fact3_title")}
+                  </span>{" "}
+                  {t("footer.why.fact3_body")}
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-emerald-600 mt-0.5 shrink-0">
+                  <Icon name="truck" className="w-3.5 h-3.5" />
+                </span>
+                <span>
+                  <span className="text-fg font-medium">
+                    {t("footer.why.fact4_title")}
+                  </span>{" "}
+                  {t("footer.why.fact4_body")}
+                </span>
+              </li>
+            </ul>
 
             {/* Social row */}
             <div className="mt-6 flex items-center gap-3 text-fg-muted">
@@ -572,6 +737,45 @@ export function Footer() {
           </div>
         </div>
 
+        {/* ── Credentials / trust badges row ───────────────────────── */}
+        <div className="mt-10 pt-6 border-t border-border">
+          <p className="text-[11px] uppercase tracking-wider text-fg-subtle font-medium mb-3">
+            {t("footer.credentials.label")}
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Credential
+              icon="shield-check"
+              title={t("footer.credentials.lic_title")}
+              body={t("footer.credentials.lic_body")}
+              tone="emerald"
+            />
+            <Credential
+              icon="lock"
+              title={t("footer.credentials.tls_title")}
+              body={t("footer.credentials.tls_body")}
+              tone="slate"
+            />
+            <Credential
+              icon="store"
+              title={t("footer.credentials.dhaka_title")}
+              body={t("footer.credentials.dhaka_body")}
+              tone="cyan"
+            />
+            <Credential
+              icon="clock"
+              title={t("footer.credentials.hours_title")}
+              body={t("footer.credentials.hours_body")}
+              tone="amber"
+            />
+            <Credential
+              icon="sparkles"
+              title={t("footer.credentials.aisearch_title")}
+              body={t("footer.credentials.aisearch_body")}
+              tone="violet"
+            />
+          </div>
+        </div>
+
         {/* ── Bottom bar ────────────────────────────────────────────── */}
         <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-[12px] text-fg-subtle">
           <p>{t("footer.copyright")}</p>
@@ -633,5 +837,61 @@ function SocialLink({
     >
       {children}
     </a>
+  );
+}
+
+const TONE_STYLES: Record<
+  "emerald" | "slate" | "cyan" | "amber" | "violet",
+  { icon: string; chip: string }
+> = {
+  emerald: {
+    icon: "bg-emerald-50 text-emerald-700",
+    chip: "border-emerald-200/60",
+  },
+  slate: {
+    icon: "bg-slate-100 text-slate-700",
+    chip: "border-slate-200/60",
+  },
+  cyan: {
+    icon: "bg-cyan-50 text-cyan-700",
+    chip: "border-cyan-200/60",
+  },
+  amber: {
+    icon: "bg-amber-50 text-amber-700",
+    chip: "border-amber-200/60",
+  },
+  violet: {
+    icon: "bg-violet-50 text-violet-700",
+    chip: "border-violet-200/60",
+  },
+};
+
+function Credential({
+  icon,
+  title,
+  body,
+  tone,
+}: {
+  icon: string;
+  title: string;
+  body: string;
+  tone: "emerald" | "slate" | "cyan" | "amber" | "violet";
+}) {
+  const s = TONE_STYLES[tone];
+  return (
+    <div
+      className={`inline-flex items-center gap-2.5 pl-1.5 pr-3 py-1.5 rounded-md border ${s.chip} bg-bg`}
+      title={body}
+    >
+      <span
+        className={`w-7 h-7 rounded ${s.icon} flex items-center justify-center shrink-0`}
+      >
+        <Icon name={icon} className="w-3.5 h-3.5" />
+      </span>
+      <span className="leading-tight min-w-0">
+        <span className="block text-[12px] font-medium text-fg">{title}</span>
+        <span className="block text-[10.5px] text-fg-subtle">{body}</span>
+      </span>
+    </div>
   );
 }
