@@ -1,6 +1,6 @@
 "use client";
 import { Container } from "@/components/ui/container";
-import { LandedCalc } from "@/components/landed-calc";
+import { ProductPriceCalc } from "@/components/product-price-calc";
 import { useLang } from "@/lib/i18n";
 import {
   AIR_TIERS_PUBLIC,
@@ -147,20 +147,22 @@ export function ShippingClient() {
         </div>
       </Container>
 
-      {/* Calculator */}
+      {/* Product price estimator */}
       <Container className="pb-12">
         <div className="max-w-5xl">
           <p className="text-[12px] font-medium tracking-wider uppercase text-emerald-700">
-            Calculator
+            Estimator
           </p>
           <h2 className="mt-3 text-[28px] md:text-[36px] leading-tight font-semibold tracking-[-0.02em]">
-            {t("ship.calc.title")}
+            Product price
           </h2>
           <p className="mt-3 text-fg-muted max-w-2xl">
-            {t("ship.calc.subtitle")}
+            What you see as the buyer-facing product price (factory FOB +
+            company margin). Shipping + duty + tax settle to the courier
+            on delivery — see the 3 mode cards above for per-kg rates.
           </p>
           <div className="mt-8">
-            <LandedCalc />
+            <ProductPriceCalc />
           </div>
         </div>
       </Container>
