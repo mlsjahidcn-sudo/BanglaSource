@@ -31,6 +31,14 @@ const AGENT_MIN_BDT = 506;
 // items OR multiple suppliers. Single-product quotes skip it.
 const CONSOL_BDT = 33700; // ~¥2000
 
+// Public read-only views for the /shipping-rates page to render
+// the actual side-service fees (single source of truth).
+export const SIDE_SERVICE_RATES_PUBLIC = {
+  cnDomestic: { bdtPerKg: CN_DOMESTIC_BDT_PER_KG, minBdt: CN_DOMESTIC_MIN_BDT },
+  agent: { pct: AGENT_PCT, minBdt: AGENT_MIN_BDT },
+  consol: { bdtPerOrder: CONSOL_BDT },
+} as const;
+
 // Bangladesh Customs air-cargo specific duties (per-kg rates).
 // Source: NBR (National Board of Revenue) HS-code-based specific
 // duty schedule for air cargo. The duty is **specific** (per kg of
@@ -119,6 +127,17 @@ function airMinBdt(chargeableKg: number): number {
   const tier = AIR_MIN_LADDER.find((t) => chargeableKg <= t.maxKg);
   return tier?.minBdt ?? 0;
 }
+// Public read-only views so the /shipping-rates page can render the
+// actual ladders from a single source of truth. (The page would
+// otherwise hard-code the same numbers and silently drift.)
+export const AIR_TIERS_PUBLIC: ReadonlyArray<{
+  maxKg: number;
+  rateBdtPerKg: number;
+}> = AIR_TIERS.map((t) => ({ ...t }));
+export const AIR_MIN_LADDER_PUBLIC: ReadonlyArray<{
+  maxKg: number;
+  minBdt: number;
+}> = AIR_MIN_LADDER.map((t) => ({ ...t }));
 
 // Express (DHL/FedEx/UPS-equivalent) — premium tier for 1-5kg parcels.
 // Real rates: $17-19/kg for 0-1kg, $11-13/kg for 1-5kg, $8-10/kg for
@@ -148,6 +167,14 @@ function expressMinBdt(chargeableKg: number): number {
   const tier = EXPRESS_MIN_LADDER.find((t) => chargeableKg <= t.maxKg);
   return tier?.minBdt ?? 0;
 }
+export const EXPRESS_TIERS_PUBLIC: ReadonlyArray<{
+  maxKg: number;
+  rateBdtPerKg: number;
+}> = EXPRESS_TIERS.map((t) => ({ ...t }));
+export const EXPRESS_MIN_LADDER_PUBLIC: ReadonlyArray<{
+  maxKg: number;
+  minBdt: number;
+}> = EXPRESS_MIN_LADDER.map((t) => ({ ...t }));
 
 // Sea LCL (৳/CBM) — based on Guangzhou→Chittagong rates (~$15-17/CBM).
 // ৳33,700/CBM ≈ $240/CBM (LCL is priced per-CBM because vessels charge
@@ -156,6 +183,10 @@ function expressMinBdt(chargeableKg: number): number {
 // the physical volume is less.
 const SEA_BDT_PER_CBM = 33700;
 const SEA_MIN_BDT = 5055;
+export const SEA_RATES_PUBLIC: { bdtPerCbm: number; minBdt: number } = {
+  bdtPerCbm: SEA_BDT_PER_CBM,
+  minBdt: SEA_MIN_BDT,
+};
 
 // ── Payment split ──────────────────────────────────────────────────────
 // Bangladeshi importer convention: 70% deposit on order confirmation,

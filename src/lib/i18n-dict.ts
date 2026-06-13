@@ -179,8 +179,127 @@ export const dict: Dict = {
   // ── Shipping rates page ───────────────────────────────────────────
   "ship.title": { en: "Shipping & landed cost", bn: "শিপিং ও ল্যান্ডেড খরচ" },
   "ship.subtitle": {
-    en: "Air, sea, and consolidation fees from our Guangzhou hub to your shop in Bangladesh.",
-    bn: "আমাদের গুয়াংজু হাব থেকে বাংলাদেশের আপনার দোকানে এয়ার, সি ও কনসোলিডেশন ফি।",
+    en: "Three shipping modes from Guangzhou to Dhaka, all-in BDT pricing. Use the calculator below to see your landed cost.",
+    bn: "গুয়াংজু থেকে ঢাকায় তিনটি শিপিং মোড, সব-অন্তর্ভুক্ত BDT মূল্য। ল্যান্ডেড খরচ দেখতে নিচের ক্যালকুলেটর ব্যবহার করুন।",
+  },
+  "ship.fx_note": {
+    en: "Factory FOB is quoted in CNY; we convert at FX ৳16.85 / ¥1. All other costs are in BDT, settled to the courier on delivery in Dhaka.",
+    bn: "কারখানা FOB CNY-তে উদ্ধৃত; আমরা ৳16.85 / ¥1 FX-এ রূপান্তর করি। অন্যান্য সব খরচ BDT-তে, ঢাকায় ডেলিভারিতে কুরিয়ারকে দেওয়া হয়।",
+  },
+  "ship.mode.air": { en: "Air freight", bn: "এয়ার ফ্রেইট" },
+  "ship.mode.sea": { en: "Sea freight (LCL)", bn: "সি ফ্রেইট (LCL)" },
+  "ship.mode.express": { en: "Express (DHL/FedEx)", bn: "এক্সপ্রেস (DHL/FedEx)" },
+  "ship.transit": { en: "Transit time", bn: "ট্রানজিট সময়" },
+  "ship.min": { en: "Minimum", bn: "ন্যূনতম" },
+  "ship.perkg": { en: "Per kg", bn: "প্রতি কেজি" },
+  "ship.percbm": { en: "Per CBM", bn: "প্রতি CBM" },
+  "ship.tier_table.title": {
+    en: "Per-kg tiers (heavier = cheaper)",
+    bn: "প্রতি কেজির হার (ভারী = সস্তা)",
+  },
+  "ship.tier_table.up_to": { en: "Up to", bn: "পর্যন্ত" },
+  "ship.tier_table.min_above": { en: "Above", bn: "উপরে" },
+  "ship.floor_table.title": {
+    en: "Service minimum (small-parcel floor)",
+    bn: "সার্ভিস ন্যূনতম (ছোট পার্সেল ফ্লোর)",
+  },
+  "ship.floor_table.note": {
+    en: "If your per-kg cost would be less than this floor, you pay the floor instead. Applies to air and express.",
+    bn: "আপনার প্রতি-কেজি খরচ এই ফ্লোরের চেয়ে কম হলে, আপনি ফ্লোর দেন। এয়ার ও এক্সপ্রেসে প্রযোজ্য।",
+  },
+  "ship.sea.note": {
+    en: "Priced per CBM (cubic meter), not per kg. LCL carriers charge a minimum 0.15 CBM per shipment even if the physical volume is less.",
+    bn: "প্রতি কেজিতে নয়, প্রতি CBM-এ (ঘন মিটার) মূল্য। LCL ক্যারিয়ার প্রতি শিপমেন্টে সর্বনিম্ন ০.১৫ CBM চার্জ করে, এমনকি ভৌত আয়তন কম হলেও।",
+  },
+  "ship.transit.air": { en: "5–9 days", bn: "৫-৯ দিন" },
+  "ship.transit.express": { en: "3–5 days", bn: "৩-৫ দিন" },
+  "ship.transit.sea": { en: "15–25 days", bn: "১৫-২৫ দিন" },
+  "ship.best_for.air": {
+    en: "Mid-size orders (2–50 kg). 70% of our orders ship by air.",
+    bn: "মাঝারি অর্ডার (২-৫০ কেজি)। আমাদের ৭০% অর্ডার এয়ারে যায়।",
+  },
+  "ship.best_for.express": {
+    en: "Samples and urgent shipments under 5 kg.",
+    bn: "৫ কেজির কম নমুনা ও জরুরি শিপমেন্ট।",
+  },
+  "ship.best_for.sea": {
+    en: "Heavy or bulky orders. 1 CBM ≈ 250 kg of clothing by sea.",
+    bn: "ভারী বা বাল্কি অর্ডার। সমুদ্রে ১ CBM ≈ ২৫০ কেজি পোশাক।",
+  },
+  "ship.sides.title": {
+    en: "Side services",
+    bn: "সহায়ক সার্ভিস",
+  },
+  "ship.sides.intro": {
+    en: "Charged on every order, bundled into the service fee you see on the order page.",
+    bn: "প্রতি অর্ডারে চার্জ হয়, অর্ডার পেজে সার্ভিস ফি-তে অন্তর্ভুক্ত।",
+  },
+  "ship.sides.cn_domestic": {
+    en: "CN first-mile pickup",
+    bn: "চীন প্রথম-মাইল পিকআপ",
+  },
+  "ship.sides.cn_domestic_help": {
+    en: "Freight agent picks up the goods at the factory and delivers to Guangzhou airport / Yantian port.",
+    bn: "ফ্রেইট এজেন্ট কারখানা থেকে পণ্য নিয়ে গুয়াংজু বিমানবন্দর / ইয়ান্টিয়ান বন্দরে পৌঁছায়।",
+  },
+  "ship.sides.agent": {
+    en: "Sourcing agent fee",
+    bn: "সোর্সিং এজেন্ট ফি",
+  },
+  "ship.sides.agent_help": {
+    en: "Yiwu / Guangzhou agent handles order placement, QC, factory communication, and consolidation.",
+    bn: "ইউউ / গুয়াংজু এজেন্ট অর্ডার দেওয়া, QC, কারখানা যোগাযোগ ও কনসোলিডেশন পরিচালনা করে।",
+  },
+  "ship.sides.consol": {
+    en: "Consolidation (multi-supplier only)",
+    bn: "কনসোলিডেশন (শুধু মাল্টি-সাপ্লায়ারে)",
+  },
+  "ship.sides.consol_help": {
+    en: "If your order has items from multiple factories, we consolidate them into one shipment. Single-supplier orders skip this fee.",
+    bn: "আপনার অর্ডারে একাধিক কারখানার পণ্য থাকলে আমরা এক শিপমেন্টে কনসোলিডেট করি। একক-সরবরাহকারী অর্ডারে এই ফি নেই।",
+  },
+  "ship.calc.title": { en: "Landed cost calculator", bn: "ল্যান্ডেড খরচ ক্যালকুলেটর" },
+  "ship.calc.subtitle": {
+    en: "Plug in your factory FOB (¥/pc), quantity, and total weight. Pick a mode. We show the per-kg tier, the floor, and the all-in BDT landed cost.",
+    bn: "আপনার কারখানা FOB (¥/পিস), পরিমাণ ও মোট ওজন দিন। একটি মোড বেছে নিন। আমরা প্রতি-কেজির হার, ফ্লোর ও সব-অন্তর্ভুক্ত BDT ল্যান্ডেড খরচ দেখাই।",
+  },
+  "ship.calc.weight": { en: "Total weight (kg)", bn: "মোট ওজন (কেজি)" },
+  "ship.calc.qty": { en: "Quantity (pcs)", bn: "পরিমাণ (পিস)" },
+  "ship.calc.cnypc": { en: "CNY / pc (factory FOB)", bn: "CNY / পিস (কারখানা FOB)" },
+  "ship.calc.mode": { en: "Mode", bn: "মোড" },
+  "ship.calc.tier": { en: "Tier (per-kg)", bn: "টায়ার (প্রতি কেজি)" },
+  "ship.calc.floor": { en: "Service min (small parcel)", bn: "সার্ভিস ন্যূনতম (ছোট পার্সেল)" },
+  "ship.calc.intl": { en: "Int'l shipping (BDT)", bn: "আন্তর্জাতিক শিপিং (BDT)" },
+  "ship.calc.cn_subtotal_bdt": { en: "Factory FOB (BDT)", bn: "কারখানা FOB (BDT)" },
+  "ship.calc.cn_first_mile": { en: "CN first-mile", bn: "CN প্রথম-মাইল" },
+  "ship.calc.agent_fee": { en: "Sourcing agent (3%)", bn: "সোর্সিং এজেন্ট (৩%)" },
+  "ship.calc.cif": { en: "CIF landed (before duty)", bn: "CIF ল্যান্ডেড (শুল্কের আগে)" },
+  "ship.calc.duty": { en: "Customs duty (per-kg specific)", bn: "কাস্টমস শুল্ক (প্রতি কেজি)" },
+  "ship.calc.vat": { en: "VAT 15%", bn: "ভ্যাট ১৫%" },
+  "ship.calc.ait": { en: "AIT 5%", bn: "AIT ৫%" },
+  "ship.calc.total": { en: "Total landed in Dhaka", bn: "ঢাকায় মোট ল্যান্ডেড" },
+  "ship.calc.markup": { en: "Our 25% markup (added at PDP)", bn: "আমাদের ২৫% মার্কআপ (PDP-তে যোগ হয়)" },
+  "ship.calc.deposit": { en: "70% deposit", bn: "৭০% ডিপোজিট" },
+  "ship.calc.disclaimer": {
+    en: "Estimate only. Final rate locks at order time; the order detail page shows the locked amount.",
+    bn: "শুধুমাত্র আনুমানিক। চূড়ান্ত হার অর্ডারের সময় লক হয়; অর্ডার ডিটেইল পেজে লক পরিমাণ দেখানো হয়।",
+  },
+  "ship.disclaimer.title": { en: "Things to know", bn: "জানা দরকার" },
+  "ship.disclaimer.1": {
+    en: "Air freight rates in Bangladesh are per-kg specific. We tier by weight so a 50kg shipment costs much less per kg than a 2kg one — the calculator above shows your tier.",
+    bn: "বাংলাদেশে এয়ার ফ্রেইট প্রতি-কেজি নির্দিষ্ট। আমরা ওজন অনুযায়ী টায়ার করি, তাই ৫০ কেজি শিপমেন্ট প্রতি কেজিতে ২ কেজির চেয়ে অনেক কম — উপরের ক্যালকুলেটর আপনার টায়ার দেখায়।",
+  },
+  "ship.disclaimer.2": {
+    en: "Customs duty in Bangladesh is specific ৳/kg (not ad-valorem). The rate per product is set by the customs class — for example sunglasses are ৳3,500/kg, smart watches ৳1,200/kg, regular watches ৳1,150/kg. See the PDP for the rate that applies to your product.",
+    bn: "বাংলাদেশে কাস্টমস শুল্ক নির্দিষ্ট ৳/কেজি (অ্যাড-ভ্যালোরেম নয়)। পণ্য অনুযায়ী হার কাস্টমস ক্লাস দ্বারা নির্ধারিত — যেমন সানগ্লাস ৳৩,৫০০/কেজি, স্মার্ট ওয়াচ ৳১,২০০/কেজি, সাধারণ ঘড়ি ৳১,১৫০/কেজি। আপনার পণ্যের জন্য প্রযোজ্য হারের জন্য PDP দেখুন।",
+  },
+  "ship.disclaimer.3": {
+    en: "Volume matters. Bulky-but-light items (cushions, packaging) are charged by volumetric weight: kg = CBM × 1000 / 167. The calculator applies volumetric weight automatically.",
+    bn: "ভলিউম গুরুত্বপূর্ণ। বাল্কি-কিন্তু-হালকা পণ্য (কুশন, প্যাকেজিং) ভলিউমেট্রিক ওজনে চার্জ হয়: কেজি = CBM × ১০০০ / ১৬৭। ক্যালকুলেটর স্বয়ংক্রিয়ভাবে ভলিউমেট্রিক ওজন প্রয়োগ করে।",
+  },
+  "ship.disclaimer.4": {
+    en: "The 70/30 deposit / balance split is on the product price only. Shipping, customs, and tax settle to the courier on delivery in Dhaka.",
+    bn: "৭০/৩০ ডিপোজিট / ব্যালেন্স বিভাজন শুধু পণ্য মূল্যের উপর। শিপিং, কাস্টমস ও কর ঢাকায় ডেলিভারিতে কুরিয়ারকে দেওয়া হয়।",
   },
   "ship.mode.air": { en: "Air freight", bn: "এয়ার ফ্রেইট" },
   "ship.mode.sea": { en: "Sea freight (LCL)", bn: "সি ফ্রেইট (LCL)" },
@@ -210,19 +329,6 @@ export const dict: Dict = {
   "ship.calc.disclaimer": {
     en: "Estimate only. Final cost locks at checkout based on actual weight, current FX, and verified customs assessment.",
     bn: "শুধুমাত্র আনুমানিক। প্রকৃত ওজন, বর্তমান FX এবং যাচাইকৃত কাস্টমস মূল্যায়নের ভিত্তিতে চেকআউটে চূড়ান্ত খরচ লক হবে।",
-  },
-  "ship.disclaimer.title": { en: "Things to know", bn: "জানা দরকার" },
-  "ship.disclaimer.1": {
-    en: "Per Bangladesh Customs: each non-document shipment is capped at 30 kg per HAWB. For heavier orders we split into multiple HAWBs automatically.",
-    bn: "বাংলাদেশ কাস্টমস অনুযায়ী: প্রতিটি নন-ডকুমেন্ট শিপমেন্ট প্রতি HAWB-এ ৩০ কেজি সীমাবদ্ধ। ভারী অর্ডারের জন্য আমরা স্বয়ংক্রিয়ভাবে একাধিক HAWB-তে ভাগ করি।",
-  },
-  "ship.disclaimer.2": {
-    en: "Customs duty shown is a typical estimate per HS code chapter; your actual rate depends on the exact classification at assessment.",
-    bn: "দেখানো কাস্টমস শুল্ক HS কোড চ্যাপ্টার অনুযায়ী সাধারণ আনুমানিক; মূল্যায়নের সময় সঠিক শ্রেণীবিভাগের উপর নির্ভর করে আপনার প্রকৃত হার।",
-  },
-  "ship.disclaimer.3": {
-    en: "Volume is calculated from packaging dimensions, not item weight alone. Bulky-but-light items (e.g. cushions) may be charged by CBM, not kg.",
-    bn: "ভলিউম প্যাকেজিং মাত্রা থেকে গণনা করা হয়, শুধু ওজন থেকে নয়। বাল্কি-কিন্তু-হালকা পণ্য (যেমন কুশন) CBM অনুযায়ী চার্জ হতে পারে।",
   },
 
   // ── Footer ────────────────────────────────────────────────────────
