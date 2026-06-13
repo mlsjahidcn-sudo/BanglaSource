@@ -1,6 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getServiceRoleClient } from "@/lib/supabase/server";
+import {
+  FX_CNY_BDT,
+  DEFAULT_BUYER_MARKUP_PCT,
+  effectiveMarkupPct,
+} from "@/lib/pricing";
 import { AdminProductEditor, type EditorProduct } from "./_editor";
 
 export const dynamic = "force-dynamic";
@@ -178,6 +183,17 @@ export default async function AdminProductPage({
           </>
         ) : null}
       </p>
+
+      {/* ── Live price card (factory FOB vs marked-up) ──────────── */}
+      <section className="mt-8">
+        <h2 className="text-[18px] font-semibold tracking-tight mb-4">
+          Live price
+        </h2>
+        <LivePriceCard
+          tiersRaw={tiersRaw}
+          markupPct={Number(product.markup_pct ?? DEFAULT_BUYER_MARKUP_PCT)}
+        />
+      </section>
 
       {/* ── Editor (titled section, client component) ─────────────── */}
       <section className="mt-8">
@@ -401,6 +417,172 @@ export default async function AdminProductPage({
           </div>
         </section>
       )}
+    </div>
+  );
+}
+
+function fmtBdt(n: number) {
+  return `৳${n.toLocaleString("en-IN")}`;
+}
+
+/**
+ * "Live price" admin card. Shows the real factory FOB (¥) and the
+ * after-markup BDT price the buyer actually sees, broken down by
+ * the existing price tiers. Markup % is editable in the editor
+ * below; the card re-renders on save.
+ */
+function LivePriceCard({
+  tiersRaw,
+  markupPct,
+}: {
+  tiersRaw: Array<{
+    qty_min: number;
+    qty_max: number | null;
+    price_cny_fen: number;
+  }>;
+  markupPct: number;
+}) {
+  if (tiersRaw.length === 0) {
+    return (
+      <div className="card p-6 text-[13px] text-fg-muted">
+        No price tiers — sync a fresh 1688 snapshot to populate this card.
+      </div>
+    );
+  }
+  const isDefault = markupPct === DEFAULT_BUYER_MARKUP_PCT;
+  const marginMul = markupPct / 100;
+  // Aggregate totals for the headline
+  const minFen = Math.min(...tiersRaw.map((t) => t.price_cny_fen));
+  const maxFen = Math.max(...tiersRaw.map((t) => t.price_cny_fen));
+  const minBdt = Math.ceil((minFen / 100) * FX_CNY_BDT);
+  const maxBdt = Math.ceil((maxFen / 100) * FX_CNY_BDT);
+  const minMarginBdt = Math.round(minBdt * marginMul);
+  const maxMarginBdt = Math.round(maxBdt * marginMul);
+
+  return (
+    <div className="card overflow-hidden">
+      {/* Headline row: factory FOB vs after markup */}
+      <div className="grid grid-cols-1 md:grid-cols-3 border-b border-border">
+        <div className="p-5 md:p-6">
+          <p className="text-[10px] font-medium tracking-wider uppercase text-fg-subtle">
+            Factory FOB
+          </p>
+          <p className="mt-2 text-[28px] md:text-[32px] font-semibold leading-none font-mono tnum">
+            ¥{(minFen / 100).toFixed(2)}
+            <span className="ml-1.5 text-fg-muted text-[14px]">–</span>
+            ¥{(maxFen / 100).toFixed(2)}
+          </p>
+          <p className="mt-2 text-[12px] text-fg-muted font-mono tnum">
+            per pc, across all tiers · direct from 1688
+          </p>
+        </div>
+
+        <div className="p-5 md:p-6 md:border-l border-border">
+          <p className="text-[10px] font-medium tracking-wider uppercase text-fg-subtle">
+            Markup
+          </p>
+          <p className="mt-2 text-[28px] md:text-[32px] font-semibold leading-none font-mono tnum">
+            <span
+              className={
+                markupPct === 0
+                  ? "text-fg-subtle"
+                  : isDefault
+                    ? "text-emerald-700"
+                    : "text-cyan-700"
+              }
+            >
+              {markupPct}%
+            </span>
+          </p>
+          <p className="mt-2 text-[12px] text-fg-muted">
+            {isDefault
+              ? "company default — change in the editor below"
+              : markupPct === 0
+                ? "no markup — buyer sees raw FOB"
+                : "custom — change in the editor below"}
+          </p>
+        </div>
+
+        <div className="p-5 md:p-6 md:border-l border-border bg-cyan-50/40">
+          <p className="text-[10px] font-medium tracking-wider uppercase text-cyan-700">
+            After markup
+          </p>
+          <p className="mt-2 text-[28px] md:text-[32px] font-semibold leading-none font-mono tnum text-cyan-700">
+            {fmtBdt(minBdt + minMarginBdt)}
+            <span className="ml-1.5 text-cyan-700/60 text-[14px]">–</span>
+            {fmtBdt(maxBdt + maxMarginBdt)}
+          </p>
+          <p className="mt-2 text-[12px] text-fg-muted font-mono tnum">
+            per pc · what the buyer sees as "Product price"
+          </p>
+        </div>
+      </div>
+
+      {/* Per-tier breakdown */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-[13px]">
+          <thead className="text-[11px] uppercase tracking-wider text-fg-subtle border-b border-border">
+            <tr>
+              <th className="text-left font-medium px-4 py-3">Tier (qty)</th>
+              <th className="text-right font-medium px-4 py-3 whitespace-nowrap">
+                Factory FOB
+              </th>
+              <th className="text-right font-medium px-4 py-3 whitespace-nowrap">
+                +{markupPct}% markup
+              </th>
+              <th className="text-right font-medium px-4 py-3 whitespace-nowrap">
+                After markup (BDT)
+              </th>
+              <th className="text-right font-medium px-4 py-3 whitespace-nowrap">
+                Margin / pc
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {tiersRaw.map((t, i) => {
+              const cny = t.price_cny_fen / 100;
+              const bdtFob = Math.ceil(cny * FX_CNY_BDT);
+              const bdtFinal = Math.ceil(bdtFob * (1 + marginMul));
+              const marginBdt = bdtFinal - bdtFob;
+              return (
+                <tr
+                  key={i}
+                  className="border-b border-border last:border-b-0 hover:bg-bg-soft"
+                >
+                  <td className="px-4 py-2.5 font-mono tnum text-[12px]">
+                    {t.qty_min}
+                    {t.qty_max ? `–${t.qty_max}` : "+"} pcs
+                  </td>
+                  <td className="px-4 py-2.5 text-right font-mono tnum text-[12px] text-fg-muted">
+                    ¥{cny.toFixed(2)}
+                    <span className="block text-[10.5px] text-fg-subtle">
+                      ≈ {fmtBdt(bdtFob)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5 text-right font-mono tnum text-[12px] text-fg-muted">
+                    +{fmtBdt(Math.round(bdtFob * marginMul))}
+                  </td>
+                  <td className="px-4 py-2.5 text-right font-mono tnum text-[12px] font-semibold">
+                    {fmtBdt(bdtFinal)}
+                  </td>
+                  <td className="px-4 py-2.5 text-right font-mono tnum text-[12px] text-emerald-700">
+                    +{fmtBdt(marginBdt)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="px-5 md:px-6 py-3 text-[11.5px] text-fg-subtle border-t border-border">
+        Factory FOB is the direct 1688 factory price (before any markup or
+        shipping). The &quot;After markup&quot; value is what appears as
+        &quot;Product price&quot; on the PDP and in the cart; it is the
+        factory FOB × FX (৳{FX_CNY_BDT.toFixed(2)}) × (1 + markup).
+        Edit the markup % in the editor below to change the buyer-facing
+        price.
+      </p>
     </div>
   );
 }

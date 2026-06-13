@@ -8,6 +8,7 @@
 //     "title_bn":     string,
 //     "description_en": string,
 //     "description_bn": string,
+//     "markup_pct":   number,   // 0-50 (% above factory FOB)
 //     "active":       boolean,
 //     "category":     CategoryKey,  // one of the 7 allowed values
 //     "images":       string[],  // REPLACES the full image list
@@ -115,11 +116,21 @@ export async function PATCH(
     }
     patch.description_bn = body.description_bn;
   }
-  // Phase 11: markup_pct is company-fixed at 10% (BUYER_MARKUP_PCT).
-  // Admins can no longer change it from the API — the editor
-  // doesn't send the field, and we ignore it if they do. The DB
-  // column stays for legacy/audit, but it's locked at 10 by
-  // migration 0023 (lock_markup_to_10.sql).
+  // Phase 11: admins CAN set the per-product markup. Range
+  // 0–50 (% above factory FOB). Setting 0 effectively disables
+  // the margin on this product (the buyer sees factory FOB +
+  // FX). The default fallback for products where this is missing
+  // is DEFAULT_BUYER_MARKUP_PCT (10) — see effectiveMarkupPct()
+  // in src/lib/pricing.ts.
+  if (typeof body.markup_pct === "number") {
+    if (body.markup_pct < 0 || body.markup_pct > 50) {
+      return NextResponse.json(
+        { ok: false, error: "markup_pct_out_of_range" },
+        { status: 400 },
+      );
+    }
+    patch.markup_pct = body.markup_pct;
+  }
   if (typeof body.active === "boolean") {
     patch.active = body.active;
   }
@@ -184,7 +195,6 @@ export async function PATCH(
   }
   if (typeof body.customs_duty_class === "string") {
     patch.customs_duty_class = body.customs_duty_class.slice(0, 64);
-  }
   }
   if (typeof body.volume_cbm === "number") {
     if (body.volume_cbm < 0 || body.volume_cbm > 10) {

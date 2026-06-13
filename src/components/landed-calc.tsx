@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import {
   fmtBdt,
   FX_CNY_BDT,
-  BUYER_MARKUP_PCT,
+  DEFAULT_BUYER_MARKUP_PCT,
   type ShippingMode,
   AIR_TIERS_PUBLIC,
   AIR_MIN_LADDER_PUBLIC,
@@ -41,10 +41,11 @@ export function LandedCalc() {
   const [cnyPerPc, setCnyPerPc] = useState(25);
   const [mode, setMode] = useState<ShippingMode>("air");
   const [dutyPerKg, setDutyPerKg] = useState(750); // default: Cat A
-  // Phase 11: markup is company-fixed at BUYER_MARKUP_PCT (10%).
-  // We no longer expose a slider — buyers shouldn't be doing
-  // our margin math. The "Product price" in the output already
-  // includes the markup.
+  // Phase 11: markup is the company default (10%). The admin
+  // can override per-product from /admin/products/[id]; this
+  // calculator uses the default because it doesn't know which
+  // product the buyer is asking about. We no longer expose a
+  // slider — buyers shouldn't be doing our margin math.
 
   const fx = FX_CNY_BDT;
 
@@ -130,9 +131,11 @@ export function LandedCalc() {
     const vatBdt = Math.round((cifBdt + dutyBdt) * 0.15);
     // AIT 5% on CIF
     const aitBdt = Math.round(cifBdt * 0.05);
-    // Markup on the CN subtotal (company-fixed; never shown as
-    // a separate line — the "Product price" absorbs it).
-    const markupBdt = Math.round(cnSubtotalBdt * (BUYER_MARKUP_PCT / 100));
+    // Markup on the CN subtotal (company default 10%; never shown
+    // as a separate line — the "Product price" absorbs it).
+    const markupBdt = Math.round(
+      cnSubtotalBdt * (DEFAULT_BUYER_MARKUP_PCT / 100),
+    );
     // Product price (factory + markup) — what the 70/30 split is on
     const productBdt = cnSubtotalBdt + markupBdt;
     // Total landed

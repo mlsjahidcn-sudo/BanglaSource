@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   FX_CNY_BDT,
-  BUYER_MARKUP_PCT,
+  DEFAULT_BUYER_MARKUP_PCT,
   ORDER_MIN_WEIGHT_KG,
   orderMinWeightMet,
 } from "./pricing";
@@ -125,11 +125,14 @@ export function useCart() {
  */
 export function cartUnitProductBdt(it: CartItem, fx = FX_CNY_BDT): number {
   const unitBdt = (it.unitPriceCny / 100) * fx;
-  // Phase 11: markup is company-fixed at 10%. The per-cart-item
-  // markup_pct is locked at add-time for forward-compat (in case
-  // the company ever changes the constant, old carts keep their
-  // snapshotted value), but for current math we use the constant.
-  const mul = 1 + BUYER_MARKUP_PCT / 100;
+  // Phase 11: the per-cart-item markup_pct is what the buyer
+  // saw on the PDP at add-time. We honour that locked value
+  // even if the admin later changes the product. Falls back
+  // to the company default if the locked value is missing or 0.
+  const markupPct = it.markup_pct && it.markup_pct > 0
+    ? it.markup_pct
+    : DEFAULT_BUYER_MARKUP_PCT;
+  const mul = 1 + markupPct / 100;
   return Math.ceil(unitBdt * mul);
 }
 
@@ -168,4 +171,4 @@ export function cartMinWeightMet(items: CartItem[]): boolean {
  * import from both files. The cart-drawer / cart-page use these
  * for the progress bar and the "Place order" disable state.
  */
-export { ORDER_MIN_WEIGHT_KG, BUYER_MARKUP_PCT };
+export { ORDER_MIN_WEIGHT_KG, DEFAULT_BUYER_MARKUP_PCT };

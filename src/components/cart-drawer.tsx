@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart, cartProductSubtotalBdt, cartUnitProductBdt, cartTotalWeightKg, cartMinWeightMet, ORDER_MIN_WEIGHT_KG } from "@/lib/cart";
 import { useLang } from "@/lib/i18n";
-import { fmtBdt, FX_CNY_BDT, BUYER_MARKUP_PCT } from "@/lib/pricing";
+import { fmtBdt, FX_CNY_BDT, effectiveMarkupPct } from "@/lib/pricing";
 
 type Props = {
   open: boolean;
@@ -394,10 +394,11 @@ function CartCrossSell({
                   image: s.image,
                   unitPriceCny: s.price_cny_fen,
                   qty: 1,
-                  // Phase 11: company-fixed 10% — passed via the
-                  // shared constant so the cart math matches the
-                  // product card and PDP.
-                  markup_pct: BUYER_MARKUP_PCT,
+                  // Phase 11: snapshot the per-product markup at
+                  // add-time. effectiveMarkupPct falls back to
+                  // the company default (10%) when the
+                  // product's markup_pct is missing/0.
+                  markup_pct: effectiveMarkupPct(s as any),
                   weight_kg: s.weight_kg ?? 0,
                   volume_cbm: s.volume_cbm ?? 0,
                   category: s.category,

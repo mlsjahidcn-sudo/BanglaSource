@@ -9,7 +9,7 @@ import {
   fmtKg,
   fmtCbm,
   ORDER_MIN_WEIGHT_KG,
-  BUYER_MARKUP_PCT,
+  effectiveMarkupPct,
   type Product,
   type ShippingMode,
   type LandedBreakdown,
@@ -84,10 +84,12 @@ export function ProductDetail({ product }: { product: Product }) {
       qty,
       // Lock the markup + logistics params at add time so the cart
       // subtotal matches what the buyer just saw on the PDP, even
-      // if the company-wide constant ever changes. Phase 11: the
-      // markup is a flat 10% (BUYER_MARKUP_PCT); the per-product
-      // `markup_pct` is now legacy.
-      markup_pct: BUYER_MARKUP_PCT,
+      // if the admin later changes the per-product value. Phase 11:
+      // admins can override the markup per-product from
+      // /admin/products/[id]; effectiveMarkupPct falls back to
+      // the company default (10%) when the product's
+      // markup_pct is missing/0.
+      markup_pct: effectiveMarkupPct(product),
       weight_kg: product.weight_kg,
       volume_cbm: product.volume_cbm,
       category: product.category,
@@ -220,7 +222,7 @@ export function ProductDetail({ product }: { product: Product }) {
                 const landedBdtPerPc = Math.ceil(
                   cny *
                     16.85 *
-                    (1 + BUYER_MARKUP_PCT / 100) *
+                    (1 + effectiveMarkupPct(product) / 100) *
                     1.30, // rough: 10% duty + 15% VAT + 5% AIT average for 7 categories
                 );
                 return (
