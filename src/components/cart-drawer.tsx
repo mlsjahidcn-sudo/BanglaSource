@@ -2,7 +2,15 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useCart, cartProductSubtotalBdt, cartUnitProductBdt, cartTotalWeightKg, cartMinWeightMet, ORDER_MIN_WEIGHT_KG } from "@/lib/cart";
+import {
+  useCart,
+  cartProductSubtotalBdt,
+  cartUnitProductBdt,
+  cartTotalWeightKg,
+  cartMinWeightMet,
+  cartTotalLandedBdt,
+  ORDER_MIN_WEIGHT_KG,
+} from "@/lib/cart";
 import { useLang } from "@/lib/i18n";
 import { fmtBdt, FX_CNY_BDT, effectiveMarkupPct } from "@/lib/pricing";
 
@@ -34,9 +42,11 @@ export function CartDrawer({ open, onClose }: Props) {
     };
   }, [open, onClose]);
 
-  // Product subtotal in BDT — includes our markup on each line.
-  // The shipping/duty/VAT line is calculated at quote time on the
-  // PDP / quote page; the cart shows the product price only.
+  // Phase 13: the cart-drawer footer now shows the full landed
+  // cost (product + shipping + customs + VAT + AIT) via
+  // cartTotalLandedBdt(). We keep the productSubtotalBdt helper
+  // for the cross-sell suggestions (it computes per-piece prices
+  // for the "Add to your order" cards below).
   const productSubtotalBdt = cartProductSubtotalBdt(items);
 
   return (
@@ -156,14 +166,48 @@ export function CartDrawer({ open, onClose }: Props) {
 
         {items.length > 0 && (
           <div className="border-t border-border p-5 space-y-3 bg-bg-soft">
-            <div className="flex items-baseline justify-between text-[13px]">
-              <span className="text-fg-muted">
-                {t("cart.product_subtotal")} ({items.length} {t("cart.skus")})
-              </span>
-              <span className="price-tag font-semibold text-[16px]">
-                {fmtBdt(productSubtotalBdt)}
-              </span>
-            </div>
+            {/* Phase 13: show the FULL landed cost (product + shipping +
+                customs + VAT + AIT) as the headline number. Air freight
+                assumed (the /cart page lets the buyer toggle to sea and
+                recomputes; the drawer stays a quick estimate). */}
+            {(() => {
+              const landed = cartTotalLandedBdt(items, "air");
+              return (
+                <>
+                  <div className="flex items-baseline justify-between text-[13px]">
+                    <span className="text-fg-muted">
+                      {t("cart.product_subtotal")} ({items.length} {t("cart.skus")})
+                    </span>
+                    <span className="font-mono tnum">
+                      {fmtBdt(landed.productBdt)}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between text-[12px] text-fg-muted">
+                    <span>+ Shipping + agent</span>
+                    <span className="font-mono tnum">
+                      {fmtBdt(landed.intlBdt + landed.cnDomesticBdt + landed.agentBdt)}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between text-[12px] text-fg-muted">
+                    <span>+ Customs + VAT + AIT</span>
+                    <span className="font-mono tnum">
+                      {fmtBdt(landed.dutyBdt + landed.vatBdt + landed.aitBdt)}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between border-t border-border pt-2.5 mt-1">
+                    <span className="text-[13px] font-semibold text-fg">
+                      Total landed in Dhaka
+                    </span>
+                    <span className="price-tag font-semibold text-[18px] text-cyan-700">
+                      {fmtBdt(landed.totalBdt)}
+                    </span>
+                  </div>
+                  <p className="text-[10.5px] text-fg-subtle">
+                    Pay 100% at order confirm. No balance on delivery.
+                  </p>
+                </>
+              );
+            })()}
 
             {/* Phase 11: weight progress + min-weight gate. */}
             {(() => {

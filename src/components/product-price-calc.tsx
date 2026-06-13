@@ -16,7 +16,10 @@ import { fmtBdt, FX_CNY_BDT } from "@/lib/pricing";
  * Per-piece ৳ = cnyPerPc × FX
  *
  * No markup line, no "FOB + markup" split, no percentage. The
- * buyer just sees the unit price in ৳ and the 70/30 split on it.
+ * buyer just sees the unit price in ৳. Phase 13 dropped the
+ * 70/30 split — the buyer now pays 100% of the landed cost
+ * upfront, but the calculator on this page is a simple
+ * per-piece CNY→BDT converter, not a 70/30 calculator.
  */
 export function ProductPriceCalc() {
   const [qty, setQty] = useState(50);

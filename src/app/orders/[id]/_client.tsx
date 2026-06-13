@@ -17,10 +17,16 @@ type OrderRow = {
   vat_bdt: number;
   ait_bdt: number;
   total_bdt: number;
+  /** Amount paid upfront at order confirm. In full_prepay mode
+   *  (Phase 13+) this equals total_bdt. In legacy deposit_balance
+   *  mode this was 70% of product_subtotal. */
   deposit_bdt: number;
+  /** Amount due on delivery. 0 in full_prepay mode. 30% of
+   *  product_subtotal in legacy mode. */
   balance_bdt: number;
-  deposit_paid_at: string | null;
+  paid_at: string | null;
   payment_method: "bkash" | "bank" | "cod" | "usdt";
+  payment_model: "full_prepay" | "deposit_balance";
   address_snapshot: null | {
     full_name: string;
     phone: string;
@@ -87,14 +93,14 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
     })();
   }, [orderId]);
 
-  async function markDepositPaid() {
+  async function markOrderPaid() {
     if (!order) return;
     setMarkingPaid(true);
     try {
       const r = await fetch(`/api/orders/${orderId}/paid`, { method: "POST" });
       if (r.ok) {
         setMarked(true);
-        setOrder({ ...order, status: "paid" });
+        setOrder({ ...order, status: "paid", paid_at: new Date().toISOString() });
       }
     } finally {
       setMarkingPaid(false);
@@ -139,28 +145,28 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
         <StatusBadge status={order.status} />
       </div>
 
-      {/* Deposit instructions (if pending) */}
+      {/* Payment instructions (if pending) — Phase 13: full prepayment */}
       {order.status === "pending_payment" ? (
         <section className="card p-6 mb-6 border-emerald-200 bg-emerald-50/40">
           <h2 className="text-[15px] font-semibold flex items-center gap-2">
             <span className="w-6 h-6 rounded-full bg-emerald-600 text-white text-[12px] font-semibold flex items-center justify-center">
               !
             </span>
-            {t("order.deposit_instructions")}
+            {t("order.payment_instructions")}
           </h2>
           <p className="mt-1 text-[12.5px] text-fg-muted">
-            {t("order.deposit_help")}
+            {t("order.payment_help")}
           </p>
 
-          <DepositInstructions
+          <PaymentInstructions
             method={order.payment_method}
             orderNumber={orderNumber}
-            amount={order.deposit_bdt}
+            amount={order.total_bdt}
           />
 
           <div className="mt-4 flex items-center gap-3">
             <button
-              onClick={markDepositPaid}
+              onClick={markOrderPaid}
               disabled={markingPaid || marked}
               className="px-4 h-10 rounded-md bg-emerald-600 text-white text-[13px] font-medium hover:bg-emerald-700 disabled:opacity-60"
             >
@@ -168,7 +174,7 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
                 ? "✓ Marked paid"
                 : markingPaid
                   ? "…"
-                  : t("order.deposit_paid")}
+                  : t("order.mark_paid")}
             </button>
             <a
               href="https://wa.me/8617325764171"
@@ -179,6 +185,15 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
               Need help? WhatsApp →
             </a>
           </div>
+        </section>
+      ) : null}
+
+      {/* Paid confirmation banner */}
+      {order.status === "paid" && order.paid_at ? (
+        <section className="card p-4 mb-6 border-cyan-200 bg-cyan-50/40 text-[13px]">
+          <p className="font-medium text-cyan-900">
+            ✓ {t("order.paid_at")}: {new Date(order.paid_at).toLocaleString()}
+          </p>
         </section>
       ) : null}
 
@@ -215,7 +230,7 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
                       {t("order.line_qty")}: {it.qty}
                     </p>
                     <p className="text-[11.5px] text-fg-subtle mt-0.5">
-                      factory ¥{(it.unit_cny_fen / 100).toFixed(2)} · FX {it.fx_cny_to_bdt} · +{it.markup_pct}%
+                      factory ¥{(it.unit_cny_fen / 100).toFixed(2)} · FX {it.fx_cny_to_bdt} · {it.weight_kg} kg/pc
                     </p>
                   </div>
                   <span className="font-mono tnum text-[13px] shrink-0">
@@ -243,20 +258,15 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
             <div className="mt-4 p-3 rounded-md bg-emerald-50 border border-emerald-200/60 text-[12.5px]">
               <div className="flex items-baseline justify-between">
                 <span className="text-emerald-900 font-medium">
-                  {t("checkout.summary.deposit")}
+                  {t("order.pay_total")}
                 </span>
                 <span className="font-mono tnum text-emerald-900 font-semibold text-[15px]">
-                  {fmtBdt(order.deposit_bdt)}
+                  {fmtBdt(order.total_bdt)}
                 </span>
               </div>
-              <div className="flex items-baseline justify-between mt-1">
-                <span className="text-emerald-900/80">
-                  {t("checkout.summary.balance")}
-                </span>
-                <span className="font-mono tnum text-emerald-900/80">
-                  {fmtBdt(order.balance_bdt)}
-                </span>
-              </div>
+              <p className="mt-1.5 text-[11.5px] text-emerald-900/80">
+                {t("order.full_prepay_note")}
+              </p>
             </div>
           </section>
         </div>
@@ -351,7 +361,7 @@ function StatusBadge({
   );
 }
 
-function DepositInstructions({
+function PaymentInstructions({
   method,
   orderNumber,
   amount,

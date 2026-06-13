@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { useLang } from "@/lib/i18n";
-import { useCart, cartUnitProductBdt, cartProductSubtotalBdt, cartTotalWeightKg, cartMinWeightMet, ORDER_MIN_WEIGHT_KG } from "@/lib/cart";
+import { useCart, cartUnitProductBdt, cartProductSubtotalBdt, cartTotalWeightKg, cartMinWeightMet, cartTotalLandedBdt, ORDER_MIN_WEIGHT_KG } from "@/lib/cart";
 import { fmtBdt, FX_CNY_BDT } from "@/lib/pricing";
 import { useState, useEffect } from "react";
 import { useCatalog } from "@/lib/use-catalog";
@@ -223,15 +223,45 @@ export function CartClient() {
 
         <aside className="lg:col-span-4 space-y-4">
           <div className="card p-5">
-            <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium">
-              {t("cart.product_subtotal")}
-            </p>
-            <p className="mt-1 price-tag text-[28px] font-semibold">
-              {fmtBdt(productSubtotalBdt)}
-            </p>
-            <p className="text-[12px] text-fg-subtle mt-1">
-              {t("cart.disclaimer")}
-            </p>
+            {/* Phase 13: show the FULL landed cost (product + shipping +
+                customs + VAT + AIT) as the headline number. Recomputes
+                when the buyer toggles air/sea. The /api/quote/landed
+                server calculation below is still the source of truth
+                for the order page; this is a live client estimate. */}
+            {(() => {
+              const landed = cartTotalLandedBdt(items, mode);
+              return (
+                <>
+                  <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium">
+                    {t("checkout.summary.total")}
+                  </p>
+                  <p className="mt-1 price-tag text-[28px] font-semibold text-cyan-700">
+                    {fmtBdt(landed.totalBdt)}
+                  </p>
+                  <div className="mt-2 space-y-1 text-[12px]">
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-fg-muted">Product subtotal</span>
+                      <span className="font-mono tnum">{fmtBdt(landed.productBdt)}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-fg-muted">+ Shipping + agent</span>
+                      <span className="font-mono tnum">{fmtBdt(landed.intlBdt + landed.cnDomesticBdt + landed.agentBdt + landed.consolBdt)}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-fg-muted">+ Customs duty</span>
+                      <span className="font-mono tnum">{fmtBdt(landed.dutyBdt)}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-fg-muted">+ VAT + AIT</span>
+                      <span className="font-mono tnum">{fmtBdt(landed.vatBdt + landed.aitBdt)}</span>
+                    </div>
+                  </div>
+                  <p className="text-[11.5px] text-fg-subtle mt-2">
+                    Pay 100% at order confirm. No balance on delivery.
+                  </p>
+                </>
+              );
+            })()}
 
             <div className="mt-5">
               <label className="text-[12px] text-fg-subtle uppercase tracking-wider font-medium">
@@ -373,7 +403,7 @@ export function CartClient() {
               <div className="pt-3 border-t border-border flex items-end justify-between">
                 <div>
                   <p className="text-[10.5px] text-fg-subtle uppercase tracking-wider">
-                    Total
+                    Pay total (100%)
                   </p>
                   <p className="price-tag text-[24px] font-semibold mt-0.5">
                     ৳{quote.totalBdt.toLocaleString("en-IN")}
@@ -389,7 +419,7 @@ export function CartClient() {
                 </div>
               </div>
               <p className="text-[10.5px] text-fg-subtle leading-relaxed">
-                Transit: {quote.transitDays}. Locks at order confirmation.
+                Transit: {quote.transitDays}. Locks at order confirmation. No balance on delivery.
               </p>
             </div>
           )}

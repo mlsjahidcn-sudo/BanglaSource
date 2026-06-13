@@ -1,10 +1,15 @@
 // POST /api/orders/[id]/paid
 //
-// "I sent the deposit" self-report. In a fully-integrated
+// "I sent the payment" self-report. In a fully-integrated
 // payment system this would be triggered by a webhook from
 // bKash/Stripe/whatever. Since we don't integrate those, the
 // buyer taps the button on the order detail page and we move
 // the order from `pending_payment` → `paid`.
+//
+// Phase 13: this is now the FULL prepayment confirmation
+// (was: 70% deposit). The `paid_at` column (renamed from
+// `deposit_paid_at` in migration 0024) records when the buyer
+// confirmed payment of the full landed cost.
 //
 // Auth: must be the owner of the order (RLS does the work).
 // Admin can also flip this via /api/admin/orders/[id] later.
@@ -48,12 +53,12 @@ export async function POST(
     .from("orders")
     .update({
       status: "paid",
-      deposit_paid_at: new Date().toISOString(),
+      paid_at: new Date().toISOString(),
     })
     .eq("id", orderId)
     .eq("user_id", user.id) // belt-and-suspenders; RLS already enforces this
     .eq("status", "pending_payment") // only transition from the pending state
-    .select("id, status, deposit_paid_at")
+    .select("id, status, paid_at, total_bdt, payment_model")
     .maybeSingle();
 
   if (error) {

@@ -71,7 +71,7 @@ export default async function BuyerOrdersPage() {
             My orders
           </h1>
           <p className="mt-3 text-[14px] text-fg-muted max-w-2xl">
-            Every order you place. Tap one to see the deposit instructions,
+            Every order you place. Tap one to see the payment instructions,
             itemised total, and tracking.
           </p>
         </div>
@@ -105,7 +105,6 @@ export default async function BuyerOrdersPage() {
                 <th className="text-left font-medium px-4 py-3">Order</th>
                 <th className="text-left font-medium px-4 py-3">Date</th>
                 <th className="text-left font-medium px-4 py-3">Mode</th>
-                <th className="text-right font-medium px-4 py-3">Deposit</th>
                 <th className="text-right font-medium px-4 py-3">Total</th>
                 <th className="text-left font-medium px-4 py-3">Status</th>
               </tr>
@@ -131,9 +130,6 @@ export default async function BuyerOrdersPage() {
                     </td>
                     <td className="px-4 py-2.5 text-[11.5px] uppercase tracking-wider text-fg-muted">
                       {o.shipping_mode}
-                    </td>
-                    <td className="px-4 py-2.5 text-right font-mono tnum">
-                      {fmtBdt(o.deposit_bdt)}
                     </td>
                     <td className="px-4 py-2.5 text-right font-mono tnum font-semibold">
                       {fmtBdt(o.total_bdt)}

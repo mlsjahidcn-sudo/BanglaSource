@@ -35,7 +35,7 @@ async function loadDashboard(userId: string, userName: string) {
         .eq("user_id", userId),
       supabase
         .from("orders")
-        .select("id, status, total_bdt, deposit_bdt, created_at")
+        .select("id, status, total_bdt, paid_at, created_at")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(5),
@@ -64,11 +64,10 @@ async function loadDashboard(userId: string, userName: string) {
     sumBdt,
     userName,
     totalOrders: totalOrders.count ?? 0,
-    recentOrders: (recentOrders.data ?? []) as Array<{
+      recentOrders: (recentOrders.data ?? []) as Array<{
       id: number;
       status: string;
       total_bdt: number;
-      deposit_bdt: number;
       created_at: string;
     }>,
   };
@@ -150,7 +149,7 @@ export default async function BuyerDashboard() {
         <QuickLink
           href="/buyer/orders"
           label="My orders"
-          desc="Track active orders, see deposit instructions."
+          desc="Track active orders, see payment instructions."
         />
         <QuickLink
           href="/buyer/quotes"
@@ -266,11 +265,10 @@ export default async function BuyerDashboard() {
             <table className="w-full text-[13px]">
               <thead className="text-[11px] uppercase tracking-wider text-fg-subtle border-b border-border">
                 <tr>
-                  <th className="text-left font-medium px-4 py-3">Order</th>
-                  <th className="text-left font-medium px-4 py-3">Date</th>
-                  <th className="text-right font-medium px-4 py-3">Deposit</th>
-                  <th className="text-right font-medium px-4 py-3">Total</th>
-                  <th className="text-left font-medium px-4 py-3">Status</th>
+                <th className="text-left font-medium px-4 py-3">Order</th>
+                <th className="text-left font-medium px-4 py-3">Date</th>
+                <th className="text-right font-medium px-4 py-3">Total</th>
+                <th className="text-left font-medium px-4 py-3">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -286,9 +284,6 @@ export default async function BuyerDashboard() {
                     </td>
                     <td className="px-4 py-2.5 font-mono tnum text-[12px] text-fg-muted">
                       {fmtDate(o.created_at)}
-                    </td>
-                    <td className="px-4 py-2.5 text-right font-mono tnum">
-                      ৳{Math.round(o.deposit_bdt).toLocaleString()}
                     </td>
                     <td className="px-4 py-2.5 text-right font-mono tnum font-semibold">
                       ৳{Math.round(o.total_bdt).toLocaleString()}

@@ -159,8 +159,8 @@ export function ProductDetail({ product }: { product: Product }) {
             },
             {
               icon: "💳",
-              title: "70/30 payment plan",
-              body: "Pay 70% to confirm, 30% on delivery in Dhaka.",
+              title: "Full prepayment",
+              body: "Pay 100% of the landed cost at order confirm. No balance on delivery.",
             },
           ].map((b) => (
             <div
@@ -256,8 +256,8 @@ export function ProductDetail({ product }: { product: Product }) {
             </tbody>
           </table>
           <p className="mt-2 text-[11px] text-fg-subtle">
-            ৳ prices are landed-in-Dhaka estimates (incl. shipping, duty, VAT, our fee).
-            Exact total with 70/30 split shown in the quote panel →
+            ৳ prices are landed-in-Dhaka estimates (incl. shipping, duty, VAT, AIT).
+            Exact total shown in the quote panel — pay 100% at order confirm →
           </p>
         </div>
 
@@ -394,15 +394,16 @@ export function ProductDetail({ product }: { product: Product }) {
             <div className="mt-5 hr" />
 
             {/* ── SkyBuy-style PDP price card ────────────────────────────
-                User's reference: skybuybd.com's PDP layout.
-                Shows three things in the default view:
+                Phase 13: switched to full-prepayment model. The card
+                now shows the buyer the full landed cost in one place
+                and the breakdown right below — no more 70/30 split.
+                Two things in the default view:
                   1. Product price (= supplier FOB × (1 + markup%))
-                  2. Pay now 70%   (deposit, on order confirm)
-                  3. Pay on delivery 30%   (balance, settled in Dhaka)
-                     + "Shipping + China Courier Charge" hint label
+                  2. Pay total (= product + shipping + duty + VAT + AIT)
                 The full landed breakdown (intl shipping tier, customs
-                class, VAT, AIT) is hidden behind a "Details" link in
-                the weight card — same UX as the reference.
+                class, VAT, AIT) is itemised right below the Pay total
+                line so the buyer sees the full landed cost before
+                paying. Weight hint card stays.
             ─────────────────────────────────────────────────────────── */}
             <div>
               {quoteLoading && !lc && (
@@ -425,44 +426,51 @@ export function ProductDetail({ product }: { product: Product }) {
                     </p>
                   </div>
 
-                  {/* ── Line 2: Pay now 70% (deposit on order confirm) ──
-                       Pay now is computed on the PRODUCT PRICE only, not
-                       the all-in landed total. SkyBuy convention: the
-                       deposit covers the goods, shipping/customs is paid
-                       on delivery in Dhaka to the courier. */}
+                  {/* ── Line 2: Pay total — full landed cost (Phase 13) ──
+                       The buyer pays 100% of the landed cost at order
+                       confirm. No balance on delivery. The breakdown
+                       below shows what makes up the total. */}
                   <div className="flex items-center justify-between">
                     <p className="text-[13px] text-fg-muted">
-                      {t("pdp.pay_now")}{" "}
+                      {t("pdp.pay_on_delivery")}{" "}
                       <span className="ml-1 px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10.5px] font-semibold uppercase tracking-wider">
                         {t("pdp.deposit_pct")}
                       </span>
                     </p>
                     <p className="price-tag font-semibold text-fg text-[16px]">
-                      {fmtBdt(lc.productDepositBdt)}
+                      {fmtBdt(lc.totalBdt)}
                     </p>
                   </div>
 
-                  {/* ── Line 3: Pay on delivery 30% (product balance) ──
-                       The "+ Shipping + China Courier Charge" hint below
-                       tells the buyer the rest of the cost (shipping +
-                       customs + VAT) is settled when the goods arrive in
-                       Dhaka. The exact number is the product balance
-                       only — shipping isn't added to this number. */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex flex-col">
-                      <p className="text-[13px] text-fg-muted">
-                        {t("pdp.pay_on_delivery")}{" "}
-                        <span className="ml-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10.5px] font-semibold uppercase tracking-wider">
-                          {t("pdp.balance_pct")}
-                        </span>
-                      </p>
-                      <p className="mt-1 text-[12px] text-cyan-700 font-medium">
-                        + {t("pdp.shipping_charge_label")}
-                      </p>
+                  {/* ── Landed cost breakdown (Phase 13: now visible by default) ──
+                       Product + shipping + customs + VAT + AIT, with each
+                       line so the buyer sees the full landed cost before
+                       placing the order. */}
+                  <div className="mt-1 p-3 rounded-md bg-slate-50/70 border border-border text-[12px] space-y-1">
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-fg-muted">Product ({qty} pcs)</span>
+                      <span className="font-mono tnum">{fmtBdt(lc.productBdt)}</span>
                     </div>
-                    <p className="price-tag font-semibold text-fg text-[16px] whitespace-nowrap">
-                      {fmtBdt(lc.productBalanceBdt)}
-                    </p>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-fg-muted">+ Shipping + agent</span>
+                      <span className="font-mono tnum">{fmtBdt(lc.intlBdt + lc.cnDomesticBdt + lc.agentBdt + lc.consolBdt)}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-fg-muted">+ Customs duty</span>
+                      <span className="font-mono tnum">{fmtBdt(lc.dutyBdt)}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-fg-muted">+ VAT 15%</span>
+                      <span className="font-mono tnum">{fmtBdt(lc.vatBdt)}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-fg-muted">+ AIT 5%</span>
+                      <span className="font-mono tnum">{fmtBdt(lc.aitBdt)}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between border-t border-border pt-1.5 mt-1.5">
+                      <span className="font-semibold text-fg">Landed total in Dhaka</span>
+                      <span className="font-mono tnum font-semibold">{fmtBdt(lc.totalBdt)}</span>
+                    </div>
                   </div>
 
                   {/* ── Weight + per-kg hint card (skyblue dashed, like skybuybd) ── */}
@@ -501,7 +509,7 @@ export function ProductDetail({ product }: { product: Product }) {
                   {/* Quote ID footer (audit trail) */}
                   <p className="mt-1 text-[10.5px] text-fg-subtle font-mono tnum">
                     Quote {lc.quoteId} · {qty} {qty > 1 ? "pcs" : "pc"} ·{" "}
-                    {t("pdp.balance_sub")} · valid until{" "}
+                    pay 100% at order confirm · valid until{" "}
                     {new Date(lc.expiresAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -541,7 +549,7 @@ export function ProductDetail({ product }: { product: Product }) {
             </div>
 
             <p className="mt-3 text-[11px] text-fg-subtle text-center">
-              No payment until you confirm order with our team.
+              Pay 100% of the landed cost when you place the order. No balance on delivery.
             </p>
           </div>
 

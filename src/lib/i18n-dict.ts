@@ -297,8 +297,8 @@ export const dict: Dict = {
     bn: "ভলিউম গুরুত্বপূর্ণ। বাল্কি-কিন্তু-হালকা পণ্য (কুশন, প্যাকেজিং) ভলিউমেট্রিক ওজনে চার্জ হয়: কেজি = CBM × ১০০০ / ১৬৭। ক্যালকুলেটর স্বয়ংক্রিয়ভাবে ভলিউমেট্রিক ওজন প্রয়োগ করে।",
   },
   "ship.disclaimer.4": {
-    en: "The 70/30 deposit / balance split is on the product price only. Shipping, customs, and tax settle to the courier on delivery in Dhaka.",
-    bn: "৭০/৩০ ডিপোজিট / ব্যালেন্স বিভাজন শুধু পণ্য মূল্যের উপর। শিপিং, কাস্টমস ও কর ঢাকায় ডেলিভারিতে কুরিয়ারকে দেওয়া হয়।",
+    en: "Full prepayment at order confirm. Shipping, customs, and tax are itemised in the cart and order pages — the buyer sees the total landed cost before paying.",
+    bn: "অর্ডার নিশ্চিতকরণে সম্পূর্ণ প্রিপেমেন্ট। শিপিং, কাস্টমস ও কর কার্ট ও অর্ডার পেজে আলাদাভাবে দেখানো হয় — ক্রেতা পেমেন্টের আগেই মোট ল্যান্ডেড খরচ দেখতে পান।",
   },
   "ship.mode.air": { en: "Air freight", bn: "এয়ার ফ্রেইট" },
   "ship.mode.sea": { en: "Sea freight (LCL)", bn: "সি ফ্রেইট (LCL)" },
@@ -356,8 +356,8 @@ export const dict: Dict = {
     bn: "পণ্যের সাবটোটাল",
   },
   "cart.disclaimer": {
-    en: "Per-piece product prices are locked at add time. Shipping, customs duty, and VAT are added when you request a quote — see the PDP for the full breakdown.",
-    bn: "পণ্যের প্রতি-পিস মূল্য অ্যাড-টাইমে লক থাকে। কোটের সময় শিপিং, শুল্ক এবং ভ্যাট যোগ হবে — সম্পূর্ণ ভাঙ্গনের জন্য PDP দেখুন।",
+    en: "Per-piece product prices are locked at add time. The total you see includes the landed cost (product + shipping + customs + VAT + AIT) — pay it all at order confirm.",
+    bn: "পণ্যের প্রতি-পিস মূল্য অ্যাড-টাইমে লক থাকে। আপনার দেখানো মোট পরিমাণে ল্যান্ডেড খরচ অন্তর্ভুক্ত (পণ্য + শিপিং + কাস্টমস + ভ্যাট + এআইটি) — অর্ডার নিশ্চিতকরণে সবটুকু দিন।",
   },
   // ── SkyBuy-style PDP price card ──────────────────────────────────────
   "pdp.product_price": {
@@ -369,32 +369,32 @@ export const dict: Dict = {
     bn: "/ পিস",
   },
   "pdp.pay_now": {
-    en: "Pay now",
-    bn: "এখনই পেমেন্ট",
+    en: "Pay total",
+    bn: "মোট পেমেন্ট",
   },
   "pdp.pay_on_delivery": {
-    en: "Pay on delivery",
-    bn: "ডেলিভারিতে পেমেন্ট",
+    en: "Landed cost",
+    bn: "ল্যান্ডেড খরচ",
   },
   "pdp.deposit_pct": {
-    en: "70%",
-    bn: "৭০%",
+    en: "100%",
+    bn: "১০০%",
   },
   "pdp.balance_pct": {
-    en: "30%",
-    bn: "৩০%",
+    en: "0%",
+    bn: "০%",
   },
   "pdp.deposit_sub": {
-    en: "on order confirm",
+    en: "at order confirm",
     bn: "অর্ডার নিশ্চিতকরণে",
   },
   "pdp.balance_sub": {
-    en: "on delivery · Dhaka",
-    bn: "ডেলিভারিতে · ঢাকা",
+    en: "no balance on delivery",
+    bn: "ডেলিভারিতে কোনো বকেয়া নেই",
   },
   "pdp.shipping_charge_label": {
-    en: "Shipping + China Courier Charge",
-    bn: "শিপিং + চায়না কুরিয়ার চার্জ",
+    en: "Shipping + China Courier Charge (itemised at cart)",
+    bn: "শিপিং + চায়না কুরিয়ার চার্জ (কার্টে বিস্তারিত)",
   },
   "pdp.weight_card_title": {
     en: "Approximate weight",
@@ -453,13 +453,13 @@ export const dict: Dict = {
   // ── Checkout / order ──────────────────────────────────────────────
   "checkout.title": { en: "Checkout", bn: "চেকআউট" },
   "checkout.subtitle": {
-    en: "Review your order, add a delivery address, then send the deposit. We hold the order for 7 days while the deposit clears.",
-    bn: "অর্ডারটি পর্যালোচনা করুন, ডেলিভারি ঠিকানা দিন, তারপর ডিপোজিট পাঠান। ডিপোজিট ক্লিয়ার হওয়া পর্যন্ত আমরা অর্ডারটি ৭ দিন ধরে রাখি।",
+    en: "Review your order, add a delivery address, then send the full payment. The landed cost breakdown is shown in the order summary on the right.",
+    bn: "অর্ডারটি পর্যালোচনা করুন, ডেলিভারি ঠিকানা দিন, তারপর সম্পূর্ণ পেমেন্ট পাঠান। ডানদিকের অর্ডার সারাংশে ল্যান্ডেড খরচের ভাঙ্গন দেখানো হচ্ছে।",
   },
   "checkout.address": { en: "Delivery address", bn: "ডেলিভারি ঠিকানা" },
   "checkout.address.help": {
-    en: "We deliver across Bangladesh. Shipping + customs settle to the courier on delivery — only the 70% deposit is paid here.",
-    bn: "আমরা সারা বাংলাদেশে ডেলিভারি দিই। শিপিং + কাস্টমস ডেলিভারিতে কুরিয়ারকে দেওয়া হয় — এখানে শুধু ৭০% ডিপোজিট দিতে হবে।",
+    en: "We deliver across Bangladesh. The total you see is the full landed cost — pay it all at order confirm. No balance is due on delivery.",
+    bn: "আমরা সারা বাংলাদেশে ডেলিভারি দিই। আপনার দেখানো মোট পরিমাণই সম্পূর্ণ ল্যান্ডেড খরচ — অর্ডার নিশ্চিতকরণে সবটুকু দিন। ডেলিভারিতে কোনো বকেয়া নেই।",
   },
   "checkout.full_name": { en: "Full name", bn: "পুরো নাম" },
   "checkout.full_name_ph": { en: "e.g. Rahim Mia", bn: "যেমন রহিম মিয়া" },
@@ -489,18 +489,18 @@ export const dict: Dict = {
     bn: "বিকাশ (পার্সোনাল)",
   },
   "checkout.payment.bkash_help": {
-    en: "Send 70% deposit to 0173-25764171. Reference your order number.",
-    bn: "৭০% ডিপোজিট ০১৭৩-২৫৭৬৪১৭১ নম্বরে পাঠান। অর্ডার নম্বর রেফারেন্সে দিন।",
+    en: "Send the full amount to 0173-25764171. Reference your order number.",
+    bn: "সম্পূর্ণ পরিমাণ ০১৭৩-২৫৭৬৪১৭১ নম্বরে পাঠান। অর্ডার নম্বর রেফারেন্সে দিন।",
   },
   "checkout.payment.bank": { en: "Bank transfer", bn: "ব্যাংক ট্রান্সফার" },
   "checkout.payment.bank_help": {
     en: "City Bank, A/C 1234-567890-1, Beneficiary: Skybuy Limited.",
     bn: "সিটি ব্যাংক, হিসাব ১২৩৪-৫৬৭৮৯০-১, বেনিফিশিয়ারি: স্কাইবুই লিমিটেড।",
   },
-  "checkout.payment.cod": { en: "Cash on delivery", bn: "ক্যাশ অন ডেলিভারি" },
+  "checkout.payment.cod": { en: "Cash on pickup", bn: "পিকআপে নগদ" },
   "checkout.payment.cod_help": {
-    en: "Pay the 70% deposit in cash at our Badda warehouse.",
-    bn: "৭০% ডিপোজিট আমাদের বাড্ডা গুদামে নগদ দিন।",
+    en: "Pay the full amount in cash at our Badda warehouse on pickup.",
+    bn: "পিকআপের সময় আমাদের বাড্ডা গুদামে সম্পূর্ণ পরিমাণ নগদ দিন।",
   },
   "checkout.payment.usdt": { en: "USDT (TRC20)", bn: "USDT (TRC20)" },
   "checkout.payment.usdt_help": {
@@ -514,11 +514,11 @@ export const dict: Dict = {
   "checkout.summary.duty": { en: "Customs duty", bn: "কাস্টমস শুল্ক" },
   "checkout.summary.tax": { en: "VAT + AIT", bn: "ভ্যাট + এআইটি" },
   "checkout.summary.total": { en: "Total landed in Dhaka", bn: "ঢাকায় মোট ল্যান্ডেড" },
-  "checkout.summary.deposit": { en: "Pay now (70% of product)", bn: "এখনই পেমেন্ট (পণ্যের ৭০%)" },
-  "checkout.summary.balance": { en: "On delivery (30%)", bn: "ডেলিভারিতে (৩০%)" },
+  "checkout.summary.deposit": { en: "Pay total", bn: "মোট পেমেন্ট" },
+  "checkout.summary.balance": { en: "(full prepayment)", bn: "(সম্পূর্ণ প্রিপেমেন্ট)" },
   "checkout.summary.deposit_help": {
-    en: "70% of product price locks the order. The remaining 30% + shipping + customs settle in Dhaka.",
-    bn: "পণ্য মূল্যের ৭০% অর্ডার লক করে। বাকি ৩০% + শিপিং + কাস্টমস ঢাকায় সমন্বয় হবে।",
+    en: "Pay 100% of the landed cost at order confirm. The full breakdown (product + shipping + customs + VAT + AIT) is shown in the summary above — no balance due on delivery.",
+    bn: "অর্ডার নিশ্চিতকরণে ল্যান্ডেড খরচের ১০০% দিন। পণ্য + শিপিং + কাস্টমস + ভ্যাট + এআইটির সম্পূর্ণ ভাঙ্গন উপরের সারাংশে দেখানো হচ্ছে — ডেলিভারিতে কোনো বকেয়া নেই।",
   },
   "checkout.place": { en: "Place order", bn: "অর্ডার দিন" },
   "checkout.placing": { en: "Placing order…", bn: "অর্ডার দিচ্ছি…" },
@@ -547,22 +547,34 @@ export const dict: Dict = {
 
   // ── Order detail page ─────────────────────────────────────────────
   "order.title": { en: "Order", bn: "অর্ডার" },
-  "order.status.pending_payment": { en: "Awaiting deposit", bn: "ডিপোজিট অপেক্ষমান" },
-  "order.status.paid": { en: "Deposit received", bn: "ডিপোজিট গৃহীত" },
+  "order.status.pending_payment": { en: "Awaiting payment", bn: "পেমেন্ট অপেক্ষমান" },
+  "order.status.paid": { en: "Payment received", bn: "পেমেন্ট গৃহীত" },
   "order.status.in_transit": { en: "In transit", bn: "ট্রানজিটে" },
   "order.status.delivered": { en: "Delivered", bn: "ডেলিভারড" },
   "order.status.cancelled": { en: "Cancelled", bn: "বাতিল" },
-  "order.deposit_instructions": {
-    en: "Deposit instructions",
-    bn: "ডিপোজিট নির্দেশনা",
+  "order.payment_instructions": {
+    en: "Payment instructions",
+    bn: "পেমেন্ট নির্দেশনা",
   },
-  "order.deposit_help": {
-    en: "Send the deposit to complete the order. Use the order number as reference.",
-    bn: "অর্ডার সম্পূর্ণ করতে ডিপোজিট পাঠান। রেফারেন্সে অর্ডার নম্বর দিন।",
+  "order.payment_help": {
+    en: "Send the full landed cost to complete the order. Use the order number as reference.",
+    bn: "অর্ডার সম্পূর্ণ করতে সম্পূর্ণ ল্যান্ডেড খরচ পাঠান। রেফারেন্সে অর্ডার নম্বর দিন।",
   },
-  "order.deposit_paid": {
-    en: "I sent the deposit",
-    bn: "আমি ডিপোজিট পাঠিয়েছি",
+  "order.mark_paid": {
+    en: "I sent the payment",
+    bn: "আমি পেমেন্ট পাঠিয়েছি",
+  },
+  "order.paid_at": {
+    en: "Payment received",
+    bn: "পেমেন্ট গৃহীত",
+  },
+  "order.pay_total": {
+    en: "Pay total",
+    bn: "মোট পেমেন্ট",
+  },
+  "order.full_prepay_note": {
+    en: "100% of the landed cost. No balance due on delivery.",
+    bn: "ল্যান্ডেড খরচের ১০০%। ডেলিভারিতে কোনো বকেয়া নেই।",
   },
   "order.buyer_info": { en: "Buyer info", bn: "ক্রেতার তথ্য" },
   "order.address": { en: "Delivery address", bn: "ডেলিভারি ঠিকানা" },

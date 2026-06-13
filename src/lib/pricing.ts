@@ -189,10 +189,14 @@ export const SEA_RATES_PUBLIC: { bdtPerCbm: number; minBdt: number } = {
 };
 
 // ── Payment split ──────────────────────────────────────────────────────
-// Bangladeshi importer convention: 70% deposit on order confirmation,
-// 30% balance on delivery (cash on delivery in BDT).
-export const DEPOSIT_PCT = 0.70;
-export const BALANCE_PCT = 0.30;
+// Phase 13: full-prepayment model. The buyer pays 100% of the
+// landed cost at order confirm. The DEPOSIT_PCT and BALANCE_PCT
+// constants are kept here as legacy (the schema still has
+// deposit_bdt / balance_bdt columns) but they are no longer
+// applied — the API route sets deposit_bdt = total_bdt and
+// balance_bdt = 0 directly. See migration 0024.
+export const DEPOSIT_PCT = 1.0; // legacy: was 0.70
+export const BALANCE_PCT = 0.0; // legacy: was 0.30
 
 // ── Company policy constants (Phase 11) ──────────────────────────────────
 //
@@ -488,22 +492,17 @@ export type LandedBreakdown = {
   quoteId: string;
   quotedAt: string;
   expiresAt: string;
-  // Payment split (70/30 importer convention).
-  // We track TWO splits because the buyer mental model is:
-  //   "Product price" → 70% now, 30% on delivery (this is the
-  //                       "what you pay for the goods" split)
-  //   Shipping + China Courier Charge → 100% on delivery in Dhaka
-  // (the carrier and the customs broker both want cash in hand
-  // before they release the parcel). This is how skybuybd.com and
-  // every other BD import agent actually invoice the buyer.
-  // We also keep the OLD `depositBdt`/`balanceBdt` (70/30 of the
-  // total landed) for the request-quote / PDF path.
+  // Payment split (Phase 13: full-prepayment model).
+  // The buyer pays 100% of the landed cost at order confirm.
+  // The schema still has deposit_bdt / balance_bdt columns
+  // (for back-compat with any pre-Phase-13 orders), but the
+  // API route writes depositBdt = totalBdt and balanceBdt = 0.
+  // The product-only split was retired along with the 70/30
+  // convention — the buyer never sees a 70% line anywhere.
   depositPct: number;
   balancePct: number;
-  // Product-only split (used on the PDP headline).
   productDepositBdt: number;
   productBalanceBdt: number;
-  // All-in split (used by the quote PDF / formal quote path).
   depositBdt: number;
   balanceBdt: number;
   // Diagnostic flags (UI shows warnings when truthy)
@@ -634,15 +633,17 @@ export function landedCost(
   const totalBdt = cifBdt + dutyBdt + vatBdt + aitBdt + markupBdt;
   const unitBdt = Math.ceil(totalBdt / qty);
 
-  // 7. Payment split (70/30 importer convention).
-  //    productDepositBdt / productBalanceBdt = 70/30 of productBdt
-  //      (shown on the PDP as "Pay now 70%" / "Pay on delivery 30%")
-  //    depositBdt / balanceBdt = 70/30 of totalBdt
-  //      (shown on the formal PDF quote)
-  //    Both splits are inlined directly in the return object so we
-  //    don't have to repeat the computation.
+  // 7. Payment split (Phase 13: full-prepayment model).
+  //    depositBdt = totalBdt (the buyer pays 100% upfront)
+  //    balanceBdt = 0 (no balance on delivery)
+  //    DEPOSIT_PCT and BALANCE_PCT constants in this file are
+  //    kept as legacy = 1.0 / 0.0 for back-compat. The product-
+  //    only split (productDepositBdt / productBalanceBdt) is
+  //    still in the returned object because the PDP / cart use
+  //    it for old code paths, but it's no longer surfaced in
+  //    the buyer UI.
   const depositBdt = Math.round(totalBdt * DEPOSIT_PCT);
-  const balanceBdt = totalBdt - depositBdt;
+  const balanceBdt = Math.round(totalBdt * BALANCE_PCT);
 
   // 8. Diagnostics
   const shippingDominantPct =

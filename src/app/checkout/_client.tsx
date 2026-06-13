@@ -116,8 +116,13 @@ export function CheckoutClient() {
   const vatBdt = Math.round(cifBdt * 0.15);
   const aitBdt = Math.round(cifBdt * 0.05);
   const totalBdt = cifBdt + dutyBdt + vatBdt + aitBdt;
-  const depositBdt = Math.round(productSubtotalBdt * 0.7);
-  const balanceBdt = productSubtotalBdt - depositBdt;
+  // Phase 13 (full prepayment): the buyer pays 100% of the
+  // landed cost at order confirm. No balance on delivery.
+  // The legacy `depositBdt` / `balanceBdt` are kept for
+  // schema compat (the API still writes them) but the UI
+  // surfaces only the total.
+  const depositBdt = totalBdt;
+  const balanceBdt = 0;
 
   async function placeOrder() {
     setErrorKey(null);
@@ -384,9 +389,7 @@ export function CheckoutClient() {
                 {t("checkout.summary.deposit_help")}
               </p>
               <p className="mt-2 text-emerald-800/80 text-[11.5px]">
-                + on delivery: {fmtBdt(balanceBdt)} (product balance) +{" "}
-                {fmtBdt(shippingBdt + dutyBdt + vatBdt + aitBdt)} (shipping +
-                duty + tax)
+                {t("checkout.summary.balance")}
               </p>
             </div>
 

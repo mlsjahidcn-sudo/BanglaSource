@@ -5,6 +5,10 @@ import {
   DEFAULT_BUYER_MARKUP_PCT,
   ORDER_MIN_WEIGHT_KG,
   orderMinWeightMet,
+  airShippingBreakdown,
+  seaShippingBdt,
+  SIDE_SERVICE_RATES_PUBLIC,
+  type ShippingMode,
 } from "./pricing";
 
 export type CartItem = {
@@ -172,3 +176,171 @@ export function cartMinWeightMet(items: CartItem[]): boolean {
  * for the progress bar and the "Place order" disable state.
  */
 export { ORDER_MIN_WEIGHT_KG, DEFAULT_BUYER_MARKUP_PCT };
+
+/**
+ * Per-line landed cost breakdown for a single cart item, using
+ * the same math as `landedCost` in `src/lib/pricing.ts` but
+ * operating on the locked cart snapshot (no `price_tiers`; the
+ * unit FOB was frozen at add time).
+ *
+ * Phase 13 (full-prepayment model): the cart surfaces the full
+ * landed cost (product + shipping + customs + VAT + AIT) on the
+ * drawer and the /cart page so the buyer sees what they'll pay
+ * before they place the order. The 70/30 split is gone.
+ *
+ * Returned shape mirrors `LandedBreakdown` from pricing.ts:
+ *   - productBdt: FOB×FX + markup (the "Product price" line)
+ *   - intlBdt, cnDomesticBdt, agentBdt, consolBdt: shipping stack
+ *   - dutyBdt: customs duty (৳/kg × weight)
+ *   - vatBdt, aitBdt: 15% / 5%
+ *   - markupBdt: per-product markup
+ *   - totalBdt: sum of everything (the amount the buyer pays)
+ */
+export type CartLandedBreakdown = {
+  productBdt: number;
+  intlBdt: number;
+  cnDomesticBdt: number;
+  agentBdt: number;
+  consolBdt: number;
+  dutyBdt: number;
+  vatBdt: number;
+  aitBdt: number;
+  markupBdt: number;
+  totalBdt: number;
+  // Diagnostic fields the UI uses to render the breakdown rows
+  weightKg: number;
+  volumeCbm: number;
+  dutyPerKg: number;
+};
+
+export function cartLineLandedCost(
+  it: CartItem,
+  mode: ShippingMode = "air",
+  fx = FX_CNY_BDT,
+): CartLandedBreakdown {
+  const markupPct =
+    it.markup_pct && it.markup_pct > 0
+      ? it.markup_pct
+      : DEFAULT_BUYER_MARKUP_PCT;
+  const unitCny = it.unitPriceCny / 100; // fen → CNY
+  const cnSubtotalCny = unitCny * it.qty;
+  const cnSubtotalBdt = cnSubtotalCny * fx;
+  const markupBdt = cnSubtotalBdt * (markupPct / 100);
+  const productBdt = cnSubtotalBdt + markupBdt;
+
+  const totalWeight = it.weight_kg * it.qty;
+  const totalVol = it.volume_cbm * it.qty;
+  // CN first-mile (135/kg, min 337)
+  const cnDomesticBdt = Math.max(
+    SIDE_SERVICE_RATES_PUBLIC.cnDomestic.minBdt,
+    Math.round(totalWeight * SIDE_SERVICE_RATES_PUBLIC.cnDomestic.bdtPerKg),
+  );
+  // Sourcing agent (3% of FOB BDT, min 506)
+  const agentBdt = Math.max(
+    SIDE_SERVICE_RATES_PUBLIC.agent.minBdt,
+    Math.round(cnSubtotalBdt * SIDE_SERVICE_RATES_PUBLIC.agent.pct),
+  );
+  // Consolidation: 0 for a single-line cart line; the /cart page
+  // adds the per-order ৳33,700/CBM fee when the order has
+  // multiple distinct SKUs (consol applies to the whole shipment,
+  // not per line).
+  const consolBdt = 0;
+  // Int'l freight — same helpers as the server uses
+  const intlBdt = mode === "sea"
+    ? seaShippingBdt(totalVol)
+    : airShippingBreakdown(totalWeight, totalVol).totalBdt;
+  // Customs duty: per-kg specific, locked at add time
+  const dutyPerKg = it.customs_duty_per_kg && it.customs_duty_per_kg > 0
+    ? it.customs_duty_per_kg
+    : 750; // Cat A fallback (the server does the same)
+  const dutyBdt = Math.round(totalWeight * dutyPerKg);
+  // CIF: FOB+markup + shipping stack
+  const cifBdt = cnSubtotalBdt + cnDomesticBdt + agentBdt + consolBdt + intlBdt;
+  const vatBdt = Math.round((cifBdt + dutyBdt) * 0.15);
+  const aitBdt = Math.round(cifBdt * 0.05);
+  const totalBdt = cifBdt + dutyBdt + vatBdt + aitBdt + markupBdt;
+
+  return {
+    productBdt: Math.round(productBdt),
+    intlBdt: Math.round(intlBdt),
+    cnDomesticBdt,
+    agentBdt,
+    consolBdt,
+    dutyBdt,
+    vatBdt,
+    aitBdt,
+    markupBdt: Math.round(markupBdt),
+    totalBdt: Math.round(totalBdt),
+    weightKg: totalWeight,
+    volumeCbm: totalVol,
+    dutyPerKg,
+  };
+}
+
+/**
+ * Cart-wide landed total in BDT, summed across all lines, with
+ * the per-order consolidation fee applied when there are 2+
+ * distinct SKUs (matching the server's behaviour). Uses air
+ * freight by default; the /cart page lets the buyer toggle to
+ * sea and recomputes via this helper.
+ */
+export function cartTotalLandedBdt(
+  items: CartItem[],
+  mode: ShippingMode = "air",
+  fx = FX_CNY_BDT,
+): {
+  productBdt: number;
+  intlBdt: number;
+  cnDomesticBdt: number;
+  agentBdt: number;
+  consolBdt: number;
+  dutyBdt: number;
+  vatBdt: number;
+  aitBdt: number;
+  totalBdt: number;
+  weightKg: number;
+  volumeCbm: number;
+} {
+  let productBdt = 0,
+    intlBdt = 0,
+    cnDomesticBdt = 0,
+    agentBdt = 0,
+    dutyBdt = 0,
+    weightKg = 0,
+    volumeCbm = 0;
+  for (const it of items) {
+    const b = cartLineLandedCost(it, mode, fx);
+    productBdt += b.productBdt;
+    intlBdt += b.intlBdt;
+    cnDomesticBdt += b.cnDomesticBdt;
+    agentBdt += b.agentBdt;
+    dutyBdt += b.dutyBdt;
+    weightKg += b.weightKg;
+    volumeCbm += b.volumeCbm;
+  }
+  // Per-order consolidation: only for multi-SKU carts in air/sea
+  // mode. Single SKU = no consolidation (matches server).
+  const consolBdt =
+    items.length > 1
+      ? mode === "sea"
+        ? Math.round(seaShippingBdt(volumeCbm)) // sea consol = ৳33,700/CBM × volume
+        : 0
+      : 0;
+  const cifBdt = productBdt + cnDomesticBdt + agentBdt + consolBdt + intlBdt;
+  const vatBdt = Math.round((cifBdt + dutyBdt) * 0.15);
+  const aitBdt = Math.round(cifBdt * 0.05);
+  const totalBdt = cifBdt + dutyBdt + vatBdt + aitBdt;
+  return {
+    productBdt: Math.round(productBdt),
+    intlBdt: Math.round(intlBdt),
+    cnDomesticBdt,
+    agentBdt,
+    consolBdt,
+    dutyBdt,
+    vatBdt,
+    aitBdt,
+    totalBdt: Math.round(totalBdt),
+    weightKg,
+    volumeCbm,
+  };
+}

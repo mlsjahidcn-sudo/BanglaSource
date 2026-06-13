@@ -227,10 +227,17 @@ export async function POST(req: NextRequest) {
   const vat_bdt = Math.round(cifBdt * 0.15);
   const ait_bdt = Math.round(cifBdt * 0.05);
   const total_bdt = cifBdt + duty_bdt + vat_bdt + ait_bdt;
-  // 70/30 split is on the PRODUCT subtotal only (SkyBuy model:
-  // shipping + duty + tax settle to the courier on delivery).
-  const deposit_bdt = Math.round(product_subtotal_bdt * 0.7);
-  const balance_bdt = product_subtotal_bdt - deposit_bdt;
+  // Phase 13 (full-prepayment model): the buyer pays 100% of the
+  // landed cost at order confirm. There is no balance due on
+  // delivery. The columns `deposit_bdt` / `balance_bdt` are
+  // reused (kept for schema stability) but the semantics shift:
+  //   - deposit_bdt = amount paid upfront = total_bdt
+  //   - balance_bdt = amount due on delivery = 0
+  // The migration added `payment_model` (default 'full_prepay')
+  // and renamed `deposit_paid_at` → `paid_at` to reflect the
+  // new model.
+  const deposit_bdt = total_bdt;
+  const balance_bdt = 0;
 
   // ── Insert order + items in a single RPC. We use a Postgres
   //    function so the insert is atomic; if the items insert
@@ -282,6 +289,7 @@ export async function POST(req: NextRequest) {
       id: orderId,
       order_number: `BS-${String(orderId).padStart(6, "0")}`,
       status: "pending_payment",
+      payment_model: "full_prepay",
       product_subtotal_bdt,
       shipping_bdt,
       duty_bdt,
@@ -307,7 +315,7 @@ export async function GET(_req: NextRequest) {
   }
   const { data: orders, error } = await sb
     .from("orders")
-    .select("id, status, shipping_mode, total_bdt, deposit_bdt, balance_bdt, deposit_paid_at, created_at")
+    .select("id, status, shipping_mode, total_bdt, deposit_bdt, balance_bdt, paid_at, payment_model, created_at")
     .order("created_at", { ascending: false })
     .limit(50);
   if (error) {

@@ -24,7 +24,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "The 70/30 split is huge. I can confirm an order with a 30,000 BDT deposit and pay the rest when the goods land in my warehouse.",
+      "The landed cost in the cart is exactly what I pay — no hidden fees when the courier delivers. I know my margin before I confirm the order.",
     name: "Sumaiya K.",
     business: "Beauty & skincare retail",
     city: "Chittagong",
