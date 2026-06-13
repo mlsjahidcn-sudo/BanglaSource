@@ -3,7 +3,8 @@ import { buyerNav } from "@/lib/buyer-nav";
 import { getServiceRoleClient } from "@/lib/supabase/server";
 import { PortalShell } from "@/components/portal-shell";
 import Link from "next/link";
-import { IconBell, IconSearch } from "@/components/portal-icons";
+import { IconSearch } from "@/components/portal-icons";
+import { NotificationsBell } from "@/components/notifications-bell";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -86,14 +87,15 @@ export default async function BuyerLayout({
           </Link>
           <Link
             href="/buyer/quotes"
-            className="h-9 w-9 rounded-md hover:bg-bg-soft flex items-center justify-center text-fg-muted hover:text-fg relative"
-            title="Notifications"
+            className="h-9 w-9 rounded-md hover:bg-bg-soft flex items-center justify-center text-fg-muted hover:text-fg"
+            title="Quotes"
           >
-            <IconBell size={16} />
-            {counts.openQuotes > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-500" />
-            )}
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 4h10v8H3z" />
+              <path d="M5 7h6M5 9h4" />
+            </svg>
           </Link>
+          <NotificationsBell />
           <Link
             href="/"
             className="text-[12px] text-fg-muted hover:text-fg h-9 px-3 rounded-md hover:bg-bg-soft flex items-center"
