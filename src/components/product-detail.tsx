@@ -421,8 +421,13 @@ export function ProductDetail({ product }: { product: Product }) {
                     value={fmtBdt(lc.agentBdt + lc.consolBdt)}
                   />
                   <BreakdownRow
-                    label={`Duty ${Math.round(lc.dutyPct * 100)}% + VAT + AIT`}
+                    label={`Customs ৳${lc.dutyPerKg.toLocaleString()}/kg + VAT + AIT`}
                     value={fmtBdt(lc.dutyBdt + lc.vatBdt + lc.aitBdt)}
+                    sub={
+                      lc.dutyClass
+                        ? `${classLabel(lc.dutyClass)} · ${lc.chargeableKg.toFixed(2)} kg chargeable`
+                        : undefined
+                    }
                   />
                   <BreakdownRow
                     label={`Our fee (${lc.markupPct}%)`}
@@ -594,4 +599,24 @@ function BreakdownRow({
       <span className="price-tag font-medium shrink-0">{value}</span>
     </div>
   );
+}
+
+/** Human label for a customs_duty_class slug. */
+function classLabel(cls: string): string {
+  const map: Record<string, string> = {
+    "cat-a": "Category A (general)",
+    "cat-b": "Category B (battery / restricted)",
+    "cat-c-high": "Category C (high-specific)",
+    "cat-b-or-c": "Category B/C",
+    "sunglasses-c": "Sunglasses (high specific)",
+    "smart-watch-c": "Smart watch",
+    "bluetooth-c": "Bluetooth headphone",
+    "regular-watch-c": "Regular watch",
+    "liquid-cosmetic-c": "Liquid cosmetics",
+    "powder-c": "Powder",
+    "beauty-electronics-b": "Battery grooming tool",
+    "power-bank-c": "Power bank",
+    "cctv-c": "CCTV camera",
+  };
+  return map[cls] ?? cls;
 }

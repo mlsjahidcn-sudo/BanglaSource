@@ -178,6 +178,19 @@ export async function PATCH(
     }
     patch.weight_kg = body.weight_kg;
   }
+  if (typeof body.customs_duty_per_kg === "number") {
+    if (body.customs_duty_per_kg < 0 || body.customs_duty_per_kg > 50000) {
+      return NextResponse.json(
+        { ok: false, error: "customs_duty_per_kg_out_of_range" },
+        { status: 400 },
+      );
+    }
+    patch.customs_duty_per_kg = body.customs_duty_per_kg;
+  }
+  if (typeof body.customs_duty_class === "string") {
+    patch.customs_duty_class = body.customs_duty_class.slice(0, 64);
+  }
+  }
   if (typeof body.volume_cbm === "number") {
     if (body.volume_cbm < 0 || body.volume_cbm > 10) {
       return NextResponse.json(

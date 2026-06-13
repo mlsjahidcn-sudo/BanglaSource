@@ -29,6 +29,8 @@ export type EditorProduct = {
   markup_pct: number;
   weight_kg: number;
   volume_cbm: number;
+  customs_duty_per_kg: number;
+  customs_duty_class: string | null;
   images: string[];
   supplier_name: string;
   supplier_city: string;
@@ -75,6 +77,12 @@ export function AdminProductEditor({
   const [active, setActive] = useState(product.active);
   const [weightKg, setWeightKg] = useState(String(product.weight_kg));
   const [volumeCbm, setVolumeCbm] = useState(String(product.volume_cbm));
+  const [customsDutyPerKg, setCustomsDutyPerKg] = useState(
+    String(product.customs_duty_per_kg ?? 750),
+  );
+  const [customsDutyClass, setCustomsDutyClass] = useState(
+    product.customs_duty_class ?? "",
+  );
   const [images, setImages] = useState<string[]>(product.images);
 
   // Save state
@@ -104,6 +112,8 @@ export function AdminProductEditor({
       active !== product.active ||
       String(weightKg) !== String(product.weight_kg) ||
       String(volumeCbm) !== String(product.volume_cbm) ||
+      String(customsDutyPerKg) !== String(product.customs_duty_per_kg ?? 750) ||
+      customsDutyClass !== (product.customs_duty_class ?? "") ||
       JSON.stringify(images) !== JSON.stringify(product.images)
     );
   }, [
@@ -116,6 +126,8 @@ export function AdminProductEditor({
     active,
     weightKg,
     volumeCbm,
+    customsDutyPerKg,
+    customsDutyClass,
     images,
     product,
   ]);
@@ -137,6 +149,8 @@ export function AdminProductEditor({
           active,
           weight_kg: Number.parseFloat(weightKg) || 0,
           volume_cbm: Number.parseFloat(volumeCbm) || 0,
+          customs_duty_per_kg: Number.parseFloat(customsDutyPerKg) || 750,
+          customs_duty_class: customsDutyClass || null,
           images,
         }),
       });
@@ -380,7 +394,7 @@ export function AdminProductEditor({
       </div>
 
       {/* Pricing + meta */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
         <div>
           <label className="block text-[11px] font-medium tracking-wider uppercase text-fg-subtle mb-1.5">
             Category
@@ -410,6 +424,43 @@ export function AdminProductEditor({
             onChange={(e) => setMarkupPct(e.target.value)}
             className="w-full px-3 py-2.5 bg-bg border border-border rounded-md text-[14px] font-mono tnum focus:border-border-strong outline-none"
           />
+        </div>
+        <div>
+          <label className="block text-[11px] font-medium tracking-wider uppercase text-fg-subtle mb-1.5">
+            Customs ৳/kg
+          </label>
+          <input
+            type="number"
+            step="50"
+            min="0"
+            max="50000"
+            value={customsDutyPerKg}
+            onChange={(e) => setCustomsDutyPerKg(e.target.value)}
+            className="w-full px-3 py-2.5 bg-bg border border-border rounded-md text-[14px] font-mono tnum focus:border-border-strong outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-[11px] font-medium tracking-wider uppercase text-fg-subtle mb-1.5">
+            Customs class
+          </label>
+          <select
+            value={customsDutyClass}
+            onChange={(e) => setCustomsDutyClass(e.target.value)}
+            className="w-full px-3 py-2.5 bg-bg border border-border rounded-md text-[14px] focus:border-border-strong outline-none"
+          >
+            <option value="">(auto)</option>
+            <option value="cat-a">cat-a (৳750/kg — general)</option>
+            <option value="cat-b">cat-b (৳1,150/kg — battery / restricted)</option>
+            <option value="sunglasses-c">sunglasses-c (৳3,500/kg)</option>
+            <option value="smart-watch-c">smart-watch-c (৳1,200/kg)</option>
+            <option value="bluetooth-c">bluetooth-c (৳1,200/kg)</option>
+            <option value="regular-watch-c">regular-watch-c (৳1,150/kg)</option>
+            <option value="liquid-cosmetic-c">liquid-cosmetic-c (৳1,150/kg)</option>
+            <option value="powder-c">powder-c (৳1,200/kg)</option>
+            <option value="beauty-electronics-b">beauty-electronics-b (৳1,150/kg)</option>
+            <option value="power-bank-c">power-bank-c (৳1,350/kg)</option>
+            <option value="cctv-c">cctv-c (৳1,500/kg)</option>
+          </select>
         </div>
         <div>
           <label className="block text-[11px] font-medium tracking-wider uppercase text-fg-subtle mb-1.5">

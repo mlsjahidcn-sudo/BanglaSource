@@ -31,23 +31,45 @@ const AGENT_MIN_BDT = 506;
 // items OR multiple suppliers. Single-product quotes skip it.
 const CONSOL_BDT = 33700; // ~¥2000
 
-// Bangladesh duty stack (FY 2024-25 reference; verify per HS chapter at quote time)
-// HS chapter notes:
-//   8517 (smartwatches, phones, accessories) → ~10%
-//   9101-9102 (wrist watches)                → ~10%
-//   9004 (sunglasses, frames)                → ~10%
-//   6401-6405 (footwear)                     → ~25%
-//   4202 (handbags, luggage)                 → ~25%
-//   7117 (imitation jewelry)                 → ~20%
-//   3304 (cosmetics, skincare)               → ~20%
+// Bangladesh Customs air-cargo specific duties (per-kg rates).
+// Source: NBR (National Board of Revenue) HS-code-based specific
+// duty schedule for air cargo. The duty is **specific** (per kg of
+// imported weight), not ad-valorem (% of CIF).
+//
+//   Category A — ৳750/kg  (shoes, bags, jewelry, machinery, stickers,
+//                            regular electronics, computer accessories,
+//                            ceramic, metal, leather, rubber, plastic,
+//                            toys excluding battery-operated)
+//   Category B — ৳1,150/kg (battery-operated products, duplicate/counterfeit
+//                            brand items, seeds, chemicals, networking
+//                            equipment, magnet/laser products)
+//   Category C — mixed (per product type, see below)
+//
+//   sunglasses              ৳3,500/kg
+//   CCTV camera             ৳1,500/kg
+//   battery / power bank    ৳1,350/kg
+//   food / kitchen knife    ৳1,200/kg
+//   powder                  ৳1,200/kg
+//   smart watch             ৳1,200/kg
+//   bluetooth headphone     ৳1,200/kg
+//   clothing / hijab / orna ৳750/kg
+//   liquid cosmetics        ৳1,150/kg
+//   regular watch           ৳1,150/kg
+//
+// Per-product rates are stored in products.customs_duty_per_kg
+// (auto-classified from title keywords at insert; admin can override).
+// DUTY_BY_CATEGORY is kept as a fallback for products that don't
+// have the column set yet (e.g. legacy data before migration 0021).
 export const DUTY_BY_CATEGORY: Record<string, number> = {
-  gadgets: 0.10,
-  eyewear: 0.10,
-  shoes: 0.25,
-  bags: 0.25,
-  watches: 0.10,
-  beauty: 0.20,
-  jewelry: 0.20,
+  // Defaults — used only if products.customs_duty_per_kg is null/0
+  // for the row. After backfill, every active product has it set.
+  gadgets: 750,
+  eyewear: 750,
+  shoes: 750,
+  bags: 750,
+  watches: 1150,
+  beauty: 1150,
+  jewelry: 750,
 };
 
 // Bangladesh supplementary duty is folded into CD for our category buckets above.
@@ -137,6 +159,11 @@ export type Product = {
   source_url: string;
   markup_pct: number;
   quality_score?: number;
+  // Bangladesh air-cargo specific customs duty in ৳/kg.
+  // Auto-classified from title keywords at insert time; admin
+  // can override per product. Default: 750 (Category A).
+  customs_duty_per_kg?: number;
+  customs_duty_class?: string;
 };
 
 export type ShippingMode = "air" | "sea" | "express";
@@ -272,7 +299,14 @@ export type LandedBreakdown = {
   cifBdt: number;
   // BD side
   dutyBdt: number;
-  dutyPct: number;
+  // Specific customs duty rate (৳/kg) used for this product.
+  // Set from products.customs_duty_per_kg (auto-classified by
+  // title) or DUTY_BY_CATEGORY fallback.
+  dutyPerKg: number;
+  // Human label like "cat-a", "sunglasses-c", "smart-watch-c".
+  // Useful for the UI to show "Customs duty: ৳1,200/kg (smart
+  // watch class)".
+  dutyClass: string;
   vatBdt: number;
   aitBdt: number;
   // Markup
@@ -364,9 +398,21 @@ export function landedCost(
   const cifBdt =
     cnSubtotalBdt + cnDomesticBdt + agentBdt + consolBdt + intlBdt;
 
-  // 4. Bangladesh duty stack
-  const dutyPct = DUTY_BY_CATEGORY[p.category] ?? 0.15;
-  const dutyBdt = Math.round(cifBdt * dutyPct);
+  // 4. Bangladesh Customs air-cargo specific duty (৳/kg).
+  //    Most HS codes for air cargo are *specific* (per kg of
+  //    imported weight) rather than ad-valorem. The rate comes
+  //    from the product row (auto-classified by title at insert,
+  //    admin-overridable). Falls back to DUTY_BY_CATEGORY for
+  //    legacy rows that don't have it set.
+  const perKg =
+    p.customs_duty_per_kg && p.customs_duty_per_kg > 0
+      ? p.customs_duty_per_kg
+      : DUTY_BY_CATEGORY[p.category] ?? 750;
+  const dutyPct = perKg; // legacy field name kept for API compat;
+  // (the UI no longer treats this as a percent — it now displays
+  // the absolute ৳/kg rate via the `dutyPerKg` field on the
+  // breakdown)
+  const dutyBdt = Math.round(totalWeight * perKg);
   // VAT on (CIF + CD); SD is folded into CD above
   const vatBdt = Math.round((cifBdt + dutyBdt) * VAT_PCT);
   const aitBdt = Math.round(cifBdt * AIT_PCT);
@@ -415,7 +461,8 @@ export function landedCost(
     rateTier,
     cifBdt,
     dutyBdt,
-    dutyPct,
+    dutyPerKg: perKg,
+    dutyClass: p.customs_duty_class ?? (perKg >= 1500 ? "cat-c-high" : perKg >= 1150 ? "cat-b-or-c" : "cat-a"),
     vatBdt,
     aitBdt,
     markupBdt,

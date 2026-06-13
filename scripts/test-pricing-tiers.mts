@@ -1,26 +1,13 @@
 // scripts/test-pricing-tiers.mts
 //
-// Smoke-tests the tiered air/express/sea freight pricing.
-// All shipping rates are now in BDT (the currency the freight
-// forwarder quotes the buyer) — only the factory FOB uses CNY.
+// Smoke-tests the tiered air/express/sea freight pricing AND the
+// per-kg customs duty (Bangladesh air-cargo specific duty schedule).
+// All shipping rates are in BDT — only the factory FOB uses CNY.
 //
 // Run with:
 //   NODE_OPTIONS="--conditions=react-server" pnpm tsx scripts/test-pricing-tiers.mts
-//
-// What we verify:
-//   1. Air freight: floor ৳4,718, 4 tier breakpoints, smooth scaling
-//   2. Express freight: floor ৳6,740, 4 tier breakpoints
-//   3. Sea LCL: floor ৳5,055, linear in volume
-//   4. CN domestic: floor ৳337, linear in weight
-//   5. Agent fee: floor ৳506, 3% of factory FOB
-//   6. chargeableWeightKg: max(actual, volumetric) where
-//      volumetric = volumeCbm * 1000 / 167
-//   7. The /api/quote/landed endpoint returns rateTier (in BDT),
-//      volumetricKg, and the new "small-parcel premium" warning
-//   8. Pro6 (80g) at qty=2 air → ৳4,718 floor fires, unit landed ৳3,848
-//   9. Pro6 (80g) at qty=100 air → drops to 2-10kg tier at 8kg
 
-import { airShippingBdt, seaShippingBdt, airRateTier, chargeableWeightKg, FX_CNY_BDT } from "../src/lib/pricing.ts";
+import { airShippingBdt, seaShippingBdt, airRateTier, chargeableWeightKg, FX_CNY_BDT, landedCost } from "../src/lib/pricing.ts";
 
 let pass = 0;
 let fail = 0;
@@ -156,6 +143,120 @@ check(
 const pro6_2_sea = await getQuote("873514490218", 2, "sea");
 check("Pro6 × 2 sea: rateTier = null", pro6_2_sea.quote.rateTier === null);
 check("Pro6 × 2 sea: intlBdt = 5055 (floor)", pro6_2_sea.quote.intlBdt === 5055);
+
+console.log("\n=== Per-kg customs duty (BD air-cargo specific) ===\n");
+
+// 873514490218 = Pro6 TWS earbuds → bluetooth-c, ৳1,200/kg
+// 828004158031 = sunglasses → sunglasses-c, ৳3,500/kg
+// 631962844096 = shoes → cat-a, ৳750/kg
+// 1009299231859 = smart watch → smart-watch-c, ৳1,200/kg
+// 972586101760 = USB heated lash curler → beauty-electronics-b, ৳1,150/kg
+// 1038465546819 = PDRN serum spray → liquid-cosmetic-c, ৳1,150/kg
+
+const sun = await getQuote("828004158031", 5, "air");
+check("Sunglasses × 5 air: ৳3,500/kg", sun.quote.dutyPerKg === 3500);
+check("Sunglasses × 5 air: dutyClass = sunglasses-c", sun.quote.dutyClass === "sunglasses-c");
+check(
+  "Sunglasses × 5 air: dutyBdt = 0.25 * 3500 = 875",
+  sun.quote.dutyBdt === 875,
+  `actual: ${sun.quote.dutyBdt}`,
+);
+
+const pro6 = await getQuote("873514490218", 2, "air");
+check("Pro6 × 2 air: ৳1,200/kg (bluetooth-c)", pro6.quote.dutyPerKg === 1200);
+check("Pro6 × 2 air: dutyClass = bluetooth-c", pro6.quote.dutyClass === "bluetooth-c");
+check(
+  "Pro6 × 2 air: dutyBdt = 0.16 * 1200 = 192",
+  pro6.quote.dutyBdt === 192,
+  `actual: ${pro6.quote.dutyBdt}`,
+);
+
+const shoes = await getQuote("631962844096", 5, "air");
+check("Shoes × 5 air: ৳750/kg (cat-a)", shoes.quote.dutyPerKg === 750);
+check("Shoes × 5 air: dutyClass = cat-a", shoes.quote.dutyClass === "cat-a");
+check(
+  "Shoes × 5 air: dutyBdt = 3.00 * 750 = 2250",
+  shoes.quote.dutyBdt === 2250,
+);
+
+const watch = await getQuote("1009299231859", 2, "air");
+check("Smart watch × 2 air: ৳1,200/kg (smart-watch-c)", watch.quote.dutyPerKg === 1200);
+check("Smart watch × 2 air: dutyClass = smart-watch-c", watch.quote.dutyClass === "smart-watch-c");
+
+const lash = await getQuote("972586101760", 2, "air");
+check("USB lash curler × 2 air: ৳1,150/kg (beauty-electronics-b)", lash.quote.dutyPerKg === 1150);
+check("USB lash curler × 2 air: dutyClass = beauty-electronics-b", lash.quote.dutyClass === "beauty-electronics-b");
+
+const serum = await getQuote("1038465546819", 5, "air");
+check("PDRN serum × 5 air: ৳1,150/kg (liquid-cosmetic-c)", serum.quote.dutyPerKg === 1150);
+check("PDRN serum × 5 air: dutyClass = liquid-cosmetic-c", serum.quote.dutyClass === "liquid-cosmetic-c");
+
+// VAT/AIT formula sanity: vat = round((cif + duty) * 0.15), ait = round(cif * 0.05)
+const checkVatAit = async (pid: string, qty: number) => {
+  const r = await getQuote(pid, qty, "air");
+  const expectedVat = Math.round((r.quote.cifBdt + r.quote.dutyBdt) * 0.15);
+  const expectedAit = Math.round(r.quote.cifBdt * 0.05);
+  return {
+    vatOk: r.quote.vatBdt === expectedVat,
+    aitOk: r.quote.aitBdt === expectedAit,
+    actualVat: r.quote.vatBdt,
+    expectedVat,
+    actualAit: r.quote.aitBdt,
+    expectedAit,
+  };
+};
+for (const [pid, qty, label] of [
+  ["828004158031", 5, "sunglasses"],
+  ["873514490218", 2, "Pro6"],
+  ["1009299231859", 2, "smart watch"],
+] as const) {
+  const r = await checkVatAit(pid, qty);
+  check(
+    `${label}: VAT = round((CIF + duty) * 0.15)`,
+    r.vatOk,
+    `actual ${r.actualVat} vs expected ${r.expectedVat}`,
+  );
+  check(
+    `${label}: AIT = round(CIF * 0.05)`,
+    r.aitOk,
+    `actual ${r.actualAit} vs expected ${r.expectedAit}`,
+  );
+}
+
+// landedCost() pure function (no API) — verify with hand-classified product
+const handTest = landedCost(
+  {
+    source_id: "test-sun",
+    title_zh: "",
+    title_en: "Sunglasses test",
+    title_bn: "",
+    category: "eyewear",
+    price_min_cny: 13,
+    price_max_cny: 13,
+    factory_moq: 1,
+    price_tiers: [{ qty_min: 1, qty_max: null, price_cny_fen: 1300 }],
+    weight_kg: 0.05,
+    volume_cbm: 0.0005,
+    supplier_name: "test",
+    supplier_province: "test",
+    supplier_city: "test",
+    stock_total: 0,
+    order_count_30d: 0,
+    rating_overall: 0,
+    badges: [],
+    images: [],
+    description_en: "",
+    description_bn: "",
+    source_url: "",
+    markup_pct: 25,
+    customs_duty_per_kg: 3500,
+    customs_duty_class: "sunglasses-c",
+  },
+  5,
+  "air",
+);
+check("Hand-rolled sunglasses × 5: per-kg 3500", handTest.dutyPerKg === 3500);
+check("Hand-rolled sunglasses × 5: dutyBdt 0.25 × 3500 = 875", handTest.dutyBdt === 875);
 
 console.log(`\n=== ${pass} passed, ${fail} failed ===\n`);
 if (fail > 0) process.exit(1);
