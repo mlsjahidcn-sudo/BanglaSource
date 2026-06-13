@@ -1,42 +1,31 @@
 "use client";
 import { useState, useMemo } from "react";
-import {
-  fmtBdt,
-  FX_CNY_BDT,
-  DEFAULT_BUYER_MARKUP_PCT,
-} from "@/lib/pricing";
+import { fmtBdt, FX_CNY_BDT } from "@/lib/pricing";
 
 /**
  * Public product-price calculator for /shipping-rates.
  *
- * Phase 12 follow-up: the page is "Shipping & landed cost" but
- * the user wants the calculator to focus on the product price
- * only — not the full landed cost breakdown. Shipping / duty /
- * VAT math is already shown on the page above (mode cards, side
- * services, and the PDP itself when a buyer lands on a product).
+ * User said: "markup price no need to add in calculator, as user
+ * is putting the product price". The input IS the per-piece price
+ * the buyer will see — the calculator is just a CNY → BDT
+ * converter. Whatever the user types in (the factory FOB) is the
+ * product price; the markup is internal-only and never shown
+ * here.
  *
- * This widget now just answers: "If I buy N pieces of something
- * that costs ¥X/pc factory FOB, what's the buyer's product
- * price in ৳?" That's the only number the buyer sees on the
- * PDP and in the cart.
+ * Math: Product price ৳ = qty × cnyPerPc × FX
+ * Per-piece ৳ = cnyPerPc × FX
  *
- * Math: Product price = qty × cnyPerPc × FX × (1 + markup)
- * The markup used here is the company default (10%) because the
- * calculator has no product context; admin-set per-product
- * markup is reflected on the actual PDP/cart/orders.
+ * No markup line, no "FOB + markup" split, no percentage. The
+ * buyer just sees the unit price in ৳ and the 70/30 split on it.
  */
 export function ProductPriceCalc() {
   const [qty, setQty] = useState(50);
   const [cnyPerPc, setCnyPerPc] = useState(25);
 
   const result = useMemo(() => {
-    const cnSubtotalCny = cnyPerPc * qty;
-    const cnSubtotalBdt = cnSubtotalCny * FX_CNY_BDT;
-    const markupBdt = Math.round(
-      cnSubtotalBdt * (DEFAULT_BUYER_MARKUP_PCT / 100),
-    );
-    const productBdt = Math.round(cnSubtotalBdt + markupBdt);
-    return { cnSubtotalBdt, markupBdt, productBdt };
+    const unitBdt = cnyPerPc * FX_CNY_BDT;
+    const productBdt = unitBdt * qty;
+    return { unitBdt, productBdt };
   }, [cnyPerPc, qty]);
 
   return (
@@ -51,7 +40,7 @@ export function ProductPriceCalc() {
             className="input"
           />
         </Field>
-        <Field label="CNY / pc (factory FOB)">
+        <Field label="CNY / pc (product price)">
           <input
             type="number"
             min={0.01}
@@ -76,6 +65,12 @@ export function ProductPriceCalc() {
             </p>
             <p className="mt-3 text-[13px] text-fg-muted">
               For {qty} pieces at ¥{cnyPerPc.toFixed(2)}/pc
+            </p>
+            <p className="mt-1 text-[12px] text-fg-subtle font-mono">
+              ৳{result.unitBdt.toLocaleString(undefined, {
+                maximumFractionDigits: 2,
+              })}{" "}
+              / pc
             </p>
           </div>
 
