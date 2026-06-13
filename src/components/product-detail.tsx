@@ -393,17 +393,20 @@ export function ProductDetail({ product }: { product: Product }) {
 
             <div className="mt-5 hr" />
 
-            {/* ── SkyBuy-style PDP price card ────────────────────────────
-                Phase 13: switched to full-prepayment model. The card
-                now shows the buyer the full landed cost in one place
-                and the breakdown right below — no more 70/30 split.
-                Two things in the default view:
+            {/* ── PDP price card ──────────────────────────────────────
+                Phase 14: the buyer only sees the product price on the
+                PDP. The landed cost (shipping + customs + VAT + AIT)
+                is NOT itemised in the buyer UI — per user instruction
+                (June 2026), our team confirms the amount by email or
+                WhatsApp after the buyer places the order. The card
+                now shows just two things:
                   1. Product price (= supplier FOB × (1 + markup%))
-                  2. Pay total (= product + shipping + duty + VAT + AIT)
-                The full landed breakdown (intl shipping tier, customs
-                class, VAT, AIT) is itemised right below the Pay total
-                line so the buyer sees the full landed cost before
-                paying. Weight hint card stays.
+                  2. "Landed cost shared after order" hint with a
+                     one-line explanation.
+                The full landed math is still computed server-side
+                (and stored on the order row) — it's just hidden
+                from the buyer's primary flow. The weight + per-kg
+                hint card stays as a transparent reference.
             ─────────────────────────────────────────────────────────── */}
             <div>
               {quoteLoading && !lc && (
@@ -426,51 +429,23 @@ export function ProductDetail({ product }: { product: Product }) {
                     </p>
                   </div>
 
-                  {/* ── Line 2: Pay total — full landed cost (Phase 13) ──
-                       The buyer pays 100% of the landed cost at order
-                       confirm. No balance on delivery. The breakdown
-                       below shows what makes up the total. */}
-                  <div className="flex items-center justify-between">
-                    <p className="text-[13px] text-fg-muted">
-                      {t("pdp.pay_on_delivery")}{" "}
-                      <span className="ml-1 px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10.5px] font-semibold uppercase tracking-wider">
-                        {t("pdp.deposit_pct")}
-                      </span>
+                  {/* ── Landed cost (Phase 14: not shown to the buyer) ──
+                       Per user instruction, the landed cost (shipping +
+                       customs + VAT + AIT) is NOT surfaced in the
+                       buyer UI. Our team confirms the amount by email
+                       or WhatsApp after the buyer places the order.
+                       The product price above is what the buyer sees
+                       on the PDP; the rest of the math is server-side
+                       and shown only on the order detail page (for
+                       admin / audit) — not in the buyer's primary
+                       flow. */}
+                  <div className="flex items-start justify-between gap-3 p-3 rounded-md bg-cyan-50/40 border border-cyan-200/60 text-[12.5px]">
+                    <p className="text-cyan-900 leading-relaxed">
+                      <span className="font-semibold">
+                        {t("pdp.landed_short")}.
+                      </span>{" "}
+                      {t("pdp.landed.body")}
                     </p>
-                    <p className="price-tag font-semibold text-fg text-[16px]">
-                      {fmtBdt(lc.totalBdt)}
-                    </p>
-                  </div>
-
-                  {/* ── Landed cost breakdown (Phase 13: now visible by default) ──
-                       Product + shipping + customs + VAT + AIT, with each
-                       line so the buyer sees the full landed cost before
-                       placing the order. */}
-                  <div className="mt-1 p-3 rounded-md bg-slate-50/70 border border-border text-[12px] space-y-1">
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-fg-muted">Product ({qty} pcs)</span>
-                      <span className="font-mono tnum">{fmtBdt(lc.productBdt)}</span>
-                    </div>
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-fg-muted">+ Shipping + agent</span>
-                      <span className="font-mono tnum">{fmtBdt(lc.intlBdt + lc.cnDomesticBdt + lc.agentBdt + lc.consolBdt)}</span>
-                    </div>
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-fg-muted">+ Customs duty</span>
-                      <span className="font-mono tnum">{fmtBdt(lc.dutyBdt)}</span>
-                    </div>
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-fg-muted">+ VAT 15%</span>
-                      <span className="font-mono tnum">{fmtBdt(lc.vatBdt)}</span>
-                    </div>
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-fg-muted">+ AIT 5%</span>
-                      <span className="font-mono tnum">{fmtBdt(lc.aitBdt)}</span>
-                    </div>
-                    <div className="flex items-baseline justify-between border-t border-border pt-1.5 mt-1.5">
-                      <span className="font-semibold text-fg">Landed total in Dhaka</span>
-                      <span className="font-mono tnum font-semibold">{fmtBdt(lc.totalBdt)}</span>
-                    </div>
                   </div>
 
                   {/* ── Weight + per-kg hint card (skyblue dashed, like skybuybd) ── */}
@@ -549,7 +524,7 @@ export function ProductDetail({ product }: { product: Product }) {
             </div>
 
             <p className="mt-3 text-[11px] text-fg-subtle text-center">
-              Pay 100% of the landed cost when you place the order. No balance on delivery.
+              You pay the landed cost (shipping + customs + tax) we confirm by email or WhatsApp after you place the order.
             </p>
           </div>
 

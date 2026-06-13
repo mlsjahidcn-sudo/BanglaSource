@@ -99,8 +99,12 @@ export const dict: Dict = {
   "pdp.tier": { en: "Bulk pricing", bn: "বাল্ক মূল্য" },
   "pdp.landed": { en: "Landed cost", bn: "ল্যান্ডেড খরচ" },
   "pdp.landed.body": {
-    en: "Includes shipping, duty, VAT. Final price locks at checkout.",
-    bn: "শিপিং, শুল্ক, ভ্যাট অন্তর্ভুক্ত। চেকআউটে চূড়ান্ত মূল্য লক হয়।",
+    en: "The landed cost (shipping + customs + tax) will be shared with you by email or WhatsApp after you place the order. You pay the amount we confirm — not an estimate.",
+    bn: "ল্যান্ডেড খরচ (শিপিং + কাস্টমস + ট্যাক্স) অর্ডার দেওয়ার পর ইমেইল বা হোয়াটসঅ্যাপে জানিয়ে দেওয়া হবে। আমরা যে পরিমাণ নিশ্চিত করি — সেটাই আপনি পেমেন্ট করবেন, কোনো আনুমানিক নয়।",
+  },
+  "pdp.landed_short": {
+    en: "Landed cost shared after order",
+    bn: "অর্ডারের পর ল্যান্ডেড খরচ জানানো হবে",
   },
   "pdp.qty": { en: "Quantity", bn: "পরিমাণ" },
   "pdp.add": { en: "Add to order list", bn: "অর্ডার তালিকায় যোগ করুন" },
@@ -297,8 +301,8 @@ export const dict: Dict = {
     bn: "ভলিউম গুরুত্বপূর্ণ। বাল্কি-কিন্তু-হালকা পণ্য (কুশন, প্যাকেজিং) ভলিউমেট্রিক ওজনে চার্জ হয়: কেজি = CBM × ১০০০ / ১৬৭। ক্যালকুলেটর স্বয়ংক্রিয়ভাবে ভলিউমেট্রিক ওজন প্রয়োগ করে।",
   },
   "ship.disclaimer.4": {
-    en: "Full prepayment at order confirm. Shipping, customs, and tax are itemised in the cart and order pages — the buyer sees the total landed cost before paying.",
-    bn: "অর্ডার নিশ্চিতকরণে সম্পূর্ণ প্রিপেমেন্ট। শিপিং, কাস্টমস ও কর কার্ট ও অর্ডার পেজে আলাদাভাবে দেখানো হয় — ক্রেতা পেমেন্টের আগেই মোট ল্যান্ডেড খরচ দেখতে পান।",
+    en: "Per-kg rates above are reference. The actual landed cost for your order is confirmed by our team via email or WhatsApp after you place the order.",
+    bn: "উপরের প্রতি-কেজি হারগুলো রেফারেন্স। আপনার অর্ডারের প্রকৃত ল্যান্ডেড খরচ অর্ডার দেওয়ার পর ইমেইল বা হোয়াটসঅ্যাপে আমাদের টিম নিশ্চিত করবে।",
   },
   "ship.mode.air": { en: "Air freight", bn: "এয়ার ফ্রেইট" },
   "ship.mode.sea": { en: "Sea freight (LCL)", bn: "সি ফ্রেইট (LCL)" },
@@ -356,8 +360,8 @@ export const dict: Dict = {
     bn: "পণ্যের সাবটোটাল",
   },
   "cart.disclaimer": {
-    en: "Per-piece product prices are locked at add time. The total you see includes the landed cost (product + shipping + customs + VAT + AIT) — pay it all at order confirm.",
-    bn: "পণ্যের প্রতি-পিস মূল্য অ্যাড-টাইমে লক থাকে। আপনার দেখানো মোট পরিমাণে ল্যান্ডেড খরচ অন্তর্ভুক্ত (পণ্য + শিপিং + কাস্টমস + ভ্যাট + এআইটি) — অর্ডার নিশ্চিতকরণে সবটুকু দিন।",
+    en: "Per-piece product prices are locked at add time. The landed cost (shipping + customs + tax) is shared by email or WhatsApp after you place the order — you pay the amount we confirm.",
+    bn: "পণ্যের প্রতি-পিস মূল্য অ্যাড-টাইমে লক থাকে। ল্যান্ডেড খরচ (শিপিং + কাস্টমস + ট্যাক্স) অর্ডার দেওয়ার পর ইমেইল বা হোয়াটসঅ্যাপে জানানো হবে — আমরা যে পরিমাণ নিশ্চিত করি, সেটাই আপনি পেমেন্ট করবেন।",
   },
   // ── SkyBuy-style PDP price card ──────────────────────────────────────
   "pdp.product_price": {
@@ -416,7 +420,7 @@ export const dict: Dict = {
     bn: "*** উল্লেখিত পণ্যের ওজন সম্পূর্ণ সঠিক নয়, আনুমানিক মাত্র। বাংলাদেশে আসার পর পণ্যটির প্রকৃত ওজন মেপে শিপিং চার্জ হিসাব করা হবে। ***",
   },
   "cart.view_all": { en: "View full list", bn: "সম্পূর্ণ তালিকা" },
-  "cart.request_quote": { en: "Request quote", bn: "কোট চান" },
+  "cart.request_quote": { en: "Save quote", bn: "কোট সংরক্ষণ করুন" },
   "cart.empty.title": { en: "Your order list is empty", bn: "আপনার অর্ডার তালিকা খালি" },
   "cart.empty.body": {
     en: "Add products and we'll bundle them into one quote.",
@@ -453,13 +457,13 @@ export const dict: Dict = {
   // ── Checkout / order ──────────────────────────────────────────────
   "checkout.title": { en: "Checkout", bn: "চেকআউট" },
   "checkout.subtitle": {
-    en: "Review your order, add a delivery address, then send the full payment. The landed cost breakdown is shown in the order summary on the right.",
-    bn: "অর্ডারটি পর্যালোচনা করুন, ডেলিভারি ঠিকানা দিন, তারপর সম্পূর্ণ পেমেন্ট পাঠান। ডানদিকের অর্ডার সারাংশে ল্যান্ডেড খরচের ভাঙ্গন দেখানো হচ্ছে।",
+    en: "Review your order, add a delivery address, then submit. The landed cost (shipping + customs + tax) is shared by email or WhatsApp after you place the order — you pay the amount we confirm.",
+    bn: "অর্ডারটি পর্যালোচনা করুন, ডেলিভারি ঠিকানা দিন, তারপর জমা দিন। ল্যান্ডেড খরচ (শিপিং + কাস্টমস + ট্যাক্স) অর্ডার দেওয়ার পর ইমেইল বা হোয়াটসঅ্যাপে জানানো হবে — আমরা যে পরিমাণ নিশ্চিত করি, সেটাই আপনি পেমেন্ট করবেন।",
   },
   "checkout.address": { en: "Delivery address", bn: "ডেলিভারি ঠিকানা" },
   "checkout.address.help": {
-    en: "We deliver across Bangladesh. The total you see is the full landed cost — pay it all at order confirm. No balance is due on delivery.",
-    bn: "আমরা সারা বাংলাদেশে ডেলিভারি দিই। আপনার দেখানো মোট পরিমাণই সম্পূর্ণ ল্যান্ডেড খরচ — অর্ডার নিশ্চিতকরণে সবটুকু দিন। ডেলিভারিতে কোনো বকেয়া নেই।",
+    en: "We deliver across Bangladesh. The landed cost is confirmed by our team after you place the order.",
+    bn: "আমরা সারা বাংলাদেশে ডেলিভারি দিই। ল্যান্ডেড খরচ অর্ডার দেওয়ার পর আমাদের টিম নিশ্চিত করবে।",
   },
   "checkout.full_name": { en: "Full name", bn: "পুরো নাম" },
   "checkout.full_name_ph": { en: "e.g. Rahim Mia", bn: "যেমন রহিম মিয়া" },
@@ -514,11 +518,11 @@ export const dict: Dict = {
   "checkout.summary.duty": { en: "Customs duty", bn: "কাস্টমস শুল্ক" },
   "checkout.summary.tax": { en: "VAT + AIT", bn: "ভ্যাট + এআইটি" },
   "checkout.summary.total": { en: "Total landed in Dhaka", bn: "ঢাকায় মোট ল্যান্ডেড" },
-  "checkout.summary.deposit": { en: "Pay total", bn: "মোট পেমেন্ট" },
-  "checkout.summary.balance": { en: "(full prepayment)", bn: "(সম্পূর্ণ প্রিপেমেন্ট)" },
+  "checkout.summary.deposit": { en: "Amount to pay", bn: "প্রদেয় পরিমাণ" },
+  "checkout.summary.balance": { en: "(confirmed after order)", bn: "(অর্ডারের পর নিশ্চিত)" },
   "checkout.summary.deposit_help": {
-    en: "Pay 100% of the landed cost at order confirm. The full breakdown (product + shipping + customs + VAT + AIT) is shown in the summary above — no balance due on delivery.",
-    bn: "অর্ডার নিশ্চিতকরণে ল্যান্ডেড খরচের ১০০% দিন। পণ্য + শিপিং + কাস্টমস + ভ্যাট + এআইটির সম্পূর্ণ ভাঙ্গন উপরের সারাংশে দেখানো হচ্ছে — ডেলিভারিতে কোনো বকেয়া নেই।",
+    en: "The landed cost (shipping + customs + tax) is shared by email or WhatsApp after you place the order. You pay the amount we confirm.",
+    bn: "ল্যান্ডেড খরচ (শিপিং + কাস্টমস + ট্যাক্স) অর্ডার দেওয়ার পর ইমেইল বা হোয়াটসঅ্যাপে জানানো হবে। আমরা যে পরিমাণ নিশ্চিত করি, সেটাই আপনি পেমেন্ট করবেন।",
   },
   "checkout.place": { en: "Place order", bn: "অর্ডার দিন" },
   "checkout.placing": { en: "Placing order…", bn: "অর্ডার দিচ্ছি…" },
@@ -557,8 +561,16 @@ export const dict: Dict = {
     bn: "পেমেন্ট নির্দেশনা",
   },
   "order.payment_help": {
-    en: "Send the full landed cost to complete the order. Use the order number as reference.",
-    bn: "অর্ডার সম্পূর্ণ করতে সম্পূর্ণ ল্যান্ডেড খরচ পাঠান। রেফারেন্সে অর্ডার নম্বর দিন।",
+    en: "Our team will email or WhatsApp you the landed cost (shipping + customs + tax) within a few hours of order. Send the amount they confirm to the bKash number below, with this order number as reference.",
+    bn: "অর্ডারের কয়েক ঘণ্টার মধ্যে আমাদের টিম ইমেইল বা হোয়াটসঅ্যাপে ল্যান্ডেড খরচ (শিপিং + কাস্টমস + ট্যাক্স) জানাবে। তারা যে পরিমাণ নিশ্চিত করবে, সেটি নিচের বিকাশ নম্বরে পাঠান, রেফারেন্সে এই অর্ডার নম্বরটি দিন।",
+  },
+  "order.amount_to_pay": {
+    en: "Amount to pay",
+    bn: "প্রদেয় পরিমাণ",
+  },
+  "order.amount_after_confirm": {
+    en: "Will be confirmed by email or WhatsApp",
+    bn: "ইমেইল বা হোয়াটসঅ্যাপে নিশ্চিত করা হবে",
   },
   "order.mark_paid": {
     en: "I sent the payment",
@@ -569,12 +581,12 @@ export const dict: Dict = {
     bn: "পেমেন্ট গৃহীত",
   },
   "order.pay_total": {
-    en: "Pay total",
-    bn: "মোট পেমেন্ট",
+    en: "Amount to pay",
+    bn: "প্রদেয় পরিমাণ",
   },
   "order.full_prepay_note": {
-    en: "100% of the landed cost. No balance due on delivery.",
-    bn: "ল্যান্ডেড খরচের ১০০%। ডেলিভারিতে কোনো বকেয়া নেই।",
+    en: "Our team confirms the amount by email or WhatsApp after you place the order. You pay the amount they send.",
+    bn: "অর্ডার দেওয়ার পর আমাদের টিম ইমেইল বা হোয়াটসঅ্যাপে পরিমাণ নিশ্চিত করবে। তারা যে পরিমাণ পাঠায়, সেটাই আপনি দেবেন।",
   },
   "order.buyer_info": { en: "Buyer info", bn: "ক্রেতার তথ্য" },
   "order.address": { en: "Delivery address", bn: "ডেলিভারি ঠিকানা" },

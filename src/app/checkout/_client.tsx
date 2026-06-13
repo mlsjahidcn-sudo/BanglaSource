@@ -370,26 +370,23 @@ export function CheckoutClient() {
 
             <div className="mt-4 pt-4 border-t border-border space-y-1.5 text-[12.5px]">
               <Row label={t("checkout.summary.subtotal")} value={fmtBdt(productSubtotalBdt)} />
-              <Row label={t("checkout.summary.shipping")} value={fmtBdt(shippingBdt)} />
-              <Row label={t("checkout.summary.duty")} value={fmtBdt(dutyBdt)} />
-              <Row label={t("checkout.summary.tax")} value={fmtBdt(vatBdt + aitBdt)} />
-              <Row
-                label={t("checkout.summary.total")}
-                value={fmtBdt(totalBdt)}
-                big
-              />
             </div>
 
-            <div className="mt-4 p-3 rounded-md bg-emerald-50 border border-emerald-200/60 text-[12px] text-emerald-900">
+            {/* Phase 14: the checkout summary no longer shows the
+                landed cost breakdown. The product subtotal is the
+                only number the buyer sees in their primary flow —
+                the landed cost (shipping + customs + VAT + AIT) is
+                NOT shown. Per user instruction, our team confirms
+                the amount by email or WhatsApp after the buyer
+                submits. The card below replaces the 70/30 emerald
+                block from Phase 13. */}
+            <div className="mt-4 p-3 rounded-md bg-cyan-50 border border-cyan-200/60 text-[12px] text-cyan-900">
               <p className="font-medium">{t("checkout.summary.deposit")}</p>
-              <p className="text-[18px] font-semibold mt-0.5">
-                {fmtBdt(depositBdt)}
-              </p>
-              <p className="mt-1 text-emerald-800/80">
-                {t("checkout.summary.deposit_help")}
-              </p>
-              <p className="mt-2 text-emerald-800/80 text-[11.5px]">
+              <p className="mt-1 text-[14.5px] font-mono tnum text-cyan-900/80">
                 {t("checkout.summary.balance")}
+              </p>
+              <p className="mt-1.5 text-cyan-800/90 text-[11.5px] leading-relaxed">
+                {t("checkout.summary.deposit_help")}
               </p>
             </div>
 

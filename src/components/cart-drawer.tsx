@@ -8,7 +8,6 @@ import {
   cartUnitProductBdt,
   cartTotalWeightKg,
   cartMinWeightMet,
-  cartTotalLandedBdt,
   ORDER_MIN_WEIGHT_KG,
 } from "@/lib/cart";
 import { useLang } from "@/lib/i18n";
@@ -166,48 +165,24 @@ export function CartDrawer({ open, onClose }: Props) {
 
         {items.length > 0 && (
           <div className="border-t border-border p-5 space-y-3 bg-bg-soft">
-            {/* Phase 13: show the FULL landed cost (product + shipping +
-                customs + VAT + AIT) as the headline number. Air freight
-                assumed (the /cart page lets the buyer toggle to sea and
-                recomputes; the drawer stays a quick estimate). */}
-            {(() => {
-              const landed = cartTotalLandedBdt(items, "air");
-              return (
-                <>
-                  <div className="flex items-baseline justify-between text-[13px]">
-                    <span className="text-fg-muted">
-                      {t("cart.product_subtotal")} ({items.length} {t("cart.skus")})
-                    </span>
-                    <span className="font-mono tnum">
-                      {fmtBdt(landed.productBdt)}
-                    </span>
-                  </div>
-                  <div className="flex items-baseline justify-between text-[12px] text-fg-muted">
-                    <span>+ Shipping + agent</span>
-                    <span className="font-mono tnum">
-                      {fmtBdt(landed.intlBdt + landed.cnDomesticBdt + landed.agentBdt)}
-                    </span>
-                  </div>
-                  <div className="flex items-baseline justify-between text-[12px] text-fg-muted">
-                    <span>+ Customs + VAT + AIT</span>
-                    <span className="font-mono tnum">
-                      {fmtBdt(landed.dutyBdt + landed.vatBdt + landed.aitBdt)}
-                    </span>
-                  </div>
-                  <div className="flex items-baseline justify-between border-t border-border pt-2.5 mt-1">
-                    <span className="text-[13px] font-semibold text-fg">
-                      Total landed in Dhaka
-                    </span>
-                    <span className="price-tag font-semibold text-[18px] text-cyan-700">
-                      {fmtBdt(landed.totalBdt)}
-                    </span>
-                  </div>
-                  <p className="text-[10.5px] text-fg-subtle">
-                    Pay 100% at order confirm. No balance on delivery.
-                  </p>
-                </>
-              );
-            })()}
+            {/* Phase 14: the buyer only sees the product subtotal in
+                the drawer. The landed cost (shipping + customs + VAT +
+                AIT) is NOT shown — per user instruction, our team
+                confirms the amount by email or WhatsApp after the
+                buyer places the order. The product subtotal is the
+                only number the drawer needs to surface; the place
+                order button stays. */}
+            <div className="flex items-baseline justify-between text-[13px]">
+              <span className="text-fg-muted">
+                {t("cart.product_subtotal")} ({items.length} {t("cart.skus")})
+              </span>
+              <span className="price-tag font-semibold text-[16px]">
+                {fmtBdt(productSubtotalBdt)}
+              </span>
+            </div>
+            <p className="text-[10.5px] text-fg-subtle leading-relaxed">
+              {t("cart.disclaimer")}
+            </p>
 
             {/* Phase 11: weight progress + min-weight gate. */}
             {(() => {

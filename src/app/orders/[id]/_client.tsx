@@ -161,7 +161,7 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
           <PaymentInstructions
             method={order.payment_method}
             orderNumber={orderNumber}
-            amount={order.total_bdt}
+            amount={null /* Phase 14: amount is shared by email/WhatsApp, not hard-coded here */}
           />
 
           <div className="mt-4 flex items-center gap-3">
@@ -245,26 +245,18 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
             <h2 className="text-[15px] font-semibold">{t("order.summary")}</h2>
             <div className="mt-3 space-y-1.5 text-[12.5px]">
               <Row label="Product subtotal" value={fmtBdt(order.product_subtotal_bdt)} />
-              <Row label="Shipping + agent" value={fmtBdt(order.shipping_bdt)} />
-              <Row label="Customs duty" value={fmtBdt(order.duty_bdt)} />
-              <Row label="VAT (15%)" value={fmtBdt(order.vat_bdt)} />
-              <Row label="AIT (5%)" value={fmtBdt(order.ait_bdt)} />
-              <Row
-                label={t("checkout.summary.total")}
-                value={fmtBdt(order.total_bdt)}
-                big
-              />
             </div>
-            <div className="mt-4 p-3 rounded-md bg-emerald-50 border border-emerald-200/60 text-[12.5px]">
-              <div className="flex items-baseline justify-between">
-                <span className="text-emerald-900 font-medium">
-                  {t("order.pay_total")}
-                </span>
-                <span className="font-mono tnum text-emerald-900 font-semibold text-[15px]">
-                  {fmtBdt(order.total_bdt)}
-                </span>
-              </div>
-              <p className="mt-1.5 text-[11.5px] text-emerald-900/80">
+            {/* Phase 14: the order summary on the buyer-facing page
+                only shows the product subtotal. The shipping /
+                customs / VAT / AIT breakdown and the grand total
+                are stored on the order row for audit (admins see
+                them in /admin/orders — not yet built) but are NOT
+                shown to the buyer. Per user instruction, our team
+                confirms the landed cost by email or WhatsApp
+                after the order is placed. */}
+            <div className="mt-4 p-3 rounded-md bg-cyan-50 border border-cyan-200/60 text-[12.5px] text-cyan-900">
+              <p className="font-medium">{t("order.amount_to_pay")}</p>
+              <p className="mt-1.5 text-[11.5px] text-cyan-800/90 leading-relaxed">
                 {t("order.full_prepay_note")}
               </p>
             </div>
@@ -368,8 +360,16 @@ function PaymentInstructions({
 }: {
   method: OrderRow["payment_method"];
   orderNumber: string;
-  amount: number;
+  /** Phase 14: null = amount is shared by email/WhatsApp, not hard-coded.
+   *  Number = legacy Phase 13 path (full prepayment with the amount on
+   *  this page). Kept for back-compat; the buyer flow now always
+   *  passes null. */
+  amount: number | null;
 }) {
+  const { t } = useLang();
+  const amountLine = amount == null
+    ? { label: "Amount", value: t("order.amount_after_confirm") }
+    : { label: "Amount", value: fmtBdt(amount) };
   const details: Record<
     OrderRow["payment_method"],
     { title: string; lines: Array<{ label: string; value: string; copy?: boolean }> }
@@ -379,7 +379,7 @@ function PaymentInstructions({
       lines: [
         { label: "Number", value: "0173-25764171", copy: true },
         { label: "Reference", value: orderNumber, copy: true },
-        { label: "Amount", value: fmtBdt(amount) },
+        amountLine,
       ],
     },
     bank: {
@@ -389,7 +389,7 @@ function PaymentInstructions({
         { label: "A/C", value: "1234-567890-1", copy: true },
         { label: "Beneficiary", value: "Skybuy Limited" },
         { label: "Reference", value: orderNumber, copy: true },
-        { label: "Amount", value: fmtBdt(amount) },
+        amountLine,
       ],
     },
     cod: {
@@ -398,7 +398,7 @@ function PaymentInstructions({
         { label: "Warehouse", value: "Badda, Dhaka" },
         { label: "Hours", value: "Sat-Thu 10:00-19:00 BST" },
         { label: "Reference", value: orderNumber, copy: true },
-        { label: "Amount", value: fmtBdt(amount) },
+        amountLine,
       ],
     },
     usdt: {
@@ -406,7 +406,7 @@ function PaymentInstructions({
       lines: [
         { label: "Wallet", value: "TXyz... (shown after order is placed)" },
         { label: "Reference", value: orderNumber, copy: true },
-        { label: "Amount", value: fmtBdt(amount) },
+        amountLine,
       ],
     },
   };
