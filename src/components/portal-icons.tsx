@@ -187,3 +187,16 @@ export const IconAI = ({ size = 16, className }: IconProps) =>
     </>,
     className,
   );
+
+// Icon for the "Import from Pinduoduo / Taobao" admin page.
+// Drawn as a downward arrow into a tray — represents "fetch
+// from a source into our catalog".
+export const IconImport = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <>
+      <path d="M8 2v8m0 0l-3-3m3 3l3-3" />
+      <path d="M3 12v1.5A1.5 1.5 0 004.5 15h9a1.5 1.5 0 001.5-1.5V12" />
+    </>,
+    className,
+  );
