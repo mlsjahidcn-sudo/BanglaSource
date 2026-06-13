@@ -90,29 +90,64 @@ const AIT_PCT = 0.05;
 //   10–50 kg ৳590/kg    (~$5/kg — the historical "bulk" rate)
 //   50 kg+   ৳421/kg    (~$3-4/kg — bulk discount)
 //
-// We model this as a step function: pick the tier for the chargeable kg
-// of the whole shipment, then multiply. The floor is the minimum service
-// charge any carrier applies, regardless of how small the parcel is.
-// ৳4,718 ≈ $40 ≈ realistic minimum for a 1kg parcel Guangzhou→Dhaka.
+// The per-kg rate is a *base* — the carrier also charges a "service
+// minimum" that scales with the actual weight (a 0.1kg document
+// doesn't cost ৳1,348 × 0.1 = ৳135 in real life; it costs about
+// ৳1,500-2,000 because the carrier still has to handle it). We
+// model this as a weight-aware minimum ladder — the floor for a
+// 0.1kg parcel is much lower than the floor for a 1.5kg parcel
+// because the carrier work is different.
+//
+//   0–0.2 kg    min ৳1,500   (document-class small parcel)
+//   0.2–0.5 kg  min ৳2,200
+//   0.5–1.0 kg  min ৳3,000
+//   1.0–2.0 kg  min ৳4,000
+//   2.0+ kg     no floor (per-kg rate takes over)
 const AIR_TIERS: Array<{ maxKg: number; rateBdtPerKg: number }> = [
   { maxKg: 2, rateBdtPerKg: 1348 },
   { maxKg: 10, rateBdtPerKg: 843 },
   { maxKg: 50, rateBdtPerKg: 590 },
   { maxKg: Infinity, rateBdtPerKg: 421 },
 ];
-const AIR_MIN_BDT = 4718;
+const AIR_MIN_LADDER: Array<{ maxKg: number; minBdt: number }> = [
+  { maxKg: 0.2, minBdt: 1500 },
+  { maxKg: 0.5, minBdt: 2200 },
+  { maxKg: 1.0, minBdt: 3000 },
+  { maxKg: 2.0, minBdt: 4000 },
+];
+function airMinBdt(chargeableKg: number): number {
+  const tier = AIR_MIN_LADDER.find((t) => chargeableKg <= t.maxKg);
+  return tier?.minBdt ?? 0;
+}
 
 // Express (DHL/FedEx/UPS-equivalent) — premium tier for 1-5kg parcels.
 // Real rates: $17-19/kg for 0-1kg, $11-13/kg for 1-5kg, $8-10/kg for
-// 5-20kg, $6-7/kg for 20kg+. Min ৳6,740 because express carriers charge
-// a base service fee even for 0.5kg documents.
+// 5-20kg, $6-7/kg for 20kg+. Express carriers also have weight-aware
+// service minimums (DHL/FedEx bill a base "shipment" fee + per-kg;
+// that base fee is higher than air freight's because of the
+// premium service).
+//
+//   ≤0.5 kg   min ৳2,500  (DHL "envelope" tier)
+//   ≤1.0 kg   min ৳3,500
+//   ≤2.0 kg   min ৳5,000
+//   ≤5.0 kg   min ৳6,740
+//   >5.0 kg   no floor (per-kg rate takes over)
 const EXPRESS_TIERS: Array<{ maxKg: number; rateBdtPerKg: number }> = [
   { maxKg: 1, rateBdtPerKg: 2359 },
   { maxKg: 5, rateBdtPerKg: 1601 },
   { maxKg: 20, rateBdtPerKg: 1180 },
   { maxKg: Infinity, rateBdtPerKg: 927 },
 ];
-const EXPRESS_MIN_BDT = 6740;
+const EXPRESS_MIN_LADDER: Array<{ maxKg: number; minBdt: number }> = [
+  { maxKg: 0.5, minBdt: 2500 },
+  { maxKg: 1.0, minBdt: 3500 },
+  { maxKg: 2.0, minBdt: 5000 },
+  { maxKg: 5.0, minBdt: 6740 },
+];
+function expressMinBdt(chargeableKg: number): number {
+  const tier = EXPRESS_MIN_LADDER.find((t) => chargeableKg <= t.maxKg);
+  return tier?.minBdt ?? 0;
+}
 
 // Sea LCL (৳/CBM) — based on Guangzhou→Chittagong rates (~$15-17/CBM).
 // ৳33,700/CBM ≈ $240/CBM (LCL is priced per-CBM because vessels charge
@@ -191,17 +226,54 @@ export function chargeableWeightKg(actualKg: number, volumeCbm: number): number 
  *   2–10 kg  ৳843/kg
  *   10–50 kg ৳590/kg
  *   50 kg+   ৳421/kg
- * with a ৳4,718 minimum service charge (real carriers don't ship
- * a 0.16 kg parcel for less than ~$40). The tier is selected
- * by the *chargeable* weight of the whole shipment.
+ *
+ * The per-kg rate is the BASE; we also apply a weight-aware
+ * minimum that scales with the actual chargeable weight:
+ *   ≤0.2 kg  min ৳1,500  (document-class small parcel)
+ *   ≤0.5 kg  min ৳2,200
+ *   ≤1.0 kg  min ৳3,000
+ *   ≤2.0 kg  min ৳4,000
+ *   >2.0 kg  no floor (per-kg rate takes over)
  *
  * Returns BDT (the currency the Bangladeshi freight forwarder quotes).
+ * The companion `airShippingBreakdown()` returns the computed value,
+ * the floor applied, and the effective per-kg rate — so the UI can
+ * show the buyer the math: "৳135 (per-kg) + ৳1,500 (small-parcel
+ * service fee) = ৳1,635".
  */
 export function airShippingBdt(actualKg: number, volumeCbm: number): number {
   const cw = chargeableWeightKg(actualKg, volumeCbm);
   const tier =
     AIR_TIERS.find((t) => cw <= t.maxKg) ?? AIR_TIERS[AIR_TIERS.length - 1];
-  return Math.max(AIR_MIN_BDT, Math.round(cw * tier.rateBdtPerKg));
+  const base = Math.round(cw * tier.rateBdtPerKg);
+  const min = airMinBdt(cw);
+  return Math.max(min, base);
+}
+
+/** Detailed air-shipping breakdown for UI display. */
+export function airShippingBreakdown(actualKg: number, volumeCbm: number): {
+  chargeableKg: number;
+  tierMaxKg: number;
+  rateBdtPerKg: number;
+  perKgAmount: number;
+  minBdt: number;
+  totalBdt: number;
+  floorApplied: boolean;
+} {
+  const cw = chargeableWeightKg(actualKg, volumeCbm);
+  const tier =
+    AIR_TIERS.find((t) => cw <= t.maxKg) ?? AIR_TIERS[AIR_TIERS.length - 1];
+  const perKg = Math.round(cw * tier.rateBdtPerKg);
+  const min = airMinBdt(cw);
+  return {
+    chargeableKg: cw,
+    tierMaxKg: tier.maxKg === Infinity ? 9999 : tier.maxKg,
+    rateBdtPerKg: tier.rateBdtPerKg,
+    perKgAmount: perKg,
+    minBdt: min,
+    totalBdt: Math.max(min, perKg),
+    floorApplied: perKg < min,
+  };
 }
 
 /** Which air-rate tier applies for a given chargeable kg (for UI). */
@@ -215,7 +287,7 @@ export function airRateTier(chargeableKg: number): {
   return {
     tierMaxKg: tier.maxKg === Infinity ? 9999 : tier.maxKg,
     rateBdtPerKg: tier.rateBdtPerKg,
-    minBdt: AIR_MIN_BDT,
+    minBdt: airMinBdt(chargeableKg),
   };
 }
 
@@ -230,7 +302,9 @@ export function expressShippingBdt(
   const tier =
     EXPRESS_TIERS.find((t) => cw <= t.maxKg) ??
     EXPRESS_TIERS[EXPRESS_TIERS.length - 1];
-  return Math.max(EXPRESS_MIN_BDT, Math.round(cw * tier.rateBdtPerKg));
+  const base = Math.round(cw * tier.rateBdtPerKg);
+  const min = expressMinBdt(cw);
+  return Math.max(min, base);
 }
 
 export function expressRateTier(chargeableKg: number): {
@@ -244,7 +318,7 @@ export function expressRateTier(chargeableKg: number): {
   return {
     tierMaxKg: tier.maxKg === Infinity ? 9999 : tier.maxKg,
     rateBdtPerKg: tier.rateBdtPerKg,
-    minBdt: EXPRESS_MIN_BDT,
+    minBdt: expressMinBdt(chargeableKg),
   };
 }
 
@@ -293,6 +367,18 @@ export type LandedBreakdown = {
     tierMaxKg: number;
     rateBdtPerKg: number;
     minBdt: number;
+  } | null;
+  // Detailed air/express shipping breakdown. Tells the UI:
+  //   - perKgAmount: what the per-kg rate alone would have cost
+  //   - minBdt:     the carrier service minimum that applies
+  //   - totalBdt:   max of the two (the actual billed amount)
+  //   - floorApplied: true if minBdt > perKgAmount (the small-
+  //     parcel service fee kicked in)
+  // The UI uses this to show: "৳135 (per-kg) + ৳1,500 (small-parcel
+  // service fee) = ৳1,635" instead of just "৳4,718".
+  shippingBreakdown?: {
+    perKgAmount: number;
+    floorApplied: boolean;
   } | null;
   // CIF (Cost + Insurance + Freight) — total cost in Bangladesh
   // before duty (the basis for duty/VAT calculation)
@@ -391,8 +477,32 @@ export function landedCost(
   // Rate tier used for the chosen mode (so the UI can show
   // "small-parcel premium — air at ৳1,348/kg tier" for tiny orders)
   let rateTier: ReturnType<typeof airRateTier> | null = null;
-  if (mode === "air") rateTier = airRateTier(chargeableKg);
-  else if (mode === "express") rateTier = expressRateTier(chargeableKg);
+  let shippingBreakdown: { perKgAmount: number; floorApplied: boolean } | null = null;
+  if (mode === "air") {
+    const bd = airShippingBreakdown(totalWeight, totalVol);
+    rateTier = {
+      tierMaxKg: bd.tierMaxKg,
+      rateBdtPerKg: bd.rateBdtPerKg,
+      minBdt: bd.minBdt,
+    };
+    shippingBreakdown = {
+      perKgAmount: bd.perKgAmount,
+      floorApplied: bd.floorApplied,
+    };
+  } else if (mode === "express") {
+    const cw = chargeableWeightKg(totalWeight, totalVol);
+    const perKg = Math.round(
+      cw *
+        (EXPRESS_TIERS.find((t) => cw <= t.maxKg) ??
+          EXPRESS_TIERS[EXPRESS_TIERS.length - 1]).rateBdtPerKg,
+    );
+    const min = expressMinBdt(cw);
+    rateTier = expressRateTier(chargeableKg);
+    shippingBreakdown = {
+      perKgAmount: perKg,
+      floorApplied: perKg < min,
+    };
+  }
 
   // 3. CIF (BDT) — total landed cost in Bangladesh before duty
   const cifBdt =
@@ -459,6 +569,7 @@ export function landedCost(
     chargeableKg: Math.round(chargeableKg * 100) / 100,
     volumetricKg: Math.round(volumetricKg * 100) / 100,
     rateTier,
+    shippingBreakdown,
     cifBdt,
     dutyBdt,
     dutyPerKg: perKg,

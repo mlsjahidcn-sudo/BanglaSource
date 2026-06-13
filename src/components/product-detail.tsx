@@ -407,12 +407,16 @@ export function ProductDetail({ product }: { product: Product }) {
                     label={`Int'l shipping (${mode})`}
                     value={fmtBdt(lc.intlBdt)}
                     sub={
-                      lc.rateTier
-                        ? `${mode === "air" ? "Air" : "Express"} at ৳${lc.rateTier.rateBdtPerKg.toLocaleString()}/kg, ${lc.chargeableKg.toFixed(2)} kg chargeable${
-                            lc.volumetricKg > lc.chargeableKg
-                              ? ` (volumetric — pack tighter to save)`
-                              : ""
-                          }`
+                      lc.rateTier && lc.shippingBreakdown
+                        ? shippingSubText(
+                            mode,
+                            lc.chargeableKg,
+                            lc.rateTier.rateBdtPerKg,
+                            lc.rateTier.minBdt,
+                            lc.shippingBreakdown.perKgAmount,
+                            lc.shippingBreakdown.floorApplied,
+                            lc.volumetricKg,
+                          )
                         : undefined
                     }
                   />
@@ -599,6 +603,29 @@ function BreakdownRow({
       <span className="price-tag font-medium shrink-0">{value}</span>
     </div>
   );
+}
+
+/** Build the Int'l shipping row sub-text. When the per-kg rate alone
+ * would under-price the parcel, we show the actual math: "৳135
+ * (per-kg) + ৳1,500 (small-parcel service fee) = ৳1,635" so the
+ * buyer understands why the shipping number is what it is. */
+function shippingSubText(
+  mode: "air" | "sea" | "express",
+  chargeableKg: number,
+  rateBdtPerKg: number,
+  minBdt: number,
+  perKgAmount: number,
+  floorApplied: boolean,
+  volumetricKg: number,
+): string {
+  const modeLabel = mode === "air" ? "Air" : mode === "express" ? "Express" : "Sea LCL";
+  const kgPart = `${chargeableKg.toFixed(2)} kg chargeable${
+    volumetricKg > chargeableKg ? " (volumetric — pack tighter to save)" : ""
+  }`;
+  if (floorApplied) {
+    return `${modeLabel}: ৳${perKgAmount.toLocaleString()} (per-kg) + ৳${minBdt.toLocaleString()} (small-parcel service fee) · ${kgPart}`;
+  }
+  return `${modeLabel} at ৳${rateBdtPerKg.toLocaleString()}/kg · ${kgPart}`;
 }
 
 /** Human label for a customs_duty_class slug. */

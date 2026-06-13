@@ -7,7 +7,7 @@
 // Run with:
 //   NODE_OPTIONS="--conditions=react-server" pnpm tsx scripts/test-pricing-tiers.mts
 
-import { airShippingBdt, seaShippingBdt, airRateTier, chargeableWeightKg, FX_CNY_BDT, landedCost } from "../src/lib/pricing.ts";
+import { airShippingBdt, seaShippingBdt, airRateTier, chargeableWeightKg, FX_CNY_BDT, landedCost, airShippingBreakdown } from "../src/lib/pricing.ts";
 
 let pass = 0;
 let fail = 0;
@@ -28,22 +28,71 @@ function approx(actual: number, expected: number, tol = 1) {
 
 console.log("\n=== Air freight tiering (in BDT) ===\n");
 
-// 0.16 kg (2 Pro6): floor ৳4,718 fires (0.16 * 1348 = 215.7 → max(4718, 216) = 4718)
-check("0.16kg via air → floor ৳4,718", airShippingBdt(0.16, 0.00032) === 4718);
+// Weight-aware minimum ladder — small parcels have a smaller realistic
+// minimum than 1kg+ parcels (the carrier still has to handle them,
+// but the handling cost is much less than 1kg+).
+//
+//   ≤0.2 kg    min ৳1,500  (document-class)
+//   ≤0.5 kg    min ৳2,200
+//   ≤1.0 kg    min ৳3,000
+//   ≤2.0 kg    min ৳4,000
+//   >2.0 kg    no floor (per-kg rate takes over)
+
+// 0.05 kg (1 sunglass, the user's reported case)
 check(
-  "0.16kg via air → tier shows ৳1,348/kg (small-parcel premium)",
-  airRateTier(0.16).rateBdtPerKg === 1348,
+  "0.05kg via air → floor ৳1,500 (document tier)",
+  airShippingBdt(0.05, 0.00045) === 1500,
+);
+check(
+  "0.05kg via air → tier shows ৳1,348/kg (small-parcel premium)",
+  airRateTier(0.05).rateBdtPerKg === 1348,
+);
+check(
+  "0.05kg via air → min ৳1,500 (NOT ৳4,718)",
+  airRateTier(0.05).minBdt === 1500,
 );
 
-// 0.40 kg (5 Pro6): still in 0-2kg tier
-check("0.40kg via air → still ৳1,348/kg tier", airRateTier(0.40).rateBdtPerKg === 1348);
-check("0.40kg via air → 0.40*1348=539 → floor ৳4,718", airShippingBdt(0.40, 0.00032) === 4718);
+// 0.10 kg (2 sunglasses)
+check(
+  "0.10kg via air → floor ৳1,500 (NOT ৳4,718)",
+  airShippingBdt(0.10, 0.0005) === 1500,
+);
 
-// 5 kg: drops to 2-10kg tier (৳843/kg), but floor still applies since 5*843=4215 < 4718
-check("5kg via air → ৳843/kg tier", airRateTier(5).rateBdtPerKg === 843);
-check("5kg via air → 5*843=4215 → floor ৳4,718", airShippingBdt(5, 0.005) === 4718);
+// 0.16 kg (2 Pro6)
+check(
+  "0.16kg via air → floor ৳1,500 (NOT ৳4,718)",
+  airShippingBdt(0.16, 0.00032) === 1500,
+);
 
-// 8 kg: 8*843=6744, above floor
+// 0.40 kg (5 Pro6) → 0.2-0.5kg tier, min ৳2,200
+check(
+  "0.40kg via air → still ৳1,348/kg tier",
+  airRateTier(0.40).rateBdtPerKg === 1348,
+);
+check(
+  "0.40kg via air → 0.40*1348=539 → floor ৳2,200",
+  airShippingBdt(0.40, 0.00032) === 2200,
+);
+
+// 0.7 kg
+check(
+  "0.7kg via air → floor ৳3,000 (0.5-1.0kg tier)",
+  airShippingBdt(0.7, 0.001) === 3000,
+);
+
+// 1.5 kg
+check(
+  "1.5kg via air → floor ৳4,000 (1.0-2.0kg tier)",
+  airShippingBdt(1.5, 0.002) === 4000,
+);
+
+// 3 kg: no floor (over 2kg, per-kg rate takes over)
+check(
+  "3kg via air → 3*843=2529, no floor",
+  airShippingBdt(3, 0.005) === 2529,
+);
+
+// 8 kg: 8*843=6744, no floor
 check("8kg via air → ৳6,744 (no floor)", airShippingBdt(8, 0.01) === 6744);
 
 // 12 kg: drops to 10-50kg tier (৳590/kg)
@@ -59,6 +108,16 @@ check("2kg via air → still 0-2kg tier (≤)", airRateTier(2).rateBdtPerKg === 
 check("2.01kg via air → drops to 2-10kg tier", airRateTier(2.01).rateBdtPerKg === 843);
 check("10kg via air → still 2-10kg tier (≤)", airRateTier(10).rateBdtPerKg === 843);
 check("10.01kg via air → drops to 10-50kg tier", airRateTier(10.01).rateBdtPerKg === 590);
+
+// airShippingBreakdown() helper
+const bd05 = airShippingBreakdown(0.05, 0.00045);
+check("0.05kg breakdown: perKgAmount = 67 (0.05*1348)", bd05.perKgAmount === 67);
+check("0.05kg breakdown: floorApplied = true", bd05.floorApplied === true);
+check("0.05kg breakdown: totalBdt = 1500", bd05.totalBdt === 1500);
+const bd3 = airShippingBreakdown(3, 0.005);
+check("3kg breakdown: perKgAmount = 2529", bd3.perKgAmount === 2529);
+check("3kg breakdown: floorApplied = false", bd3.floorApplied === false);
+check("3kg breakdown: totalBdt = 2529 (no floor)", bd3.totalBdt === 2529);
 
 console.log("\n=== Sea freight ===\n");
 check("0.001 CBM sea → floor ৳5,055", seaShippingBdt(0.001) === 5055);
@@ -112,8 +171,22 @@ const pro6_2 = await getQuote("873514490218", 2, "air");
 check("Pro6 × 2 air: rateTier present", pro6_2.quote.rateTier != null);
 check("Pro6 × 2 air: rateTier.tierMaxKg = 2", pro6_2.quote.rateTier?.tierMaxKg === 2);
 check("Pro6 × 2 air: rateTier.rateBdtPerKg = 1348", pro6_2.quote.rateTier?.rateBdtPerKg === 1348);
-check("Pro6 × 2 air: rateTier.minBdt = 4718", pro6_2.quote.rateTier?.minBdt === 4718);
-check("Pro6 × 2 air: intlBdt = 4718 (floor)", pro6_2.quote.intlBdt === 4718);
+check(
+  "Pro6 × 2 air: rateTier.minBdt = 1500 (weight-aware floor, NOT ৳4,718)",
+  pro6_2.quote.rateTier?.minBdt === 1500,
+);
+check(
+  "Pro6 × 2 air: intlBdt = 1500 (weight-aware floor, NOT ৳4,718)",
+  pro6_2.quote.intlBdt === 1500,
+);
+check(
+  "Pro6 × 2 air: shippingBreakdown.perKgAmount = 216",
+  pro6_2.quote.shippingBreakdown?.perKgAmount === 216,
+);
+check(
+  "Pro6 × 2 air: shippingBreakdown.floorApplied = true",
+  pro6_2.quote.shippingBreakdown?.floorApplied === true,
+);
 check("Pro6 × 2 air: cnDomesticBdt = 337 (floor)", pro6_2.quote.cnDomesticBdt === 337);
 check("Pro6 × 2 air: agentBdt = 506 (floor)", pro6_2.quote.agentBdt === 506);
 check("Pro6 × 2 air: volumetricKg present", typeof pro6_2.quote.volumetricKg === "number");

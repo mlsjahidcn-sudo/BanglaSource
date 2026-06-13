@@ -87,7 +87,7 @@ export async function GET(req: NextRequest) {
   }
   if (quote.tooSmallForAir) {
     warnings.push(
-      `Small-parcel premium: at ${quote.chargeableKg.toFixed(2)} kg you're in the air-freight ৳${(quote.rateTier?.rateBdtPerKg ?? 1348).toLocaleString()}/kg tier. Order 5+ kg to drop to the ৳843/kg tier and cut shipping ~40% — or use sea LCL for orders under 30 kg.`,
+      `Small-parcel premium: at ${quote.chargeableKg.toFixed(2)} kg you're in the air-freight ৳${(quote.rateTier?.rateBdtPerKg ?? 1348).toLocaleString()}/kg tier. Order 5+ kg to drop to the ৳843/kg tier and cut shipping ~40% — or use sea LCL for orders under 30 kg. Note: the ৳${quote.intlBdt.toLocaleString()} shipping on this order includes a small-parcel service fee (৳${(quote.rateTier?.minBdt ?? 0).toLocaleString()}) because the carrier still has to handle the parcel even when it's very light.`,
     );
   }
   if (
