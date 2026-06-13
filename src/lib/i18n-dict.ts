@@ -232,13 +232,42 @@ export const dict: Dict = {
   },
   "footer.company": { en: "Company", bn: "কোম্পানি" },
   "footer.sourcing": { en: "Sourcing", bn: "সোর্সিং" },
+  "footer.categories": { en: "Categories", bn: "ক্যাটাগরি" },
+  "footer.stay_updated": { en: "Stay updated", bn: "আপডেট থাকুন" },
+  "footer.newsletter_blurb": {
+    en: "Weekly drops, restock alerts, price changes. ~1 email per week.",
+    bn: "সাপ্তাহিক নতুন পণ্য, রিস্টক সতর্কতা, মূল্য পরিবর্তন। সপ্তাহে ~১টি ইমেইল।",
+  },
+  "footer.email_placeholder": {
+    en: "you@email.com",
+    bn: "আপনার@ইমেইল.কম",
+  },
+  "footer.subscribe": { en: "Subscribe", bn: "সাবস্ক্রাইব" },
+  "footer.subscribed": {
+    en: "✓ You're in. Check your inbox.",
+    bn: "✓ আপনি সাবস্ক্রাইব করেছেন। ইনবক্স দেখুন।",
+  },
+  "footer.payments": { en: "Payment methods", bn: "পেমেন্ট পদ্ধতি" },
+  "footer.payments_blurb": {
+    en: "We accept bank transfer, mobile wallets, and crypto. 70/30 split, balance on delivery in Dhaka.",
+    bn: "আমরা ব্যাংক ট্রান্সফার, মোবাইল ওয়ালেট এবং ক্রিপ্টো গ্রহণ করি। ৭০/৩০ বিভাজন, বাকি ঢাকায় ডেলিভারিতে।",
+  },
+  "footer.trade_license": {
+    en: "Trade License: TRAD/DSCC/023758/2021",
+    bn: "ট্রেড লাইসেন্স: TRAD/DSCC/023758/2021",
+  },
   "footer.legal": { en: "Legal", bn: "আইনি" },
   "footer.privacy": { en: "Privacy", bn: "গোপনীয়তা" },
   "footer.terms": { en: "Terms", bn: "শর্তাবলী" },
   "footer.refund": { en: "Refund policy", bn: "রিফান্ড নীতি" },
+  "footer.built_in": { en: "Built in Dhaka", bn: "ঢাকায় তৈরি" },
   "footer.copyright": {
     en: "© 2026 BanglaSource. All rights reserved.",
     bn: "© ২০২৬ বাংলাসোর্স। সর্বস্বত্ব সংরক্ষিত।",
+  },
+  "footer.trust_strip": {
+    en: "Live stats from our sourcing network",
+    bn: "আমাদের সোর্সিং নেটওয়ার্কের লাইভ পরিসংখ্যান",
   },
 
   // ── Cart drawer ───────────────────────────────────────────────────
