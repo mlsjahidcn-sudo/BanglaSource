@@ -13,9 +13,16 @@ const AIR_VOLUMETRIC_DIVISOR = 167;
 
 // CN-side domestic shipping rate (¥/kg)
 const CN_DOMESTIC_CNY_PER_KG = 8;
+// Floor for the CN-side domestic leg — even tiny shipments
+// have a fixed first-mile handling cost (~¥20 for SF Express
+// local pickup, ~¥30 for dedicated line-haul).
+const CN_DOMESTIC_MIN_CNY = 20;
 
-// Sourcing agent commission (% of subtotal)
+// Sourcing agent commission (% of subtotal). Real sourcing agents
+// in Yiwu/Guangzhou typically charge 3-5% of FOB + a fixed service
+// fee of ¥50-200 per order. We model it as 3% with a ¥30 floor.
 const AGENT_PCT = 0.03;
+const AGENT_MIN_CNY = 30;
 
 // Consolidation fee (¥/order) — only charged when the cart has multiple
 // items OR multiple suppliers. Single-product quotes skip it.
@@ -45,12 +52,47 @@ export const DUTY_BY_CATEGORY: Record<string, number> = {
 const VAT_PCT = 0.15;
 const AIT_PCT = 0.05;
 
-// Air rate (¥/kg chargeable weight) — corresponds to ~$5/kg at current FX
-const AIR_CNY_PER_KG = 35;
-// Express premium tier (DHL/UPS-equivalent): ~$10/kg
-const EXPRESS_CNY_PER_KG = 70;
-// Sea LCL (¥/CBM)
+// Air freight China→Bangladesh is tiered: small parcels (1-5kg) cost
+// substantially more per kg than bulk air. Real-world quotes from
+// Guangzhou→Dhaka via standard air freight agents:
+//   0–2 kg   ≈ ¥80/kg   (small-parcel premium, $11-12/kg)
+//   2–10 kg  ≈ ¥50/kg   ($7-8/kg)
+//   10–50 kg ≈ ¥35/kg   ($5/kg — the historical "bulk" rate)
+//   50 kg+   ≈ ¥25/kg   ($3-4/kg — bulk discount)
+//
+// We model this as a step function: pick the tier for the
+// chargeable kg of the whole shipment, then multiply. The floor
+// is the minimum service charge any carrier applies, regardless
+// of how small the parcel is. ¥280 = $40 ≈ realistic minimum
+// for a 1kg parcel going Guangzhou→Dhaka.
+const AIR_TIERS: Array<{ maxKg: number; rateCnyPerKg: number }> = [
+  { maxKg: 2, rateCnyPerKg: 80 },
+  { maxKg: 10, rateCnyPerKg: 50 },
+  { maxKg: 50, rateCnyPerKg: 35 },
+  { maxKg: Infinity, rateCnyPerKg: 25 },
+];
+const AIR_MIN_CNY = 280;
+const AIR_RATE_FALLBACK = 25; // for diagnostics when tier not in table
+
+// Express (DHL/FedEx/UPS-equivalent) — premium tier for 1-5kg parcels.
+// Real rates: 0-1kg ¥140/kg, 1-5kg ¥95/kg, 5-20kg ¥70/kg, 20kg+ ¥55/kg.
+// Min ¥400 because express carriers charge a base service fee even
+// for 0.5kg documents.
+const EXPRESS_TIERS: Array<{ maxKg: number; rateCnyPerKg: number }> = [
+  { maxKg: 1, rateCnyPerKg: 140 },
+  { maxKg: 5, rateCnyPerKg: 95 },
+  { maxKg: 20, rateCnyPerKg: 70 },
+  { maxKg: Infinity, rateCnyPerKg: 55 },
+];
+const EXPRESS_MIN_CNY = 400;
+const EXPRESS_RATE_FALLBACK = 55;
+
+// Sea LCL (¥/CBM) — based on Guangzhou→Chittagong rates.
+// Bumped floor to ¥300: LCL carriers charge a minimum per shipment
+// (often called "CBM minimum") of about 0.15 CBM even if the
+// physical volume is less.
 const SEA_CNY_PER_CBM = 2000;
+const SEA_MIN_CNY = 300;
 
 // ── Payment split ──────────────────────────────────────────────────────
 // Bangladeshi importer convention: 70% deposit on order confirmation,
@@ -100,37 +142,78 @@ export function tierPrice(tiers: PriceTier[], qty: number): number {
   return fen / 100; // convert fen → yuan
 }
 
-/** Chargeable weight in kg — max(actual, volumetric). */
-function chargeableWeightKg(actualKg: number, volumeCbm: number): number {
+/** Chargeable weight in kg — max(actual, volumetric).
+ * Public so the UI can show "your 4kg box is being charged for
+ * 5.3kg volumetric — pack tighter and save".
+ */
+export function chargeableWeightKg(actualKg: number, volumeCbm: number): number {
   const volumetric = (volumeCbm * 1000) / AIR_VOLUMETRIC_DIVISOR; // kg
   return Math.max(actualKg, volumetric);
 }
 
 /**
- * Air freight (CN → BD). ¥/kg chargeable weight, no artificial minimum.
- * For very small orders (< 0.1 kg chargeable) the absolute cost is
- * tiny (< ¥4), so the per-piece landed cost correctly reflects the
- * real freight. The product card will warn when shipping exceeds
- * 30% of the unit landed cost — that's a sign the buyer needs to
- * order more pieces.
+ * Air freight (CN → BD), tiered. Real-world rates from Guangzhou
+ * to Dhaka via standard air-freight agents:
+ *   0–2 kg   ¥80/kg (small-parcel premium, $11-12/kg)
+ *   2–10 kg  ¥50/kg
+ *   10–50 kg ¥35/kg
+ *   50 kg+   ¥25/kg
+ * with a ¥280 minimum service charge (real carriers don't ship
+ * a 0.16 kg parcel for less than ~$40). The tier is selected
+ * by the *chargeable* weight of the whole shipment.
  */
 export function airShippingCny(actualKg: number, volumeCbm: number): number {
   const cw = chargeableWeightKg(actualKg, volumeCbm);
-  return Math.max(50, Math.round(cw * AIR_CNY_PER_KG));
+  const tier =
+    AIR_TIERS.find((t) => cw <= t.maxKg) ?? AIR_TIERS[AIR_TIERS.length - 1];
+  return Math.max(AIR_MIN_CNY, Math.round(cw * tier.rateCnyPerKg));
 }
 
-/** Express freight — premium tier (DHL/UPS equivalent). */
+/** Which air-rate tier applies for a given chargeable kg (for UI). */
+export function airRateTier(chargeableKg: number): {
+  tierMaxKg: number;
+  rateCnyPerKg: number;
+  minCny: number;
+} {
+  const tier =
+    AIR_TIERS.find((t) => chargeableKg <= t.maxKg) ?? AIR_TIERS[AIR_TIERS.length - 1];
+  return {
+    tierMaxKg: tier.maxKg === Infinity ? 9999 : tier.maxKg,
+    rateCnyPerKg: tier.rateCnyPerKg,
+    minCny: AIR_MIN_CNY,
+  };
+}
+
+/** Express freight — premium tier (DHL/FedEx/UPS equivalent), tiered. */
 export function expressShippingCny(
   actualKg: number,
   volumeCbm: number,
 ): number {
   const cw = chargeableWeightKg(actualKg, volumeCbm);
-  return Math.max(100, Math.round(cw * EXPRESS_CNY_PER_KG));
+  const tier =
+    EXPRESS_TIERS.find((t) => cw <= t.maxKg) ??
+    EXPRESS_TIERS[EXPRESS_TIERS.length - 1];
+  return Math.max(EXPRESS_MIN_CNY, Math.round(cw * tier.rateCnyPerKg));
 }
 
-/** Sea LCL freight — based on volume, no minimum. */
+export function expressRateTier(chargeableKg: number): {
+  tierMaxKg: number;
+  rateCnyPerKg: number;
+  minCny: number;
+} {
+  const tier =
+    EXPRESS_TIERS.find((t) => chargeableKg <= t.maxKg) ??
+    EXPRESS_TIERS[EXPRESS_TIERS.length - 1];
+  return {
+    tierMaxKg: tier.maxKg === Infinity ? 9999 : tier.maxKg,
+    rateCnyPerKg: tier.rateCnyPerKg,
+    minCny: EXPRESS_MIN_CNY,
+  };
+}
+
+/** Sea LCL freight — based on volume. ¥2000/CBM with ¥300 minimum. */
 export function seaShippingCny(volumeCbm: number): number {
-  return Math.max(150, Math.round(volumeCbm * SEA_CNY_PER_CBM));
+  return Math.max(SEA_MIN_CNY, Math.round(volumeCbm * SEA_CNY_PER_CBM));
 }
 
 export function intlShippingCny(
@@ -162,6 +245,17 @@ export type LandedBreakdown = {
   intlBdt: number;
   // chargeable weight for transparency
   chargeableKg: number;
+  // Volumetric weight (CBM → kg) shown alongside actual weight so
+  // the UI can explain "we charged you for 8kg volumetric, your
+  // actual is 4kg — pack tighter and save ৳X".
+  volumetricKg: number;
+  // Air/express rate tier used (for the small-parcel premium
+  // explanation). Null for sea.
+  rateTier?: {
+    tierMaxKg: number;
+    rateCnyPerKg: number;
+    minCny: number;
+  } | null;
   // CIF
   cifBdt: number;
   // BD side
@@ -226,8 +320,14 @@ export function landedCost(
   // 2. CN-side costs
   const totalWeight = p.weight_kg * qty;
   const totalVol = p.volume_cbm * qty;
-  const cnDomesticCny = Math.round(totalWeight * CN_DOMESTIC_CNY_PER_KG);
-  const agentCny = Math.round(cnSubtotalCny * AGENT_PCT);
+  const cnDomesticCny = Math.max(
+    CN_DOMESTIC_MIN_CNY,
+    Math.round(totalWeight * CN_DOMESTIC_CNY_PER_KG),
+  );
+  const agentCny = Math.max(
+    AGENT_MIN_CNY,
+    Math.round(cnSubtotalCny * AGENT_PCT),
+  );
   // Consolidation fee: ONLY applied when the order has multiple
   // products / suppliers. Single-product quotes skip it. Caller
   // passes `qty` as the number of pieces of ONE product; a future
@@ -236,6 +336,12 @@ export function landedCost(
   const consolCny = 0;
   const intlCny = intlShippingCny(totalWeight, totalVol, mode);
   const chargeableKg = chargeableWeightKg(totalWeight, totalVol);
+  const volumetricKg = (totalVol * 1000) / AIR_VOLUMETRIC_DIVISOR;
+  // Rate tier used for the chosen mode (so the UI can show
+  // "small-parcel premium — air at ¥80/kg tier" for tiny orders)
+  let rateTier: ReturnType<typeof airRateTier> | null = null;
+  if (mode === "air") rateTier = airRateTier(chargeableKg);
+  else if (mode === "express") rateTier = expressRateTier(chargeableKg);
 
   // 3. CIF (BDT) — total landed cost in Bangladesh before duty
   const cnTotalCny =
@@ -266,7 +372,13 @@ export function landedCost(
     totalBdt > 0
       ? Math.round(((intlCny + consolCny) * fx * 100) / totalBdt)
       : 0;
-  const tooSmallForAir = mode === "air" && totalWeight < 5 && totalVol < 0.05;
+  // "Too small for air" now means: actual weight under 2kg AND
+  // small-parcel premium tier in effect. With the new tiered
+  // pricing, the warning fires when the buyer is paying ¥80/kg
+  // (the small-parcel premium) — that's the signal to consolidate
+  // with a sea shipment or order more pieces.
+  const tooSmallForAir =
+    mode === "air" && totalWeight < 2 && rateTier?.rateCnyPerKg === 80;
 
   // 9. Quote envelope
   const now = new Date();
@@ -288,6 +400,8 @@ export function landedCost(
     intlCny,
     intlBdt: Math.round(intlCny * fx),
     chargeableKg: Math.round(chargeableKg * 100) / 100,
+    volumetricKg: Math.round(volumetricKg * 100) / 100,
+    rateTier,
     cifBdt,
     dutyBdt,
     dutyPct,

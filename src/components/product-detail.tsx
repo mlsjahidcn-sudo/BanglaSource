@@ -385,9 +385,16 @@ export function ProductDetail({ product }: { product: Product }) {
               </p>
 
               {quote && quote.warnings.length > 0 && (
-                <p className="mt-3 text-[11.5px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-2.5">
-                  {quote.warnings[0]}
-                </p>
+                <div className="mt-3 space-y-1.5">
+                  {quote.warnings.map((w, i) => (
+                    <p
+                      key={i}
+                      className="text-[11.5px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-2.5"
+                    >
+                      {w}
+                    </p>
+                  ))}
+                </div>
               )}
 
               {lc ? (
@@ -399,6 +406,15 @@ export function ProductDetail({ product }: { product: Product }) {
                   <BreakdownRow
                     label={`Int'l shipping (${mode})`}
                     value={fmtBdt(lc.intlBdt)}
+                    sub={
+                      lc.rateTier
+                        ? `Air at ৳${Math.round((lc.rateTier.rateCnyPerKg * 16.85))}/kg, ${lc.chargeableKg.toFixed(2)} kg chargeable${
+                            lc.volumetricKg > lc.chargeableKg
+                              ? ` (volumetric — pack tighter to save)`
+                              : ""
+                          }`
+                        : undefined
+                    }
                   />
                   <BreakdownRow
                     label="Sourcing & consolidation"
@@ -556,11 +572,26 @@ function Spec({ label, value }: { label: string; value: string }) {
   );
 }
 
-function BreakdownRow({ label, value }: { label: string; value: string }) {
+function BreakdownRow({
+  label,
+  value,
+  sub,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+}) {
   return (
-    <div className="flex items-center justify-between">
-      <span className="text-fg-muted">{label}</span>
-      <span className="price-tag font-medium">{value}</span>
+    <div className="flex items-baseline justify-between gap-3">
+      <div>
+        <p className="text-fg-muted">{label}</p>
+        {sub && (
+          <p className="text-[10.5px] text-fg-subtle leading-snug mt-0.5 max-w-[220px]">
+            {sub}
+          </p>
+        )}
+      </div>
+      <span className="price-tag font-medium shrink-0">{value}</span>
     </div>
   );
 }
