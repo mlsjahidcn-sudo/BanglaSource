@@ -257,6 +257,12 @@ export function CartClient() {
             >
               {quoteLoading ? "Calculating…" : t("cart.request_quote")}
             </button>
+            <Link
+              href={signedInEmail ? "/checkout" : "/login?redirect=/checkout"}
+              className="mt-2 w-full h-11 rounded-md border border-emerald-600 text-emerald-700 text-[13.5px] font-medium hover:bg-emerald-50 flex items-center justify-center"
+            >
+              {t("cart.place_order")} →
+            </Link>
             {!signedInEmail && (
               <Link
                 href="/login?redirect=/cart"

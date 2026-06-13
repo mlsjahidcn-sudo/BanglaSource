@@ -176,11 +176,11 @@ export function CartDrawer({ open, onClose }: Props) {
                 {t("cart.view_all")}
               </Link>
               <Link
-                href="/cart/request-quote"
+                href="/checkout"
                 onClick={onClose}
                 className="h-10 inline-flex items-center justify-center text-[13px] font-medium rounded-md bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
               >
-                {t("cart.request_quote")}
+                {t("cart.place_order")}
               </Link>
             </div>
           </div>

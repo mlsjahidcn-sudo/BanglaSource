@@ -324,6 +324,131 @@ export const dict: Dict = {
   },
   "cart.empty.cta": { en: "Browse the catalog", bn: "ক্যাটালগ দেখুন" },
   "cart.added": { en: "Added to order list", bn: "অর্ডার তালিকায় যোগ হয়েছে" },
+  "cart.place_order": { en: "Place order", bn: "অর্ডার দিন" },
+
+  // ── Checkout / order ──────────────────────────────────────────────
+  "checkout.title": { en: "Checkout", bn: "চেকআউট" },
+  "checkout.subtitle": {
+    en: "Review your order, add a delivery address, then send the deposit. We hold the order for 7 days while the deposit clears.",
+    bn: "অর্ডারটি পর্যালোচনা করুন, ডেলিভারি ঠিকানা দিন, তারপর ডিপোজিট পাঠান। ডিপোজিট ক্লিয়ার হওয়া পর্যন্ত আমরা অর্ডারটি ৭ দিন ধরে রাখি।",
+  },
+  "checkout.address": { en: "Delivery address", bn: "ডেলিভারি ঠিকানা" },
+  "checkout.address.help": {
+    en: "We deliver across Bangladesh. Shipping + customs settle to the courier on delivery — only the 70% deposit is paid here.",
+    bn: "আমরা সারা বাংলাদেশে ডেলিভারি দিই। শিপিং + কাস্টমস ডেলিভারিতে কুরিয়ারকে দেওয়া হয় — এখানে শুধু ৭০% ডিপোজিট দিতে হবে।",
+  },
+  "checkout.full_name": { en: "Full name", bn: "পুরো নাম" },
+  "checkout.full_name_ph": { en: "e.g. Rahim Mia", bn: "যেমন রহিম মিয়া" },
+  "checkout.phone": { en: "Phone (bKash / WhatsApp)", bn: "ফোন (বিকাশ / হোয়াটসঅ্যাপ)" },
+  "checkout.district": { en: "Area / district", bn: "এলাকা / জেলা" },
+  "checkout.district_ph": { en: "e.g. Gulshan, Dhaka", bn: "যেমন গুলশান, ঢাকা" },
+  "checkout.address_line": { en: "Address line", bn: "ঠিকানা" },
+  "checkout.address_line_ph": {
+    en: "House, road, landmark",
+    bn: "বাড়ি, রোড, ল্যান্ডমার্ক",
+  },
+  "checkout.buyer_note": { en: "Note to seller (optional)", bn: "বিক্রেতাকে নোট (ঐচ্ছিক)" },
+  "checkout.buyer_note_ph": {
+    en: "e.g. Call before delivery, deliver after 6pm",
+    bn: "যেমন ডেলিভারির আগে কল করুন, সন্ধ্যা ৬টার পরে দিন",
+  },
+  "checkout.shipping": { en: "Shipping mode", bn: "শিপিং মোড" },
+  "checkout.shipping.air": { en: "Air freight (7–12 days)", bn: "এয়ার ফ্রেইট (৭-১২ দিন)" },
+  "checkout.shipping.sea": { en: "Sea freight LCL (35–45 days)", bn: "সি ফ্রেইট LCL (৩৫-৪৫ দিন)" },
+  "checkout.shipping.help": {
+    en: "Sea is ~৳10,000/CBM but takes 5+ weeks. Air is 7–12 days, charged per kg.",
+    bn: "সি প্রায় ৳১০,০০০/CBM কিন্তু ৫+ সপ্তাহ লাগে। এয়ার ৭-১২ দিন, প্রতি কেজিতে চার্জ।",
+  },
+  "checkout.payment": { en: "Payment method", bn: "পেমেন্ট পদ্ধতি" },
+  "checkout.payment.bkash": {
+    en: "bKash (Personal)",
+    bn: "বিকাশ (পার্সোনাল)",
+  },
+  "checkout.payment.bkash_help": {
+    en: "Send 70% deposit to 0173-25764171. Reference your order number.",
+    bn: "৭০% ডিপোজিট ০১৭৩-২৫৭৬৪১৭১ নম্বরে পাঠান। অর্ডার নম্বর রেফারেন্সে দিন।",
+  },
+  "checkout.payment.bank": { en: "Bank transfer", bn: "ব্যাংক ট্রান্সফার" },
+  "checkout.payment.bank_help": {
+    en: "City Bank, A/C 1234-567890-1, Beneficiary: Skybuy Limited.",
+    bn: "সিটি ব্যাংক, হিসাব ১২৩৪-৫৬৭৮৯০-১, বেনিফিশিয়ারি: স্কাইবুই লিমিটেড।",
+  },
+  "checkout.payment.cod": { en: "Cash on delivery", bn: "ক্যাশ অন ডেলিভারি" },
+  "checkout.payment.cod_help": {
+    en: "Pay the 70% deposit in cash at our Badda warehouse.",
+    bn: "৭০% ডিপোজিট আমাদের বাড্ডা গুদামে নগদ দিন।",
+  },
+  "checkout.payment.usdt": { en: "USDT (TRC20)", bn: "USDT (TRC20)" },
+  "checkout.payment.usdt_help": {
+    en: "0% spread, network fee ~$1. Wallet: TXyz... (shown after order is placed).",
+    bn: "০% স্প্রেড, নেটওয়ার্ক ফি ~$১। ওয়ালেট: TXyz... (অর্ডার দেওয়ার পর দেখানো হবে)।",
+  },
+  "checkout.summary": { en: "Order summary", bn: "অর্ডার সারাংশ" },
+  "checkout.summary.items": { en: "Items", bn: "আইটেম" },
+  "checkout.summary.subtotal": { en: "Product subtotal", bn: "পণ্য সাবটোটাল" },
+  "checkout.summary.shipping": { en: "Shipping + agent", bn: "শিপিং + এজেন্ট" },
+  "checkout.summary.duty": { en: "Customs duty", bn: "কাস্টমস শুল্ক" },
+  "checkout.summary.tax": { en: "VAT + AIT", bn: "ভ্যাট + এআইটি" },
+  "checkout.summary.total": { en: "Total landed in Dhaka", bn: "ঢাকায় মোট ল্যান্ডেড" },
+  "checkout.summary.deposit": { en: "Pay now (70% of product)", bn: "এখনই পেমেন্ট (পণ্যের ৭০%)" },
+  "checkout.summary.balance": { en: "On delivery (30%)", bn: "ডেলিভারিতে (৩০%)" },
+  "checkout.summary.deposit_help": {
+    en: "70% of product price locks the order. The remaining 30% + shipping + customs settle in Dhaka.",
+    bn: "পণ্য মূল্যের ৭০% অর্ডার লক করে। বাকি ৩০% + শিপিং + কাস্টমস ঢাকায় সমন্বয় হবে।",
+  },
+  "checkout.place": { en: "Place order", bn: "অর্ডার দিন" },
+  "checkout.placing": { en: "Placing order…", bn: "অর্ডার দিচ্ছি…" },
+  "checkout.empty": { en: "Your order list is empty.", bn: "আপনার অর্ডার তালিকা খালি।" },
+  "checkout.empty.cta": { en: "Browse the catalog", bn: "ক্যাটালগ দেখুন" },
+  "checkout.sign_in": {
+    en: "Sign in to place an order.",
+    bn: "অর্ডার দিতে সাইন ইন করুন।",
+  },
+  "checkout.error.address": {
+    en: "Please fill in your full name, phone, area, and address.",
+    bn: "আপনার নাম, ফোন, এলাকা ও ঠিকানা পূরণ করুন।",
+  },
+  "checkout.error.network": {
+    en: "Could not place the order. Please try again.",
+    bn: "অর্ডার দেওয়া যায়নি। আবার চেষ্টা করুন।",
+  },
+  "checkout.error.unauth": {
+    en: "Please sign in to continue.",
+    bn: "চালিয়ে যেতে সাইন ইন করুন।",
+  },
+  "checkout.note.thanks": {
+    en: "✓ Order placed. We'll review and confirm within 2 hours.",
+    bn: "✓ অর্ডার গৃহীত। আমরা ২ ঘণ্টার মধ্যে নিশ্চিত করব।",
+  },
+
+  // ── Order detail page ─────────────────────────────────────────────
+  "order.title": { en: "Order", bn: "অর্ডার" },
+  "order.status.pending_payment": { en: "Awaiting deposit", bn: "ডিপোজিট অপেক্ষমান" },
+  "order.status.paid": { en: "Deposit received", bn: "ডিপোজিট গৃহীত" },
+  "order.status.in_transit": { en: "In transit", bn: "ট্রানজিটে" },
+  "order.status.delivered": { en: "Delivered", bn: "ডেলিভারড" },
+  "order.status.cancelled": { en: "Cancelled", bn: "বাতিল" },
+  "order.deposit_instructions": {
+    en: "Deposit instructions",
+    bn: "ডিপোজিট নির্দেশনা",
+  },
+  "order.deposit_help": {
+    en: "Send the deposit to complete the order. Use the order number as reference.",
+    bn: "অর্ডার সম্পূর্ণ করতে ডিপোজিট পাঠান। রেফারেন্সে অর্ডার নম্বর দিন।",
+  },
+  "order.deposit_paid": {
+    en: "I sent the deposit",
+    bn: "আমি ডিপোজিট পাঠিয়েছি",
+  },
+  "order.buyer_info": { en: "Buyer info", bn: "ক্রেতার তথ্য" },
+  "order.address": { en: "Delivery address", bn: "ডেলিভারি ঠিকানা" },
+  "order.items": { en: "Items", bn: "আইটেম" },
+  "order.line_unit": { en: "Unit price", bn: "একক মূল্য" },
+  "order.line_qty": { en: "Qty", bn: "পরিমাণ" },
+  "order.line_subtotal": { en: "Line subtotal", bn: "লাইন সাবটোটাল" },
+  "order.placed_on": { en: "Placed on", bn: "অর্ডার করা হয়েছে" },
+  "order.shipping_mode": { en: "Shipping mode", bn: "শিপিং মোড" },
+  "order.summary": { en: "Order summary", bn: "অর্ডার সারাংশ" },
 
   // ── Search ────────────────────────────────────────────────────────
   "search.placeholder": {

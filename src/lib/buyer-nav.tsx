@@ -31,6 +31,11 @@ export const buyerNav = (counts: {
     label: "Buying",
     items: [
       {
+        label: "My orders",
+        href: "/buyer/orders",
+        icon: <IconPackage />,
+      },
+      {
         label: "My quotes",
         href: "/buyer/quotes",
         icon: <IconQuote />,
