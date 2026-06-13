@@ -304,10 +304,6 @@ export const dict: Dict = {
     en: "{min} / {max} Per Kg",
     bn: "{min} / {max} প্রতি কেজি",
   },
-  "pdp.details": {
-    en: "Details",
-    bn: "বিস্তারিত",
-  },
   "pdp.customs_disclaimer": {
     // Disclaimer below the weight card. Key: framing customs as a
     // national duty the buyer pays directly to Bangladesh — not

@@ -35,7 +35,6 @@ export function ProductDetail({ product }: { product: Product }) {
   const [activeImage, setActiveImage] = useState(0);
   const [quote, setQuote] = useState<QuoteResponse | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
-  const [showBreakdown, setShowBreakdown] = useState(false);
   const { add } = useCart();
   const { t } = useLang();
 
@@ -462,19 +461,9 @@ export function ProductDetail({ product }: { product: Product }) {
                           {t("pdp.weight_card_title")}: {fmtKg(lc.chargeableKg)}
                         </p>
                       </div>
-                      <div className="mt-2 flex items-center justify-between">
-                        <p className="text-[14px] font-semibold text-fg">
-                          {t("pdp.shipping_label_bn")}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => setShowBreakdown((s) => !s)}
-                          className="text-[11.5px] text-cyan-700 hover:text-cyan-900 underline underline-offset-2 font-medium"
-                          aria-expanded={showBreakdown}
-                        >
-                          {showBreakdown ? "✕" : t("pdp.details")}
-                        </button>
-                      </div>
+                      <p className="mt-2 text-[14px] font-semibold text-fg">
+                        {t("pdp.shipping_label_bn")}
+                      </p>
                       <p className="mt-1 text-[13px] font-semibold text-cyan-700">
                         {t("pdp.shipping_rate", {
                           // Show the range from the worst-case tier (currently
@@ -486,53 +475,6 @@ export function ProductDetail({ product }: { product: Product }) {
                           max: "৳421",
                         })}
                       </p>
-                      {showBreakdown && (
-                        <dl className="mt-3 pt-3 border-t border-cyan-300 space-y-1.5 text-[12px] text-fg-muted">
-                          <BreakdownRow
-                            label="Factory FOB (CN)"
-                            value={fmtBdt(lc.cnSubtotalBdt)}
-                          />
-                          <BreakdownRow
-                            label={`Int'l shipping (${mode})`}
-                            value={fmtBdt(lc.intlBdt)}
-                            sub={
-                              lc.rateTier && lc.shippingBreakdown
-                                ? shippingSubText(
-                                    mode,
-                                    lc.chargeableKg,
-                                    lc.rateTier.rateBdtPerKg,
-                                    lc.rateTier.minBdt,
-                                    lc.shippingBreakdown.perKgAmount,
-                                    lc.shippingBreakdown.floorApplied,
-                                    lc.volumetricKg,
-                                  )
-                                : undefined
-                            }
-                          />
-                          <BreakdownRow
-                            label="CN first-mile + sourcing agent"
-                            value={fmtBdt(
-                              lc.cnDomesticBdt + lc.agentBdt + lc.consolBdt,
-                            )}
-                          />
-                          <BreakdownRow
-                            label={`Customs ৳${lc.dutyPerKg.toLocaleString()}/kg (${classLabelStatic(lc.dutyClass)})`}
-                            value={fmtBdt(lc.dutyBdt)}
-                          />
-                          <BreakdownRow
-                            label="VAT 15% (CIF + duty)"
-                            value={fmtBdt(lc.vatBdt)}
-                          />
-                          <BreakdownRow
-                            label="AIT 5% (CIF)"
-                            value={fmtBdt(lc.aitBdt)}
-                          />
-                          <div className="pt-2 mt-2 border-t border-cyan-300 flex justify-between font-semibold text-fg">
-                            <dt>Total landed in Dhaka</dt>
-                            <dd className="price-tag">{fmtBdt(lc.totalBdt)}</dd>
-                          </div>
-                        </dl>
-                      )}
                     </div>
                   )}
 
@@ -630,80 +572,4 @@ function Spec({ label, value }: { label: string; value: string }) {
   );
 }
 
-function BreakdownRow({
-  label,
-  value,
-  sub,
-}: {
-  label: string;
-  value: string;
-  sub?: string;
-}) {
-  return (
-    <div className="flex items-baseline justify-between gap-3">
-      <div>
-        <p className="text-fg-muted">{label}</p>
-        {sub && (
-          <p className="text-[10.5px] text-fg-subtle leading-snug mt-0.5 max-w-[220px]">
-            {sub}
-          </p>
-        )}
-      </div>
-      <span className="price-tag font-medium shrink-0">{value}</span>
-    </div>
-  );
-}
 
-/** Build the Int'l shipping row sub-text. When the per-kg rate alone
- * would under-price the parcel, we show the actual math: "৳135
- * (per-kg) + ৳1,500 (small-parcel service fee) = ৳1,635" so the
- * buyer understands why the shipping number is what it is. */
-function shippingSubText(
-  mode: "air" | "sea" | "express",
-  chargeableKg: number,
-  rateBdtPerKg: number,
-  minBdt: number,
-  perKgAmount: number,
-  floorApplied: boolean,
-  volumetricKg: number,
-): string {
-  const modeLabel = modeLabelFor(mode);
-  const kgPart = `${chargeableKg.toFixed(2)} kg chargeable${
-    volumetricKg > chargeableKg ? " (volumetric — pack tighter to save)" : ""
-  }`;
-  if (floorApplied) {
-    return `${modeLabel}: ৳${perKgAmount.toLocaleString()} (per-kg) + ৳${minBdt.toLocaleString()} (small-parcel service fee) · ${kgPart}`;
-  }
-  return `${modeLabel} at ৳${rateBdtPerKg.toLocaleString()}/kg · ${kgPart}`;
-}
-
-/** Short human label for a shipping mode. Used in the PDP's
- *  shipping-line sub-text: "Air · 0.10 kg · transit 5–9 days". */
-function modeLabelFor(mode: ShippingMode): string {
-  if (mode === "air") return "Air freight";
-  if (mode === "express") return "Express (DHL/FedEx)";
-  return "Sea LCL";
-}
-
-/** Local copy of the customs class label. Kept here because the
- * inline breakdown uses it only inside the modal; for the default
- * PDP view we want the short English label so buyers don't have
- * to expand the details. */
-function classLabelStatic(slug: string): string {
-  const map: Record<string, string> = {
-    "cat-a": "Category A (general)",
-    "cat-b": "Category B (battery / restricted)",
-    "cat-c-high": "Category C (high-specific)",
-    "cat-b-or-c": "Category B/C",
-    "sunglasses-c": "Sunglasses (high specific)",
-    "smart-watch-c": "Smart watch",
-    "bluetooth-c": "Bluetooth headphone",
-    "regular-watch-c": "Regular watch",
-    "liquid-cosmetic-c": "Liquid cosmetics",
-    "powder-c": "Powder",
-    "beauty-electronics-b": "Battery grooming tool",
-    "power-bank-c": "Power bank",
-    "cctv-c": "CCTV camera",
-  };
-  return map[slug] ?? slug;
-}
