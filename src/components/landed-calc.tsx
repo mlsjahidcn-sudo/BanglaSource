@@ -3,6 +3,7 @@ import { useState, useMemo } from "react";
 import {
   fmtBdt,
   FX_CNY_BDT,
+  BUYER_MARKUP_PCT,
   type ShippingMode,
   AIR_TIERS_PUBLIC,
   AIR_MIN_LADDER_PUBLIC,
@@ -40,7 +41,10 @@ export function LandedCalc() {
   const [cnyPerPc, setCnyPerPc] = useState(25);
   const [mode, setMode] = useState<ShippingMode>("air");
   const [dutyPerKg, setDutyPerKg] = useState(750); // default: Cat A
-  const [markupPct, setMarkupPct] = useState(25);
+  // Phase 11: markup is company-fixed at BUYER_MARKUP_PCT (10%).
+  // We no longer expose a slider — buyers shouldn't be doing
+  // our margin math. The "Product price" in the output already
+  // includes the markup.
 
   const fx = FX_CNY_BDT;
 
@@ -126,8 +130,9 @@ export function LandedCalc() {
     const vatBdt = Math.round((cifBdt + dutyBdt) * 0.15);
     // AIT 5% on CIF
     const aitBdt = Math.round(cifBdt * 0.05);
-    // Markup on the CN subtotal
-    const markupBdt = Math.round(cnSubtotalBdt * (markupPct / 100));
+    // Markup on the CN subtotal (company-fixed; never shown as
+    // a separate line — the "Product price" absorbs it).
+    const markupBdt = Math.round(cnSubtotalBdt * (BUYER_MARKUP_PCT / 100));
     // Product price (factory + markup) — what the 70/30 split is on
     const productBdt = cnSubtotalBdt + markupBdt;
     // Total landed
@@ -152,7 +157,7 @@ export function LandedCalc() {
       depositBdt,
       balanceBdt,
     };
-  }, [cnyPerPc, qty, weight, fx, mode, tierInfo, dutyPerKg, markupPct]);
+  }, [cnyPerPc, qty, weight, fx, mode, tierInfo, dutyPerKg]);
 
   return (
     <div className="card overflow-hidden">
@@ -220,22 +225,6 @@ export function LandedCalc() {
             ))}
           </div>
         </Field>
-        <Field label={`Our markup (default 25% — admin-adjustable per product)`}>
-          <div className="flex items-center gap-3">
-            <input
-              type="range"
-              min={0}
-              max={50}
-              step={5}
-              value={markupPct}
-              onChange={(e) => setMarkupPct(parseInt(e.target.value) || 0)}
-              className="flex-1"
-            />
-            <span className="font-mono tnum text-[13px] w-12 text-right">
-              {markupPct}%
-            </span>
-          </div>
-        </Field>
       </div>
 
       <div className="border-t border-border" />
@@ -257,14 +246,16 @@ export function LandedCalc() {
               Breakdown (BDT)
             </p>
             <dl className="mt-3 space-y-1.5 text-[13px]">
-              <Row label="Factory FOB (BDT)" value={fmtBdt(result.cnSubtotalBdt)} />
+              {/* Phase 11: "Product price" already includes the
+                  company markup. We don't surface it as a
+                  separate line — the buyer sees one number. */}
+              <Row label="Product price" value={fmtBdt(result.cnSubtotalBdt + result.markupBdt)} />
               <Row label="Int'l shipping" value={fmtBdt(result.intlBdt)} />
               <Row label="CN first-mile" value={fmtBdt(result.cnDomesticBdt)} />
               <Row label="Sourcing agent (3%)" value={fmtBdt(result.agentBdt)} />
               <Row label={`Customs (৳${dutyPerKg.toLocaleString()}/kg)`} value={fmtBdt(result.dutyBdt)} />
               <Row label="VAT 15% (CIF + duty)" value={fmtBdt(result.vatBdt)} />
               <Row label="AIT 5% (CIF)" value={fmtBdt(result.aitBdt)} />
-              <Row label={`Our markup (${markupPct}%)`} value={fmtBdt(result.markupBdt)} />
             </dl>
           </div>
 

@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { useLang } from "@/lib/i18n";
-import { useCart, cartUnitProductBdt, cartProductSubtotalBdt } from "@/lib/cart";
+import { useCart, cartUnitProductBdt, cartProductSubtotalBdt, cartTotalWeightKg, cartMinWeightMet, ORDER_MIN_WEIGHT_KG } from "@/lib/cart";
 import { fmtBdt, FX_CNY_BDT } from "@/lib/pricing";
 import { useState, useEffect } from "react";
 import { useCatalog } from "@/lib/use-catalog";
@@ -42,6 +42,10 @@ export function CartClient() {
   // Product subtotal (BDT) — includes our markup. Shipping is added
   // when the buyer picks a mode + clicks "Request quote".
   const productSubtotalBdt = cartProductSubtotalBdt(items);
+  // Phase 11: total cart weight (kg) for the progress bar + the
+  // min-weight gate. Computed from each item's locked weight × qty.
+  const totalWeightKg = cartTotalWeightKg(items);
+  const minWeightMet = cartMinWeightMet(items);
 
   async function requestQuote() {
     if (enriched.length === 0) return;
@@ -250,6 +254,43 @@ export function CartClient() {
               </div>
             </div>
 
+            {/* ── Weight progress bar (Phase 11) ── */}
+            <div className="mt-5">
+              <div className="flex items-baseline justify-between text-[11.5px]">
+                <span className="text-fg-muted">{t("cart.weight_label")}</span>
+                <span
+                  className={
+                    minWeightMet
+                      ? "text-emerald-700 font-mono tnum font-medium"
+                      : "text-fg font-mono tnum"
+                  }
+                >
+                  {totalWeightKg.toFixed(2)} / {ORDER_MIN_WEIGHT_KG} kg
+                </span>
+              </div>
+              <div className="mt-1.5 h-1.5 rounded-full bg-bg-soft overflow-hidden">
+                <div
+                  className={`h-full transition-all ${
+                    minWeightMet ? "bg-emerald-600" : "bg-amber-500"
+                  }`}
+                  style={{
+                    width: `${Math.min(100, (totalWeightKg / ORDER_MIN_WEIGHT_KG) * 100).toFixed(1)}%`,
+                  }}
+                />
+              </div>
+              <p
+                className={`mt-1.5 text-[11px] ${
+                  minWeightMet ? "text-emerald-700" : "text-fg-muted"
+                }`}
+              >
+                {minWeightMet
+                  ? t("cart.weight_progress_met")
+                  : t("cart.weight_progress_below", {
+                      kg: `${(ORDER_MIN_WEIGHT_KG - totalWeightKg).toFixed(2)} kg`,
+                    })}
+              </p>
+            </div>
+
             <button
               onClick={requestQuote}
               disabled={quoteLoading}
@@ -257,12 +298,23 @@ export function CartClient() {
             >
               {quoteLoading ? "Calculating…" : t("cart.request_quote")}
             </button>
-            <Link
-              href={signedInEmail ? "/checkout" : "/login?redirect=/checkout"}
-              className="mt-2 w-full h-11 rounded-md border border-emerald-600 text-emerald-700 text-[13.5px] font-medium hover:bg-emerald-50 flex items-center justify-center"
-            >
-              {t("cart.place_order")} →
-            </Link>
+            {minWeightMet ? (
+              <Link
+                href={signedInEmail ? "/checkout" : "/login?redirect=/checkout"}
+                className="mt-2 w-full h-11 rounded-md border border-emerald-600 text-emerald-700 text-[13.5px] font-medium hover:bg-emerald-50 flex items-center justify-center"
+              >
+                {t("cart.place_order")} →
+              </Link>
+            ) : (
+              <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                className="mt-2 w-full h-11 rounded-md border border-border bg-bg-soft text-fg-subtle text-[13.5px] font-medium cursor-not-allowed flex items-center justify-center"
+              >
+                {t("cart.place_order")} →
+              </button>
+            )}
             {!signedInEmail && (
               <Link
                 href="/login?redirect=/cart"
@@ -295,7 +347,13 @@ export function CartClient() {
               </div>
 
               <dl className="space-y-1.5 text-[12.5px]">
-                <Row label="FOB China" value={fmtBdtDisplay(quote.cnSubtotalBdt)} />
+                {/* Phase 11: "Product price" (was "FOB China") is the
+                    buyer's locked product price including the
+                    company margin. We don't disclose the markup as
+                    a separate line — the buyer's product price is
+                    a single number. The breakdown now reconciles
+                    against the same "Total" the order page shows. */}
+                <Row label="Product price" value={fmtBdtDisplay(quote.productBdt)} />
                 <Row
                   label={`Int'l shipping (${quote.mode})`}
                   value={fmtBdtDisplay(quote.intlBdt)}
@@ -305,15 +363,11 @@ export function CartClient() {
                   value={fmtBdtDisplay(quote.agentBdt + quote.consolBdt)}
                 />
                 <Row
-                  label={`Duty (${Math.round(quote.dutyPct * 100)}%)`}
+                  label={`Duty (৳${quote.dutyPerKg?.toLocaleString() ?? "—"}/kg)`}
                   value={fmtBdtDisplay(quote.dutyBdt)}
                 />
                 <Row label="VAT (15%)" value={fmtBdtDisplay(quote.vatBdt)} />
                 <Row label="AIT (5%)" value={fmtBdtDisplay(quote.aitBdt)} />
-                <Row
-                  label={`Our fee (${quote.markupPct}%)`}
-                  value={fmtBdtDisplay(quote.markupBdt)}
-                />
               </dl>
 
               <div className="pt-3 border-t border-border flex items-end justify-between">

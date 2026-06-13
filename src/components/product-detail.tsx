@@ -8,6 +8,8 @@ import {
   fmtCny,
   fmtKg,
   fmtCbm,
+  ORDER_MIN_WEIGHT_KG,
+  BUYER_MARKUP_PCT,
   type Product,
   type ShippingMode,
   type LandedBreakdown,
@@ -82,8 +84,10 @@ export function ProductDetail({ product }: { product: Product }) {
       qty,
       // Lock the markup + logistics params at add time so the cart
       // subtotal matches what the buyer just saw on the PDP, even
-      // if the admin changes markup later.
-      markup_pct: product.markup_pct ?? 25,
+      // if the company-wide constant ever changes. Phase 11: the
+      // markup is a flat 10% (BUYER_MARKUP_PCT); the per-product
+      // `markup_pct` is now legacy.
+      markup_pct: BUYER_MARKUP_PCT,
       weight_kg: product.weight_kg,
       volume_cbm: product.volume_cbm,
       category: product.category,
@@ -216,7 +220,7 @@ export function ProductDetail({ product }: { product: Product }) {
                 const landedBdtPerPc = Math.ceil(
                   cny *
                     16.85 *
-                    (1 + (product.markup_pct || 10) / 100) *
+                    (1 + BUYER_MARKUP_PCT / 100) *
                     1.30, // rough: 10% duty + 15% VAT + 5% AIT average for 7 categories
                 );
                 return (
@@ -353,6 +357,15 @@ export function ProductDetail({ product }: { product: Product }) {
                   +
                 </button>
               </div>
+              {/* Phase 11: order-level min-weight hint. The number
+                  is sourced from the same constant the cart
+                  progress bar uses, so the UI never disagrees
+                  with the server. */}
+              <p className="mt-2 text-[11.5px] text-fg-subtle">
+                {t("pdp.min_order_weight", {
+                  kg: String(ORDER_MIN_WEIGHT_KG),
+                })}
+              </p>
             </div>
 
             <div className="mt-4">

@@ -194,6 +194,33 @@ export const SEA_RATES_PUBLIC: { bdtPerCbm: number; minBdt: number } = {
 export const DEPOSIT_PCT = 0.70;
 export const BALANCE_PCT = 0.30;
 
+// ── Company policy constants (Phase 11) ──────────────────────────────────
+//
+// These are NOT shown to the buyer. The markup is the company's
+// flat margin between factory FOB and the "Product price" the
+// buyer sees on the PDP / cart / checkout. The 5kg minimum is
+// the smallest order we can economically air-freight from
+// Guangzhou (anything below that hits the small-parcel service
+// fee of ৳1,500+ on a single item, which makes the unit cost
+// uncompetitive vs. local Dhaka stockists).
+//
+// IMPORTANT: do NOT surface either of these as a user-visible %
+// or threshold. Buyers shouldn't be doing our margin math, and
+// the 5kg rule is enforced silently (cart shows progress, but
+// never names the number as "our minimum").
+export const BUYER_MARKUP_PCT = 10;
+export const ORDER_MIN_WEIGHT_KG = 5;
+
+/**
+ * Returns true if the buyer's order meets the minimum-weight
+ * requirement. Used by both the cart (to grey out "Place
+ * order") and the server (to reject sub-min orders with a
+ * 400 below_minimum_weight).
+ */
+export function orderMinWeightMet(weightKg: number): boolean {
+  return weightKg >= ORDER_MIN_WEIGHT_KG;
+}
+
 export type PriceTier = {
   qty_min: number;
   qty_max: number;
@@ -585,8 +612,11 @@ export function landedCost(
   const vatBdt = Math.round((cifBdt + dutyBdt) * VAT_PCT);
   const aitBdt = Math.round(cifBdt * AIT_PCT);
 
-  // 5. Our markup (% of CN subtotal BDT)
-  const markupPct = p.markup_pct;
+  // 5. Our markup (company-wide constant 10% — Phase 11 hide rule).
+  //    This is never shown to the buyer as a separate line; it is
+  //    baked into `productBdt` (= FOB + markup) which is the
+  //    "Product price" on the PDP and cart.
+  const markupPct = BUYER_MARKUP_PCT;
   const markupBdt = Math.round(cnSubtotalBdt * (markupPct / 100));
 
   // 6. Total
@@ -701,6 +731,12 @@ export function classLabel(slug: string): string {
  *
  * No shipping, no duty — that's the "Product price" line on the PDP
  * (SkyBuy-style: product price is separate from shipping).
+ *
+ * The markup is the company's flat 10% (BUYER_MARKUP_PCT) and is
+ * NEVER shown to the buyer as a separate line. It is baked into
+ * the "Product price" the buyer sees — the breakdown panel folds
+ * it into the FOB China line so the buyer's quoted FOB already
+ * includes our margin. (Phase 11: hide-the-markup rule.)
  */
 export function unitProductBdt(
   p: Product,
@@ -709,7 +745,11 @@ export function unitProductBdt(
 ): number {
   const unitCny = tierPrice(p.price_tiers, qty);
   const unitBdt = unitCny * fx;
-  const markupMul = 1 + (p.markup_pct ?? 25) / 100;
+  // The per-product `p.markup_pct` field is now legacy; we
+  // always use the company-wide constant. The field stays in
+  // the DB for backfill / audit purposes, but the buyer math
+  // uses the constant.
+  const markupMul = 1 + BUYER_MARKUP_PCT / 100;
   return Math.ceil(unitBdt * markupMul);
 }
 

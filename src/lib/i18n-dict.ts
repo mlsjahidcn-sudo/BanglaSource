@@ -278,7 +278,6 @@ export const dict: Dict = {
   "ship.calc.vat": { en: "VAT 15%", bn: "ভ্যাট ১৫%" },
   "ship.calc.ait": { en: "AIT 5%", bn: "AIT ৫%" },
   "ship.calc.total": { en: "Total landed in Dhaka", bn: "ঢাকায় মোট ল্যান্ডেড" },
-  "ship.calc.markup": { en: "Our 25% markup (added at PDP)", bn: "আমাদের ২৫% মার্কআপ (PDP-তে যোগ হয়)" },
   "ship.calc.deposit": { en: "70% deposit", bn: "৭০% ডিপোজিট" },
   "ship.calc.disclaimer": {
     en: "Estimate only. Final rate locks at order time; the order detail page shows the locked amount.",
@@ -325,7 +324,6 @@ export const dict: Dict = {
   "ship.calc.ait": { en: "AIT (5%)", bn: "AIT (৫%)" },
   "ship.calc.intl": { en: "International shipping", bn: "আন্তর্জাতিক শিপিং" },
   "ship.calc.consol": { en: "Consolidation fee", bn: "কনসোলিডেশন ফি" },
-  "ship.calc.markup": { en: "Our markup", bn: "আমাদের মার্কআপ" },
   "ship.calc.disclaimer": {
     en: "Estimate only. Final cost locks at checkout based on actual weight, current FX, and verified customs assessment.",
     bn: "শুধুমাত্র আনুমানিক। প্রকৃত ওজন, বর্তমান FX এবং যাচাইকৃত কাস্টমস মূল্যায়নের ভিত্তিতে চেকআউটে চূড়ান্ত খরচ লক হবে।",
@@ -427,6 +425,30 @@ export const dict: Dict = {
   "cart.empty.cta": { en: "Browse the catalog", bn: "ক্যাটালগ দেখুন" },
   "cart.added": { en: "Added to order list", bn: "অর্ডার তালিকায় যোগ হয়েছে" },
   "cart.place_order": { en: "Place order", bn: "অর্ডার দিন" },
+  "cart.weight_label": {
+    en: "Order weight",
+    bn: "অর্ডার ওজন",
+  },
+  "cart.weight_min": {
+    en: "Minimum order weight",
+    bn: "ন্যূনতম অর্ডার ওজন",
+  },
+  "cart.weight_progress_below": {
+    en: "Add {kg} more to reach the minimum order weight.",
+    bn: "ন্যূনতম অর্ডার ওজনে পৌঁছাতে আরও {kg} যোগ করুন।",
+  },
+  "cart.weight_progress_met": {
+    en: "Minimum weight met.",
+    bn: "ন্যূনতম ওজন পূরণ।",
+  },
+  "pdp.min_order_weight": {
+    en: "Minimum order: {kg} kg total (across all items in your cart).",
+    bn: "ন্যূনতম অর্ডার: মোট {kg} কেজি (আপনার কার্টের সব পণ্য মিলিয়ে)।",
+  },
+  "checkout.error.below_min_weight": {
+    en: "Order must be at least {kg} kg. Add more items to your order list.",
+    bn: "অর্ডার কমপক্ষে {kg} কেজি হতে হবে। আরও পণ্য যোগ করুন।",
+  },
 
   // ── Checkout / order ──────────────────────────────────────────────
   "checkout.title": { en: "Checkout", bn: "চেকআউট" },

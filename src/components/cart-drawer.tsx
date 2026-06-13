@@ -2,9 +2,9 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useCart, cartProductSubtotalBdt, cartUnitProductBdt } from "@/lib/cart";
+import { useCart, cartProductSubtotalBdt, cartUnitProductBdt, cartTotalWeightKg, cartMinWeightMet, ORDER_MIN_WEIGHT_KG } from "@/lib/cart";
 import { useLang } from "@/lib/i18n";
-import { fmtBdt, FX_CNY_BDT } from "@/lib/pricing";
+import { fmtBdt, FX_CNY_BDT, BUYER_MARKUP_PCT } from "@/lib/pricing";
 
 type Props = {
   open: boolean;
@@ -164,6 +164,50 @@ export function CartDrawer({ open, onClose }: Props) {
                 {fmtBdt(productSubtotalBdt)}
               </span>
             </div>
+
+            {/* Phase 11: weight progress + min-weight gate. */}
+            {(() => {
+              const totalWeightKg = cartTotalWeightKg(items);
+              const minWeightMet = cartMinWeightMet(items);
+              return (
+                <div>
+                  <div className="flex items-baseline justify-between text-[11.5px]">
+                    <span className="text-fg-muted">{t("cart.weight_label")}</span>
+                    <span
+                      className={
+                        minWeightMet
+                          ? "text-emerald-700 font-mono tnum font-medium"
+                          : "text-fg font-mono tnum"
+                      }
+                    >
+                      {totalWeightKg.toFixed(2)} / {ORDER_MIN_WEIGHT_KG} kg
+                    </span>
+                  </div>
+                  <div className="mt-1.5 h-1.5 rounded-full bg-bg overflow-hidden">
+                    <div
+                      className={`h-full transition-all ${
+                        minWeightMet ? "bg-emerald-600" : "bg-amber-500"
+                      }`}
+                      style={{
+                        width: `${Math.min(100, (totalWeightKg / ORDER_MIN_WEIGHT_KG) * 100).toFixed(1)}%`,
+                      }}
+                    />
+                  </div>
+                  <p
+                    className={`mt-1.5 text-[11px] ${
+                      minWeightMet ? "text-emerald-700" : "text-fg-muted"
+                    }`}
+                  >
+                    {minWeightMet
+                      ? t("cart.weight_progress_met")
+                      : t("cart.weight_progress_below", {
+                          kg: `${(ORDER_MIN_WEIGHT_KG - totalWeightKg).toFixed(2)} kg`,
+                        })}
+                  </p>
+                </div>
+              );
+            })()}
+
             <p className="text-[10.5px] text-fg-subtle leading-relaxed">
               {t("cart.disclaimer")}
             </p>
@@ -175,13 +219,24 @@ export function CartDrawer({ open, onClose }: Props) {
               >
                 {t("cart.view_all")}
               </Link>
-              <Link
-                href="/checkout"
-                onClick={onClose}
-                className="h-10 inline-flex items-center justify-center text-[13px] font-medium rounded-md bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
-              >
-                {t("cart.place_order")}
-              </Link>
+              {cartMinWeightMet(items) ? (
+                <Link
+                  href="/checkout"
+                  onClick={onClose}
+                  className="h-10 inline-flex items-center justify-center text-[13px] font-medium rounded-md bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                >
+                  {t("cart.place_order")}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  className="h-10 inline-flex items-center justify-center text-[13px] font-medium rounded-md bg-bg-soft text-fg-subtle border border-border cursor-not-allowed"
+                >
+                  {t("cart.place_order")}
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -339,7 +394,10 @@ function CartCrossSell({
                   image: s.image,
                   unitPriceCny: s.price_cny_fen,
                   qty: 1,
-                  markup_pct: s.markup_pct ?? 25,
+                  // Phase 11: company-fixed 10% — passed via the
+                  // shared constant so the cart math matches the
+                  // product card and PDP.
+                  markup_pct: BUYER_MARKUP_PCT,
                   weight_kg: s.weight_kg ?? 0,
                   volume_cbm: s.volume_cbm ?? 0,
                   category: s.category,

@@ -14,7 +14,14 @@ const ROWS = [
     feature: "All-in price in BDT",
     bs: "✓ One landed price, no surprises",
     direct: "✗ FOB only; you handle shipping, duty, VAT",
-    local: "✓ Quoted in BDT but 30–60% markup",
+    // Phase 11: drop the "30–60% markup" callout. (a) It tells
+    // buyers that importers mark up, which is industry-wide and
+    // not specific to local Dhaka stockists; (b) "all importers
+    // do this" is the kind of language that erodes trust in
+    // the B2B category as a whole. The strongest contrast is
+    // our transparent shipping math, not a competitor bashing
+    // number.
+    local: "✓ Quoted in BDT, pay on collection",
   },
   {
     feature: "Quantity flexibility",

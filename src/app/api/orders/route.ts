@@ -14,6 +14,10 @@ import { getServerClient, getServiceRoleClient } from "@/lib/supabase/server";
 import { rateLimit, clientKey } from "@/lib/rate-limit";
 import { getProduct, dbProductToLegacy } from "@/lib/catalog";
 import {
+  ORDER_MIN_WEIGHT_KG,
+  orderMinWeightMet,
+} from "@/lib/pricing";
+import {
   landedCost,
   type ShippingMode,
   FX_CNY_BDT,
@@ -137,6 +141,28 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // ── Minimum weight check (Phase 11).
+  //    Compute the total chargeable weight from the buyer's locked
+  //    cart items and reject anything below the order minimum. This
+  //    happens BEFORE the product re-resolution so a sub-min order
+  //    short-circuits without hitting the DB.
+  const totalWeightKg = body.items.reduce(
+    (s, it) => s + it.weight_kg * it.qty,
+    0,
+  );
+  if (!orderMinWeightMet(totalWeightKg)) {
+    return NextResponse.json(
+      {
+        error: "below_minimum_weight",
+        message: `Order is ${totalWeightKg.toFixed(2)} kg; minimum is ${ORDER_MIN_WEIGHT_KG} kg.`,
+        weight_kg: Math.round(totalWeightKg * 1000) / 1000,
+        min_weight_kg: ORDER_MIN_WEIGHT_KG,
+        shortfall_kg: Math.round((ORDER_MIN_WEIGHT_KG - totalWeightKg) * 1000) / 1000,
+      },
+      { status: 400 },
+    );
+  }
+
   // ── Re-resolve each product server-side. Never trust the cart's
   //    unit price or weight — fetch the live product, recompute.
   //    The locked `markup_pct` is the buyer's "what you saw on the
@@ -162,10 +188,12 @@ export async function POST(req: NextRequest) {
       );
     }
     const legacy = dbProductToLegacy(db);
-    // Honour the buyer's locked markup_pct. If the admin has since
-    // changed the product's markup, we still use what the buyer saw
-    // when they added to cart. (This is the whole point of the
-    // cart-lock pattern from earlier work.)
+    // Phase 11: the per-product markup_pct is now a legacy field.
+    // The buyer's locked value is preserved on `it.markup_pct` for
+    // forward-compat, but the actual math in landedCost uses the
+    // company-wide BUYER_MARKUP_PCT constant. We still write the
+    // locked value into the legacy product so order_items.title
+    // gets a stable per-cart-item snapshot.
     legacy.markup_pct = it.markup_pct;
     // Recompute per-product landed cost (single-product, with buyer's locked qty)
     const breakdown = landedCost(legacy, it.qty, body.shipping_mode, FX_CNY_BDT);

@@ -73,7 +73,10 @@ export function AdminProductEditor({
   const [descEn, setDescEn] = useState(product.description_en);
   const [descBn, setDescBn] = useState(product.description_bn);
   const [category, setCategory] = useState(product.category);
-  const [markupPct, setMarkupPct] = useState(String(product.markup_pct));
+  // Phase 11: markup is company-fixed at 10% (BUYER_MARKUP_PCT).
+  // Admins can no longer set it per-product from this editor —
+  // it's set once in src/lib/pricing.ts. The DB column stays
+  // (legacy / audit) but is no longer editable.
   const [active, setActive] = useState(product.active);
   const [weightKg, setWeightKg] = useState(String(product.weight_kg));
   const [volumeCbm, setVolumeCbm] = useState(String(product.volume_cbm));
@@ -108,7 +111,6 @@ export function AdminProductEditor({
       descEn !== product.description_en ||
       descBn !== product.description_bn ||
       category !== product.category ||
-      String(markupPct) !== String(product.markup_pct) ||
       active !== product.active ||
       String(weightKg) !== String(product.weight_kg) ||
       String(volumeCbm) !== String(product.volume_cbm) ||
@@ -145,7 +147,10 @@ export function AdminProductEditor({
           description_en: descEn,
           description_bn: descBn,
           category,
-          markup_pct: Number.parseFloat(markupPct) || 0,
+          // Phase 11: don't send markup_pct. The server ignores
+          // it even if sent (see /api/admin/products/[id]/route.ts
+          // — markup_pct handler removed). The DB column is
+          // locked to 10 by migration 0023.
           active,
           weight_kg: Number.parseFloat(weightKg) || 0,
           volume_cbm: Number.parseFloat(volumeCbm) || 0,
@@ -410,20 +415,6 @@ export function AdminProductEditor({
               </option>
             ))}
           </select>
-        </div>
-        <div>
-          <label className="block text-[11px] font-medium tracking-wider uppercase text-fg-subtle mb-1.5">
-            Markup %
-          </label>
-          <input
-            type="number"
-            step="0.5"
-            min="0"
-            max="50"
-            value={markupPct}
-            onChange={(e) => setMarkupPct(e.target.value)}
-            className="w-full px-3 py-2.5 bg-bg border border-border rounded-md text-[14px] font-mono tnum focus:border-border-strong outline-none"
-          />
         </div>
         <div>
           <label className="block text-[11px] font-medium tracking-wider uppercase text-fg-subtle mb-1.5">

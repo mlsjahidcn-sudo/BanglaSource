@@ -8,7 +8,6 @@
 //     "title_bn":     string,
 //     "description_en": string,
 //     "description_bn": string,
-//     "markup_pct":   number,   // 0-50
 //     "active":       boolean,
 //     "category":     CategoryKey,  // one of the 7 allowed values
 //     "images":       string[],  // REPLACES the full image list
@@ -116,15 +115,11 @@ export async function PATCH(
     }
     patch.description_bn = body.description_bn;
   }
-  if (typeof body.markup_pct === "number") {
-    if (body.markup_pct < 0 || body.markup_pct > 50) {
-      return NextResponse.json(
-        { ok: false, error: "markup_pct_out_of_range" },
-        { status: 400 },
-      );
-    }
-    patch.markup_pct = body.markup_pct;
-  }
+  // Phase 11: markup_pct is company-fixed at 10% (BUYER_MARKUP_PCT).
+  // Admins can no longer change it from the API — the editor
+  // doesn't send the field, and we ignore it if they do. The DB
+  // column stays for legacy/audit, but it's locked at 10 by
+  // migration 0023 (lock_markup_to_10.sql).
   if (typeof body.active === "boolean") {
     patch.active = body.active;
   }
