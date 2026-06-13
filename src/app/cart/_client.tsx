@@ -169,10 +169,17 @@ export function CartClient() {
                 >
                   {lang === "bn" ? item.title_bn : item.title_en}
                 </Link>
+                {/*
+                  Per-piece product price + factory ¥-reference are
+                  HIDDEN in the cart. The buyer already saw them on
+                  the PDP; in the cart we keep only the line total so
+                  the buyer commits to the order without second-guessing
+                  the per-piece math.
+                */}
                 <p className="mt-1 text-[12px] text-fg-subtle font-mono tnum">
                   {product?.supplier_city ?? "—"},{" "}
                   {product?.supplier_province ?? "—"} · MOQ{" "}
-                  {product?.factory_moq ?? "—"}
+                  {product?.factory_moq ?? "—"} · Qty {item.qty}
                 </p>
                 <div className="mt-3 flex items-center justify-between">
                   <div className="flex items-center border border-border rounded-md">
@@ -213,7 +220,7 @@ export function CartClient() {
         <aside className="lg:col-span-4 space-y-4">
           <div className="card p-5">
             <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium">
-              {t("cart.est_fob")}
+              {t("cart.product_subtotal")}
             </p>
             <p className="mt-1 price-tag text-[28px] font-semibold">
               {fmtBdt(productSubtotalBdt)}

@@ -247,10 +247,13 @@ export const dict: Dict = {
   "cart.close": { en: "Close cart", bn: "কার্ট বন্ধ করুন" },
   "cart.remove": { en: "Remove", bn: "সরান" },
   "cart.skus": { en: "SKUs", bn: "SKU" },
-  "cart.est_fob": { en: "Product subtotal", bn: "পণ্যের সাবটোটাল" },
+  "cart.product_subtotal": {
+    en: "Product subtotal",
+    bn: "পণ্যের সাবটোটাল",
+  },
   "cart.disclaimer": {
-    en: "Product prices shown. Shipping, customs duty, and VAT are added at quote time — see the PDP for the full breakdown.",
-    bn: "পণ্যের মূল্য দেখানো হয়েছে। কোটের সময় শিপিং, শুল্ক এবং ভ্যাট যোগ হবে — সম্পূর্ণ ভাঙ্গনের জন্য PDP দেখুন।",
+    en: "Per-piece product prices are locked at add time. Shipping, customs duty, and VAT are added when you request a quote — see the PDP for the full breakdown.",
+    bn: "পণ্যের প্রতি-পিস মূল্য অ্যাড-টাইমে লক থাকে। কোটের সময় শিপিং, শুল্ক এবং ভ্যাট যোগ হবে — সম্পূর্ণ ভাঙ্গনের জন্য PDP দেখুন।",
   },
   "cart.view_all": { en: "View full list", bn: "সম্পূর্ণ তালিকা" },
   "cart.request_quote": { en: "Request quote", bn: "কোট চান" },

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart, cartProductSubtotalBdt, cartUnitProductBdt } from "@/lib/cart";
 import { useLang } from "@/lib/i18n";
-import { fmtBdt, fmtCny, FX_CNY_BDT } from "@/lib/pricing";
+import { fmtBdt, FX_CNY_BDT } from "@/lib/pricing";
 
 type Props = {
   open: boolean;
@@ -102,12 +102,17 @@ export function CartDrawer({ open, onClose }: Props) {
                       <p className="text-[13px] font-medium leading-snug line-clamp-2">
                         {it.title_en}
                       </p>
+                      {/*
+                        Per-piece price + factory reference are HIDDEN in
+                        the cart. The buyer already saw them on the PDP
+                        when they added the line — at the cart stage the
+                        only number that matters for committing is the
+                        LINE TOTAL. The unit price and factory ¥-reference
+                        would just create "should I shop around?" noise
+                        right before the buyer clicks "Request quote".
+                      */}
                       <p className="mt-1 text-[11px] text-fg-subtle font-mono tnum">
-                        {fmtBdt(cartUnitProductBdt(it))} / pc ·{" "}
-                        {fmtBdt(cartUnitProductBdt(it) * it.qty)} line ·{" "}
-                        <span className="text-fg-muted">
-                          factory {fmtCny(it.unitPriceCny)}
-                        </span>
+                        Qty {it.qty}
                       </p>
                       <div className="mt-2 flex items-center justify-between">
                         <div className="flex items-center border border-border rounded-md">
@@ -153,7 +158,7 @@ export function CartDrawer({ open, onClose }: Props) {
           <div className="border-t border-border p-5 space-y-3 bg-bg-soft">
             <div className="flex items-baseline justify-between text-[13px]">
               <span className="text-fg-muted">
-                {t("cart.est_fob")} ({items.length} {t("cart.skus")})
+                {t("cart.product_subtotal")} ({items.length} {t("cart.skus")})
               </span>
               <span className="price-tag font-semibold text-[16px]">
                 {fmtBdt(productSubtotalBdt)}
@@ -259,6 +264,9 @@ function CartCrossSell({
   items: ReturnType<typeof useCart>["items"];
 }) {
   const [suggestions, setSuggestions] = useState<CrossItem[]>([]);
+  // Always call useCart() at the top of the component — never after
+  // an early return — to keep hook order stable across renders.
+  const { add } = useCart();
   const inCartIds = new Set(items.map((i) => i.productId));
 
   useEffect(() => {
@@ -287,7 +295,6 @@ function CartCrossSell({
   const filtered = suggestions.filter((s) => !inCartIds.has(s.source_id));
   if (filtered.length === 0) return null;
 
-  const { add } = useCart();
   return (
     <div className="border-t border-border p-4 bg-bg-soft/50">
       <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium">
