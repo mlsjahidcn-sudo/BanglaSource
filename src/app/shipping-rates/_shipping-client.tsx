@@ -157,9 +157,9 @@ export function ShippingClient() {
             Product price
           </h2>
           <p className="mt-3 text-fg-muted max-w-2xl">
-            What you see as the buyer-facing product price (factory FOB +
-            company margin). Shipping + duty + tax settle to the courier
-            on delivery — see the 3 mode cards above for per-kg rates.
+            The all-in unit price you'll see as the buyer, per piece.
+            Shipping + duty + tax settle to the courier on delivery — see
+            the 3 mode cards above for per-kg rates.
           </p>
           <div className="mt-8">
             <ProductPriceCalc />

@@ -75,11 +75,7 @@ export function ProductPriceCalc() {
               {fmtBdt(result.productBdt)}
             </p>
             <p className="mt-3 text-[13px] text-fg-muted">
-              For {qty} pieces at ¥{cnyPerPc.toFixed(2)}/pc factory FOB
-            </p>
-            <p className="mt-1 text-[12px] text-fg-subtle font-mono">
-              = ৳{result.cnSubtotalBdt.toLocaleString()} (FOB) + ৳
-              {result.markupBdt.toLocaleString()} (markup)
+              For {qty} pieces at ¥{cnyPerPc.toFixed(2)}/pc
             </p>
           </div>
 
