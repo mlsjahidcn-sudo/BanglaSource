@@ -13,6 +13,7 @@ import {
   type LandedBreakdown,
 } from "@/lib/pricing";
 import { useCart } from "@/lib/cart";
+import { SaveButton } from "@/components/save-button";
 
 const BADGE_LABEL: Record<string, { en: string; bn: string }> = {
   verified_factory: { en: "Verified factory", bn: "যাচাইকৃত কারখানা" },
@@ -448,6 +449,10 @@ export function ProductDetail({ product }: { product: Product }) {
               <Button size="lg" className="w-full" onClick={handleAdd}>
                 Add to order list
               </Button>
+              <SaveButton
+                sourceId={product.source_id}
+                variant="lg"
+              />
               <Button
                 size="md"
                 variant="outline"

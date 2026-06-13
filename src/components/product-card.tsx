@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useLang } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
+import { SaveButton } from "@/components/save-button";
 import { fmtBdt, fmtCny, FX_CNY_BDT } from "@/lib/pricing";
 import type { Product } from "@/lib/pricing";
 
@@ -35,6 +36,9 @@ export function ProductCard({
             <Badge tone="accent">★ Verified</Badge>
           </div>
         )}
+        <div className="absolute top-3 right-3">
+          <SaveButton sourceId={product.source_id} variant="icon" />
+        </div>
       </div>
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
