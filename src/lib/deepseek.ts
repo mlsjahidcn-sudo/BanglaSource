@@ -55,6 +55,11 @@ export type ChatOptions = {
                               // is much smaller. ~1500 is enough for product
                               // title+description. Set 4096+ for chat.)
   jsonMode?: boolean;         // request JSON object output
+  tools?: unknown[];          // OpenAI-compatible tool definitions. When set
+                              // the model can return `tool_calls` in the
+                              // assistant message. The route is responsible
+                              // for executing the tool and feeding results
+                              // back as `role: "tool"` messages.
   signal?: AbortSignal;
 };
 
@@ -89,6 +94,7 @@ export async function deepseekChat(
   if (opts.maxTokens) body.max_tokens = opts.maxTokens;
   else body.max_tokens = 2048;
   if (opts.jsonMode) body.response_format = { type: "json_object" };
+  if (opts.tools && opts.tools.length > 0) body.tools = opts.tools;
 
   const r = await fetch(`${BASE}/chat/completions`, {
     method: "POST",
