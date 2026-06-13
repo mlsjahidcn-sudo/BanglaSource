@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useLang } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
 import { SaveButton } from "@/components/save-button";
-import { fmtBdt, fmtCny, FX_CNY_BDT } from "@/lib/pricing";
+import { fmtBdt, fmtCny, unitProductBdt } from "@/lib/pricing";
 import type { Product } from "@/lib/pricing";
 
 export function ProductCard({
@@ -16,8 +16,16 @@ export function ProductCard({
 }) {
   const { lang } = useLang();
   const title = lang === "bn" ? product.title_bn : product.title_en;
-  const lowestPrice = product.price_tiers[product.price_tiers.length - 1].price_cny_fen;
+  // Product price per piece = factory FOB × (1 + our markup %).
+  // This is what the buyer pays for the product itself; shipping
+  // is added at quote time (PDP "Shipping & delivery" line).
+  // Use the lowest (bulk) tier so the card price is "from ৳X".
+  const lowestPriceCnyFen =
+    product.price_tiers[product.price_tiers.length - 1].price_cny_fen;
+  const productPriceBdt = unitProductBdt(product, 9999); // forces last tier
+  // Factory reference (CNY) for transparency — same as before.
   const highestPrice = product.price_tiers[0].price_cny_fen;
+  const lowestFactoryCny = lowestPriceCnyFen;
   return (
     <Link
       href={`/products/${product.source_id}`}
@@ -73,12 +81,12 @@ export function ProductCard({
           <div>
             <div className="flex items-baseline gap-1.5">
               <span className="price-tag text-[15px] font-semibold text-fg">
-                {fmtBdt(Math.ceil((lowestPrice / 100) * FX_CNY_BDT))}
+                {fmtBdt(productPriceBdt)}
               </span>
-              <span className="text-[11px] text-fg-subtle">/ pc · Dhaka</span>
+              <span className="text-[11px] text-fg-subtle">/ pc · product</span>
             </div>
             <p className="text-[11px] text-fg-subtle mt-0.5 font-mono tnum">
-              factory {fmtCny(highestPrice)} → {fmtCny(lowestPrice)}
+              factory {fmtCny(highestPrice)} → {fmtCny(lowestFactoryCny)} · +shipping
             </p>
           </div>
           <div className="text-right">

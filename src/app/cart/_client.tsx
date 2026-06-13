@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { useLang } from "@/lib/i18n";
-import { useCart } from "@/lib/cart";
+import { useCart, cartUnitProductBdt, cartProductSubtotalBdt } from "@/lib/cart";
 import { fmtBdt, FX_CNY_BDT } from "@/lib/pricing";
 import { useState, useEffect } from "react";
 import { useCatalog } from "@/lib/use-catalog";
@@ -39,10 +39,9 @@ export function CartClient() {
     return { item: it, product };
   });
 
-  const totalCny = items.reduce(
-    (s, i) => s + i.qty * i.unitPriceCny,
-    0,
-  );
+  // Product subtotal (BDT) — includes our markup. Shipping is added
+  // when the buyer picks a mode + clicks "Request quote".
+  const productSubtotalBdt = cartProductSubtotalBdt(items);
 
   async function requestQuote() {
     if (enriched.length === 0) return;
@@ -56,9 +55,11 @@ export function CartClient() {
       const first = enriched[0];
       if (!first.product) return;
       const totalQty = enriched.reduce((s, e) => s + e.item.qty, 0);
-      // Use the average per-pc price (locked at add time)
+      // Average per-pc factory price (locked at add time, no markup —
+      // markup is in the per-piece product BDT for the cart line)
       const avgUnitFen = Math.round(
-        totalCny / Math.max(1, totalQty),
+        items.reduce((s, i) => s + i.qty * i.unitPriceCny, 0) /
+          Math.max(1, totalQty),
       );
       // Build a synthetic product with locked unit price for the calculator
       const synth = {
@@ -194,11 +195,7 @@ export function CartClient() {
                     </button>
                   </div>
                   <p className="price-tag font-semibold text-[15px]">
-                    {fmtBdt(
-                      Math.ceil(
-                        ((item.unitPriceCny * item.qty) / 100) * FX_CNY_BDT,
-                      ),
-                    )}
+                    {fmtBdt(cartUnitProductBdt(item) * item.qty)}
                   </p>
                 </div>
               </div>
@@ -219,7 +216,7 @@ export function CartClient() {
               {t("cart.est_fob")}
             </p>
             <p className="mt-1 price-tag text-[28px] font-semibold">
-              {fmtBdt(Math.ceil((totalCny / 100) * FX_CNY_BDT))}
+              {fmtBdt(productSubtotalBdt)}
             </p>
             <p className="text-[12px] text-fg-subtle mt-1">
               {t("cart.disclaimer")}

@@ -7,7 +7,7 @@
 // Run with:
 //   NODE_OPTIONS="--conditions=react-server" pnpm tsx scripts/test-pricing-tiers.mts
 
-import { airShippingBdt, seaShippingBdt, airRateTier, chargeableWeightKg, FX_CNY_BDT, landedCost, airShippingBreakdown } from "../src/lib/pricing.ts";
+import { airShippingBdt, seaShippingBdt, airRateTier, chargeableWeightKg, FX_CNY_BDT, landedCost, airShippingBreakdown, unitProductBdt } from "../src/lib/pricing.ts";
 
 let pass = 0;
 let fail = 0;
@@ -330,6 +330,69 @@ const handTest = landedCost(
 );
 check("Hand-rolled sunglasses × 5: per-kg 3500", handTest.dutyPerKg === 3500);
 check("Hand-rolled sunglasses × 5: dutyBdt 0.25 × 3500 = 875", handTest.dutyBdt === 875);
+
+// SkyBuy-style two-line regrouping:
+//   productBdt  = supplier FOB (BDT) + our markup
+//   deliveryBdt = CN first-mile + agent + intl freight + duty + VAT + AIT
+//   totalBdt    = productBdt + deliveryBdt (the previous all-in)
+check(
+  "Hand test: productBdt = FOB × (1 + markup%)",
+  handTest.productBdt === Math.round(handTest.cnSubtotalBdt * 1.25),
+);
+check(
+  "Hand test: productBdt excludes shipping (FOB 13*5=65 CNY = 1095 BDT × 1.25 = 1369)",
+  handTest.productBdt === 1369,
+  `actual ${handTest.productBdt}`,
+);
+check(
+  "Hand test: deliveryBdt = sum of all logistics + duty + tax",
+  handTest.deliveryBdt ===
+    handTest.cnDomesticBdt +
+      handTest.agentBdt +
+      handTest.consolBdt +
+      handTest.intlBdt +
+      handTest.dutyBdt +
+      handTest.vatBdt +
+      handTest.aitBdt,
+);
+check(
+  "Hand test: totalBdt = productBdt + deliveryBdt (the SkyBuy add-up)",
+  handTest.totalBdt === handTest.productBdt + handTest.deliveryBdt,
+);
+check(
+  "Hand test: productBdt < totalBdt (sanity — shipping/duty make up the rest)",
+  handTest.productBdt < handTest.totalBdt,
+);
+
+// unitProductBdt helper — used by product cards and cross-sell
+// (without the in-flight quote, just the per-piece product price
+//  including markup, at the LOWEST price tier)
+// 5 pieces → tier covers qty 1+ at 13.00 CNY/pc. FX 16.85. 25% markup.
+//   = ceil(13 × 16.85 × 1.25) = ceil(273.81) = 274
+const sunglassProduct: Parameters<typeof unitProductBdt>[0] = {
+  source_id: "test", title_zh: "", title_en: "", title_bn: "",
+  category: "eyewear", price_min_cny: 13, price_max_cny: 13,
+  factory_moq: 1,
+  price_tiers: [{ qty_min: 1, qty_max: 9999, price_cny_fen: 1300 }],
+  weight_kg: 0.05, volume_cbm: 0.0005,
+  supplier_name: "", supplier_province: "", supplier_city: "",
+  stock_total: 0, order_count_30d: 0, rating_overall: 0,
+  badges: [], images: [], description_en: "", description_bn: "",
+  source_url: "", markup_pct: 25, customs_duty_per_kg: 3500,
+  customs_duty_class: "sunglasses-c",
+};
+check(
+  "unitProductBdt at qty 5 = ceil(13 × 16.85 × 1.25) = 274",
+  unitProductBdt(sunglassProduct, 5) === 274,
+);
+check(
+  "unitProductBdt at qty 100 (lower tier 11 CNY) = ceil(11 × 16.85 × 1.25) = 232",
+  unitProductBdt({ ...sunglassProduct, price_tiers: [
+    { qty_min: 1, qty_max: 9, price_cny_fen: 1500 },
+    { qty_min: 10, qty_max: 99, price_cny_fen: 1300 },
+    { qty_min: 100, qty_max: 9999, price_cny_fen: 1100 },
+  ] }, 100) === 232,
+);
 
 console.log(`\n=== ${pass} passed, ${fail} failed ===\n`);
 if (fail > 0) process.exit(1);

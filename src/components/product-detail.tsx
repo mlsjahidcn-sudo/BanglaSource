@@ -8,6 +8,7 @@ import {
   fmtCny,
   fmtKg,
   fmtCbm,
+  classLabel,
   type Product,
   type ShippingMode,
   type LandedBreakdown,
@@ -34,6 +35,7 @@ export function ProductDetail({ product }: { product: Product }) {
   const [activeImage, setActiveImage] = useState(0);
   const [quote, setQuote] = useState<QuoteResponse | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
+  const [showBreakdown, setShowBreakdown] = useState(false);
   const { add } = useCart();
 
   // Fetch real quote from API whenever qty/mode change (debounced)
@@ -78,6 +80,14 @@ export function ProductDetail({ product }: { product: Product }) {
       unitPriceCny: unitCny,
       factory_moq: product.factory_moq,
       qty,
+      // Lock the markup + logistics params at add time so the cart
+      // subtotal matches what the buyer just saw on the PDP, even
+      // if the admin changes markup later.
+      markup_pct: product.markup_pct ?? 25,
+      weight_kg: product.weight_kg,
+      volume_cbm: product.volume_cbm,
+      category: product.category,
+      customs_duty_per_kg: product.customs_duty_per_kg ?? 0,
     });
   }
 
@@ -368,11 +378,21 @@ export function ProductDetail({ product }: { product: Product }) {
 
             <div className="mt-5 hr" />
 
-            {/* Landed cost */}
+            {/* ── Price card ────────────────────────────────────────────
+                SkyBuy-style two-line layout:
+                  Product price  = supplier cost + our markup (profit)
+                  + Shipping & delivery = CN first-mile + int'l freight
+                                         + customs duty + VAT + AIT
+                  = Total
+                A "See breakdown" disclosure expands the shipping line
+                into its underlying components (FOB / shipping tier /
+                customs class / VAT). Buyers see one clean number; the
+                audit trail is one click away.
+            ─────────────────────────────────────────────────────────── */}
             <div>
               <div className="flex items-baseline justify-between">
                 <p className="text-[11px] text-emerald-700 uppercase tracking-wider font-semibold">
-                  Landed cost in Dhaka
+                  Pricing for {qty} piece{qty > 1 ? "s" : ""}
                 </p>
                 {quoteLoading && (
                   <span className="text-[10.5px] text-fg-subtle">
@@ -380,9 +400,6 @@ export function ProductDetail({ product }: { product: Product }) {
                   </span>
                 )}
               </div>
-              <p className="mt-1 text-[12px] text-fg-subtle">
-                Includes shipping, duty, VAT. Locks at checkout.
-              </p>
 
               {quote && quote.warnings.length > 0 && (
                 <div className="mt-3 space-y-1.5">
@@ -398,62 +415,114 @@ export function ProductDetail({ product }: { product: Product }) {
               )}
 
               {lc ? (
-                <dl className="mt-4 space-y-2 text-[13px]">
-                  <BreakdownRow
-                    label="FOB China"
-                    value={fmtBdt(lc.cnSubtotalBdt)}
-                  />
-                  <BreakdownRow
-                    label={`Int'l shipping (${mode})`}
-                    value={fmtBdt(lc.intlBdt)}
-                    sub={
-                      lc.rateTier && lc.shippingBreakdown
-                        ? shippingSubText(
-                            mode,
-                            lc.chargeableKg,
-                            lc.rateTier.rateBdtPerKg,
-                            lc.rateTier.minBdt,
-                            lc.shippingBreakdown.perKgAmount,
-                            lc.shippingBreakdown.floorApplied,
-                            lc.volumetricKg,
-                          )
-                        : undefined
-                    }
-                  />
-                  <BreakdownRow
-                    label="Sourcing & consolidation"
-                    value={fmtBdt(lc.agentBdt + lc.consolBdt)}
-                  />
-                  <BreakdownRow
-                    label={`Customs ৳${lc.dutyPerKg.toLocaleString()}/kg + VAT + AIT`}
-                    value={fmtBdt(lc.dutyBdt + lc.vatBdt + lc.aitBdt)}
-                    sub={
-                      lc.dutyClass
-                        ? `${classLabel(lc.dutyClass)} · ${lc.chargeableKg.toFixed(2)} kg chargeable`
-                        : undefined
-                    }
-                  />
-                  <BreakdownRow
-                    label={`Our fee (${lc.markupPct}%)`}
-                    value={fmtBdt(lc.markupBdt)}
-                  />
-                </dl>
+                <div className="mt-4 space-y-2.5">
+                  {/* ── Line 1: Product price (our markup on supplier FOB) ── */}
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <p className="text-[12.5px] text-fg-muted">
+                        Product price
+                      </p>
+                      <p className="text-[10.5px] text-fg-subtle mt-0.5">
+                        {fmtBdt(Math.round(lc.cnSubtotalBdt / qty))} factory
+                        {lc.markupPct > 0 && (
+                          <> · +{lc.markupPct}% margin</>
+                        )}{" "}
+                        = {fmtBdt(Math.ceil((lc.cnSubtotalBdt / qty) * (1 + lc.markupPct/100)))} / pc
+                      </p>
+                    </div>
+                    <p className="price-tag text-[20px] font-semibold text-fg">
+                      {fmtBdt(lc.productBdt)}
+                    </p>
+                  </div>
+
+                  {/* ── Line 2: Shipping & delivery (grouped) ── */}
+                  <div className="flex items-end justify-between pt-2 border-t border-border">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-[12.5px] text-fg-muted">
+                          + Shipping &amp; delivery
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setShowBreakdown((s) => !s)}
+                          className="text-[10.5px] text-cyan-700 hover:text-cyan-900 underline-offset-2 hover:underline"
+                          aria-expanded={showBreakdown}
+                        >
+                          {showBreakdown ? "Hide details" : "See breakdown"}
+                        </button>
+                      </div>
+                      <p className="text-[10.5px] text-fg-subtle mt-0.5">
+                        {modeLabelFor(mode)} · {fmtKg(lc.chargeableKg)} · transit {lc.transitDays}
+                      </p>
+
+                      {/* Expanded breakdown — only when the buyer clicks */}
+                      {showBreakdown && (
+                        <dl className="mt-2 ml-1 space-y-1 text-[11.5px] text-fg-muted border-l-2 border-slate-200 pl-2.5">
+                          <BreakdownRow
+                            label="Factory FOB (CN)"
+                            value={fmtBdt(lc.cnSubtotalBdt)}
+                          />
+                          <BreakdownRow
+                            label={`Int'l shipping (${mode})`}
+                            value={fmtBdt(lc.intlBdt)}
+                            sub={
+                              lc.rateTier && lc.shippingBreakdown
+                                ? shippingSubText(
+                                    mode,
+                                    lc.chargeableKg,
+                                    lc.rateTier.rateBdtPerKg,
+                                    lc.rateTier.minBdt,
+                                    lc.shippingBreakdown.perKgAmount,
+                                    lc.shippingBreakdown.floorApplied,
+                                    lc.volumetricKg,
+                                  )
+                                : undefined
+                            }
+                          />
+                          <BreakdownRow
+                            label="CN first-mile + sourcing agent"
+                            value={fmtBdt(lc.cnDomesticBdt + lc.agentBdt + lc.consolBdt)}
+                          />
+                          <BreakdownRow
+                            label={`Customs ৳${lc.dutyPerKg.toLocaleString()}/kg`}
+                            value={fmtBdt(lc.dutyBdt)}
+                            sub={
+                              lc.dutyClass
+                                ? `${classLabel(lc.dutyClass)} · ${lc.chargeableKg.toFixed(2)} kg chargeable`
+                                : undefined
+                            }
+                          />
+                          <BreakdownRow
+                            label="VAT 15% (CIF + duty)"
+                            value={fmtBdt(lc.vatBdt)}
+                          />
+                          <BreakdownRow
+                            label="AIT 5% (CIF)"
+                            value={fmtBdt(lc.aitBdt)}
+                          />
+                        </dl>
+                      )}
+                    </div>
+                    <p className="price-tag text-[20px] font-semibold text-fg whitespace-nowrap pl-3">
+                      {fmtBdt(lc.deliveryBdt)}
+                    </p>
+                  </div>
+                </div>
               ) : (
                 <div className="mt-4 space-y-2 animate-pulse">
-                  <div className="h-3 bg-slate-100 rounded w-full" />
-                  <div className="h-3 bg-slate-100 rounded w-4/5" />
-                  <div className="h-3 bg-slate-100 rounded w-3/5" />
+                  <div className="h-4 bg-slate-100 rounded w-full" />
+                  <div className="h-4 bg-slate-100 rounded w-4/5" />
                 </div>
               )}
 
               {lc && (
-                <div className="mt-5 pt-5 border-t border-border">
+                <div className="mt-5 pt-5 border-t-2 border-border-strong">
                   <div className="flex items-end justify-between">
                     <div>
-                      <p className="text-[11px] text-fg-subtle uppercase tracking-wider">
+                      <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-semibold">
                         Total
                       </p>
-                      <p className="price-tag text-[28px] font-semibold mt-0.5">
+                      <p className="price-tag text-[28px] font-semibold mt-0.5 text-fg">
                         {fmtBdt(lc.totalBdt)}
                       </p>
                     </div>
@@ -509,7 +578,7 @@ export function ProductDetail({ product }: { product: Product }) {
                   </div>
 
                   <p className="mt-2 text-[10.5px] text-fg-subtle font-mono tnum">
-                    Quote {lc.quoteId} · transit {lc.transitDays} · valid until{" "}
+                    Quote {lc.quoteId} · valid until{" "}
                     {new Date(lc.expiresAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -618,7 +687,7 @@ function shippingSubText(
   floorApplied: boolean,
   volumetricKg: number,
 ): string {
-  const modeLabel = mode === "air" ? "Air" : mode === "express" ? "Express" : "Sea LCL";
+  const modeLabel = modeLabelFor(mode);
   const kgPart = `${chargeableKg.toFixed(2)} kg chargeable${
     volumetricKg > chargeableKg ? " (volumetric — pack tighter to save)" : ""
   }`;
@@ -628,22 +697,10 @@ function shippingSubText(
   return `${modeLabel} at ৳${rateBdtPerKg.toLocaleString()}/kg · ${kgPart}`;
 }
 
-/** Human label for a customs_duty_class slug. */
-function classLabel(cls: string): string {
-  const map: Record<string, string> = {
-    "cat-a": "Category A (general)",
-    "cat-b": "Category B (battery / restricted)",
-    "cat-c-high": "Category C (high-specific)",
-    "cat-b-or-c": "Category B/C",
-    "sunglasses-c": "Sunglasses (high specific)",
-    "smart-watch-c": "Smart watch",
-    "bluetooth-c": "Bluetooth headphone",
-    "regular-watch-c": "Regular watch",
-    "liquid-cosmetic-c": "Liquid cosmetics",
-    "powder-c": "Powder",
-    "beauty-electronics-b": "Battery grooming tool",
-    "power-bank-c": "Power bank",
-    "cctv-c": "CCTV camera",
-  };
-  return map[cls] ?? cls;
+/** Short human label for a shipping mode. Used in the PDP's
+ *  shipping-line sub-text: "Air · 0.10 kg · transit 5–9 days". */
+function modeLabelFor(mode: ShippingMode): string {
+  if (mode === "air") return "Air freight";
+  if (mode === "express") return "Express (DHL/FedEx)";
+  return "Sea LCL";
 }

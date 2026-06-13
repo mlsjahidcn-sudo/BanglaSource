@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useCart } from "@/lib/cart";
+import { useCart, cartProductSubtotalBdt, cartUnitProductBdt } from "@/lib/cart";
 import { useLang } from "@/lib/i18n";
 import { fmtBdt, fmtCny, FX_CNY_BDT } from "@/lib/pricing";
 
@@ -34,10 +34,10 @@ export function CartDrawer({ open, onClose }: Props) {
     };
   }, [open, onClose]);
 
-  const subtotalFen = items.reduce(
-    (s, i) => s + i.qty * i.unitPriceCny,
-    0,
-  );
+  // Product subtotal in BDT — includes our markup on each line.
+  // The shipping/duty/VAT line is calculated at quote time on the
+  // PDP / quote page; the cart shows the product price only.
+  const productSubtotalBdt = cartProductSubtotalBdt(items);
 
   return (
     <>
@@ -103,7 +103,11 @@ export function CartDrawer({ open, onClose }: Props) {
                         {it.title_en}
                       </p>
                       <p className="mt-1 text-[11px] text-fg-subtle font-mono tnum">
-                        {fmtBdt(Math.ceil((it.unitPriceCny / 100) * FX_CNY_BDT))} / pc · {fmtCny(it.unitPriceCny)} factory
+                        {fmtBdt(cartUnitProductBdt(it))} / pc ·{" "}
+                        {fmtBdt(cartUnitProductBdt(it) * it.qty)} line ·{" "}
+                        <span className="text-fg-muted">
+                          factory {fmtCny(it.unitPriceCny)}
+                        </span>
                       </p>
                       <div className="mt-2 flex items-center justify-between">
                         <div className="flex items-center border border-border rounded-md">
@@ -152,7 +156,7 @@ export function CartDrawer({ open, onClose }: Props) {
                 {t("cart.est_fob")} ({items.length} {t("cart.skus")})
               </span>
               <span className="price-tag font-semibold text-[16px]">
-                {fmtBdt(Math.ceil((subtotalFen / 100) * FX_CNY_BDT))}
+                {fmtBdt(productSubtotalBdt)}
               </span>
             </div>
             <p className="text-[10.5px] text-fg-subtle leading-relaxed">
@@ -242,6 +246,11 @@ type CrossItem = {
   title_bn: string;
   image: string;
   price_cny_fen: number;
+  markup_pct: number;
+  weight_kg: number;
+  volume_cbm: number;
+  category: string;
+  customs_duty_per_kg: number;
 };
 
 function CartCrossSell({
@@ -305,8 +314,13 @@ function CartCrossSell({
               </p>
               <p className="text-[10px] text-fg-subtle font-mono tnum">
                 {fmtBdt(
-                  Math.ceil((s.price_cny_fen / 100) * FX_CNY_BDT),
-                )}
+                  Math.ceil(
+                    (s.price_cny_fen / 100) *
+                      FX_CNY_BDT *
+                      (1 + (s.markup_pct ?? 25) / 100),
+                  ),
+                )}{" "}
+                / pc
               </p>
             </div>
             <button
@@ -318,6 +332,11 @@ function CartCrossSell({
                   image: s.image,
                   unitPriceCny: s.price_cny_fen,
                   qty: 1,
+                  markup_pct: s.markup_pct ?? 25,
+                  weight_kg: s.weight_kg ?? 0,
+                  volume_cbm: s.volume_cbm ?? 0,
+                  category: s.category,
+                  customs_duty_per_kg: s.customs_duty_per_kg ?? 0,
                 })
               }
               className="text-[10.5px] font-medium text-cyan-600 hover:text-cyan-700 px-2 py-1 rounded hover:bg-cyan-50"

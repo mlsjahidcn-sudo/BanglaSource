@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
   const { data: candidates, error } = await supabase
     .from("products")
     .select(
-      "source_id, title_en, title_bn, images, category, price_tiers(price_cny_fen)",
+      "source_id, title_en, title_bn, images, category, markup_pct, weight_kg, volume_cbm, customs_duty_per_kg, price_tiers(price_cny_fen)",
     )
     .in("category", categories)
     .eq("active", true)
@@ -91,6 +91,11 @@ export async function POST(req: NextRequest) {
     title_en: string;
     title_bn: string;
     images: string[];
+    category: string;
+    markup_pct: number;
+    weight_kg: number;
+    volume_cbm: number;
+    customs_duty_per_kg: number;
     price_tiers: Array<{ price_cny_fen: number }>;
   }>)
     .filter((c) => !excludeIds.has(c.source_id))
@@ -106,6 +111,11 @@ export async function POST(req: NextRequest) {
         title_bn: c.title_bn,
         image: (c.images ?? [])[0] ?? "",
         price_cny_fen: minFen,
+        markup_pct: c.markup_pct ?? 25,
+        weight_kg: c.weight_kg ?? 0,
+        volume_cbm: c.volume_cbm ?? 0,
+        category: c.category,
+        customs_duty_per_kg: c.customs_duty_per_kg ?? 0,
       };
     });
   return NextResponse.json(

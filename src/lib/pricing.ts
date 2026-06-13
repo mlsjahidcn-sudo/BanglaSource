@@ -398,6 +398,20 @@ export type LandedBreakdown = {
   // Markup
   markupBdt: number;
   markupPct: number;
+  // ── Buyer-facing regrouping (SkyBuy model) ──
+  // "Product price" = what the buyer pays for the product itself.
+  //   = factory FOB (BDT) × (1 + markup%).
+  //   This is OUR selling price. It includes our profit margin on
+  //   top of the supplier cost.
+  productBdt: number;
+  // "Shipping & delivery" = everything else the buyer pays to get
+  //   the product from the CN factory to their door in Dhaka.
+  //   = CN domestic + sourcing agent + consolidation + int'l freight
+  //     + customs duty + VAT + AIT.
+  //   We roll all of these into a single buyer-facing line because
+  //   the buyer doesn't care about our internal cost structure —
+  //   they care about "what does it cost to get this to me".
+  deliveryBdt: number;
   // Totals
   totalBdt: number;
   unitBdt: number;
@@ -578,6 +592,12 @@ export function landedCost(
     aitBdt,
     markupBdt,
     markupPct,
+    // Buyer-facing regrouping:
+    //   Product price  = supplier FOB (BDT) + our markup
+    //   Shipping       = CN first-mile + int'l freight + duty + VAT + AIT
+    productBdt: cnSubtotalBdt + markupBdt,
+    deliveryBdt:
+      cnDomesticBdt + agentBdt + consolBdt + intlBdt + dutyBdt + vatBdt + aitBdt,
     totalBdt,
     unitBdt,
     transitDays: TRANSIT_DAYS[mode],
@@ -594,6 +614,49 @@ export function landedCost(
 }
 
 // ── Display formatters ────────────────────────────────────────────────────
+
+/**
+ * Human label for the customs duty class slug (used in the buyer
+ * disclosure tooltip on the PDP). Truncated to keep the label
+ * short — these show up under "Customs ৳/kg".
+ */
+export function classLabel(slug: string): string {
+  const map: Record<string, string> = {
+    "cat-a": "Category A (general)",
+    "cat-b": "Category B (battery / restricted)",
+    "cat-c-high": "Category C (high-specific)",
+    "cat-b-or-c": "Category B/C",
+    "sunglasses-c": "Sunglasses (high specific)",
+    "smart-watch-c": "Smart watch",
+    "bluetooth-c": "Bluetooth headphone",
+    "regular-watch-c": "Regular watch",
+    "liquid-cosmetic-c": "Liquid cosmetics",
+    "powder-c": "Powder",
+    "beauty-electronics-b": "Battery grooming tool",
+    "power-bank-c": "Power bank",
+    "cctv-c": "CCTV camera",
+  };
+  return map[slug] ?? slug;
+}
+
+/** Per-piece product price (BDT) at a given qty — used for product
+ * cards and "from ৳X" headlines on the PDP.
+ *
+ *   = (unit factory price in CNY × FX × (1 + markup%)) per piece
+ *
+ * No shipping, no duty — that's the "Product price" line on the PDP
+ * (SkyBuy-style: product price is separate from shipping).
+ */
+export function unitProductBdt(
+  p: Product,
+  qty: number,
+  fx = FX_CNY_BDT,
+): number {
+  const unitCny = tierPrice(p.price_tiers, qty);
+  const unitBdt = unitCny * fx;
+  const markupMul = 1 + (p.markup_pct ?? 25) / 100;
+  return Math.ceil(unitBdt * markupMul);
+}
 
 /** Display formatter — BDT with the ৳ symbol, no decimals. */
 export function fmtBdt(n: number): string {
