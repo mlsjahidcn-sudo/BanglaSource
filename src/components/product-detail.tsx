@@ -128,15 +128,61 @@ export function ProductDetail({ product }: { product: Product }) {
           </p>
         </div>
 
+        {/* Why buy from us — trust strip */}
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {[
+            {
+              icon: "🛡️",
+              title: "Trade-assured",
+              body: "Refund if the product doesn't match the listing.",
+            },
+            {
+              icon: "🚚",
+              title: "Door-to-door Dhaka",
+              body: "Air or sea, customs handled. You pay in BDT.",
+            },
+            {
+              icon: "💳",
+              title: "70/30 payment plan",
+              body: "Pay 70% to confirm, 30% on delivery in Dhaka.",
+            },
+          ].map((b) => (
+            <div
+              key={b.title}
+              className="rounded-lg border border-border bg-slate-50/50 p-3"
+            >
+              <p className="text-[18px] leading-none">{b.icon}</p>
+              <p className="mt-2 text-[12.5px] font-semibold">{b.title}</p>
+              <p className="mt-0.5 text-[11.5px] text-fg-muted leading-snug">
+                {b.body}
+              </p>
+            </div>
+          ))}
+        </div>
+
         {/* Bulk tier table */}
         <div className="mt-10">
-          <div className="flex items-baseline justify-between">
+          <div className="flex items-baseline justify-between flex-wrap gap-2">
             <h2 className="text-[18px] font-semibold tracking-tight">
               Bulk pricing
             </h2>
-            <p className="text-[11px] text-fg-subtle uppercase tracking-wider">
-              Factory price · ৳ BDT / pc
-            </p>
+            <div className="flex items-center gap-3 text-[11.5px] text-fg-muted">
+              {product.order_count_30d > 0 && (
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  {product.order_count_30d} ordered in last 30d
+                </span>
+              )}
+              {product.rating_overall > 0 && (
+                <span className="inline-flex items-center gap-1">
+                  <span className="text-amber-500">★</span>
+                  {product.rating_overall.toFixed(1)} rating
+                </span>
+              )}
+              <span className="uppercase tracking-wider text-fg-subtle">
+                Factory price · ৳ BDT / pc
+              </span>
+            </div>
           </div>
           <table className="table-clean mt-4">
             <thead>

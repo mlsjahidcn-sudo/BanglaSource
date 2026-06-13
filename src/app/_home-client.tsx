@@ -8,6 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { useCatalog, type CatalogProduct } from "@/lib/use-catalog";
 import { fmtCny, fmtBdt, FX_CNY_BDT, landedCost } from "@/lib/pricing";
 import { categoryList, categories, type CategoryKey } from "@/lib/categories";
+import { ForYou } from "@/components/for-you";
+import { RecentlyViewed } from "@/components/recently-viewed";
+import { NewsletterSignup } from "@/components/newsletter-signup";
+import { TrustBar } from "@/components/trust-bar";
+import { ValueProps } from "@/components/value-props";
+import { Testimonials } from "@/components/testimonials";
 
 const SLIDES: Array<{
   eyebrowKey: string;
@@ -121,30 +127,25 @@ export function HomeClient({
         </Container>
       </section>
 
-      {/* ────────────────────  VALUE STRIP  ──────────────────── */}
-      <section className="border-b border-border bg-bg">
-        <Container className="py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border border border-border rounded-lg overflow-hidden">
-            {(
-              [
-                ["home.value1.title", "home.value1.body"],
-                ["home.value2.title", "home.value2.body"],
-                ["home.value3.title", "home.value3.body"],
-                ["home.value4.title", "home.value4.body"],
-              ] as const
-            ).map(([titleKey, bodyKey]) => (
-              <div key={titleKey} className="bg-bg p-4 md:p-5">
-                <p className="text-[14px] font-semibold tracking-tight">
-                  {t(titleKey)}
-                </p>
-                <p className="mt-1 text-[12.5px] text-fg-muted">{t(bodyKey)}</p>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
+      {/* ────────────────────  RECENTLY VIEWED  ──────────────────── */}
+      {loaded && (
+        <section className="bg-bg">
+          <Container className="py-8">
+            <RecentlyViewed limit={8} />
+          </Container>
+        </section>
+      )}
 
-      {/* ──────────────────  PER-CATEGORY STRIPS  ────────────────────── */}
+      {/* ────────────────────  FOR YOU (personalized)  ──────────────────── */}
+      {loaded && (
+        <section className="bg-bg">
+          <Container className="py-10">
+            <ForYou limit={12} />
+          </Container>
+        </section>
+      )}
+
+      {/* ────────────────────  PER-CATEGORY STRIPS  ──────────────────── */}
       <section className="bg-bg">
         <Container className="py-10">
           {loaded
@@ -156,6 +157,37 @@ export function HomeClient({
                 />
               ))
             : null}
+        </Container>
+      </section>
+
+      {/* ────────────────────  TRUST BAR  ──────────────────── */}
+      <section className="bg-bg-soft border-y border-border">
+        <Container className="py-10">
+          <TrustBar
+            activeCount={syncStats.activeCount}
+            productCount={allProducts.length}
+          />
+        </Container>
+      </section>
+
+      {/* ────────────────────  VALUE PROPS  ──────────────────── */}
+      <section className="bg-bg">
+        <Container className="py-12">
+          <ValueProps />
+        </Container>
+      </section>
+
+      {/* ────────────────────  TESTIMONIALS  ──────────────────── */}
+      <section className="bg-bg">
+        <Container className="py-12">
+          <Testimonials />
+        </Container>
+      </section>
+
+      {/* ────────────────────  NEWSLETTER  ──────────────────── */}
+      <section className="bg-bg-soft border-t border-border">
+        <Container className="py-12">
+          <NewsletterSignup />
         </Container>
       </section>
     </>

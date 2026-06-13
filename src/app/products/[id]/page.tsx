@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { ProductDetail } from "@/components/product-detail";
 import { RecommendationsCarousel } from "@/components/recommendations-carousel";
+import { ForYou } from "@/components/for-you";
+import { SameFactory } from "@/components/same-factory";
 import { getCatalog, getProduct, dbProductToLegacy } from "@/lib/catalog";
 import { categories } from "@/lib/categories";
 import { FX_CNY_BDT } from "@/lib/pricing";
@@ -115,7 +117,12 @@ export default async function ProductPage({ params }: Params) {
             product as unknown as Parameters<typeof ProductDetail>[0]["product"]
           }
         />
+        <SameFactory
+          supplierName={db.supplier_name ?? ""}
+          excludeSourceId={db.source_id}
+        />
         <RecommendationsCarousel productId={db.source_id} />
+        <ForYou limit={8} title="More for you" eyebrow="Personalized" className="mt-12" />
       </Container>
     </>
   );

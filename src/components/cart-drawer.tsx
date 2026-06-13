@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
@@ -85,60 +85,63 @@ export function CartDrawer({ open, onClose }: Props) {
           ) : items.length === 0 ? (
             <Empty />
           ) : (
-            <ul className="divide-y divide-border">
-              {items.map((it) => (
-                <li key={it.productId} className="p-4 flex gap-3">
-                  <div className="relative w-20 h-20 rounded-md overflow-hidden bg-slate-50 border border-border shrink-0">
-                    <Image
-                      src={it.image}
-                      alt={it.title_en}
-                      fill
-                      sizes="80px"
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium leading-snug line-clamp-2">
-                      {it.title_en}
-                    </p>
-                    <p className="mt-1 text-[11px] text-fg-subtle font-mono tnum">
-                      {fmtBdt(Math.ceil((it.unitPriceCny / 100) * FX_CNY_BDT))} / pc · {fmtCny(it.unitPriceCny)} factory
-                    </p>
-                    <div className="mt-2 flex items-center justify-between">
-                      <div className="flex items-center border border-border rounded-md">
+            <>
+              <ul className="divide-y divide-border">
+                {items.map((it) => (
+                  <li key={it.productId} className="p-4 flex gap-3">
+                    <div className="relative w-20 h-20 rounded-md overflow-hidden bg-slate-50 border border-border shrink-0">
+                      <Image
+                        src={it.image}
+                        alt={it.title_en}
+                        fill
+                        sizes="80px"
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-medium leading-snug line-clamp-2">
+                        {it.title_en}
+                      </p>
+                      <p className="mt-1 text-[11px] text-fg-subtle font-mono tnum">
+                        {fmtBdt(Math.ceil((it.unitPriceCny / 100) * FX_CNY_BDT))} / pc · {fmtCny(it.unitPriceCny)} factory
+                      </p>
+                      <div className="mt-2 flex items-center justify-between">
+                        <div className="flex items-center border border-border rounded-md">
+                          <button
+                            onClick={() =>
+                              updateQty(it.productId, it.qty - 1)
+                            }
+                            className="w-7 h-7 text-fg-muted hover:bg-slate-50"
+                            aria-label="Decrease"
+                          >
+                            −
+                          </button>
+                          <span className="w-8 h-7 text-center text-[12px] price-tag font-medium flex items-center justify-center">
+                            {it.qty}
+                          </span>
+                          <button
+                            onClick={() =>
+                              updateQty(it.productId, it.qty + 1)
+                            }
+                            className="w-7 h-7 text-fg-muted hover:bg-slate-50"
+                            aria-label="Increase"
+                          >
+                            +
+                          </button>
+                        </div>
                         <button
-                          onClick={() =>
-                            updateQty(it.productId, it.qty - 1)
-                          }
-                          className="w-7 h-7 text-fg-muted hover:bg-slate-50"
-                          aria-label="Decrease"
+                          onClick={() => remove(it.productId)}
+                          className="text-[11px] text-fg-subtle hover:text-fg"
                         >
-                          −
-                        </button>
-                        <span className="w-8 h-7 text-center text-[12px] price-tag font-medium flex items-center justify-center">
-                          {it.qty}
-                        </span>
-                        <button
-                          onClick={() =>
-                            updateQty(it.productId, it.qty + 1)
-                          }
-                          className="w-7 h-7 text-fg-muted hover:bg-slate-50"
-                          aria-label="Increase"
-                        >
-                          +
+                          {t("cart.remove")}
                         </button>
                       </div>
-                      <button
-                        onClick={() => remove(it.productId)}
-                        className="text-[11px] text-fg-subtle hover:text-fg"
-                      >
-                        {t("cart.remove")}
-                      </button>
                     </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+              <CartCrossSell items={items} />
+            </>
           )}
         </div>
 
@@ -222,6 +225,108 @@ function Skeleton() {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+// /components/cart-drawer.tsx — CartCrossSell
+//
+// "Add to your order" cross-sell at the bottom of the cart.
+// Picks 3 popular products from the same categories already
+// in the cart, excluding any item the user already has in
+// their order list. Loads on mount, swaps as cart changes.
+
+type CrossItem = {
+  source_id: string;
+  title_en: string;
+  title_bn: string;
+  image: string;
+  price_cny_fen: number;
+};
+
+function CartCrossSell({
+  items,
+}: {
+  items: ReturnType<typeof useCart>["items"];
+}) {
+  const [suggestions, setSuggestions] = useState<CrossItem[]>([]);
+  const inCartIds = new Set(items.map((i) => i.productId));
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetch("/api/ai/cart-cross-sell", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            source_ids: items.map((i) => i.productId),
+          }),
+        });
+        if (!r.ok) return;
+        const j = (await r.json()) as { items?: CrossItem[] };
+        if (!cancelled) setSuggestions(j.items ?? []);
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [items]);
+
+  const filtered = suggestions.filter((s) => !inCartIds.has(s.source_id));
+  if (filtered.length === 0) return null;
+
+  const { add } = useCart();
+  return (
+    <div className="border-t border-border p-4 bg-bg-soft/50">
+      <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium">
+        Add to your order
+      </p>
+      <ul className="mt-2 space-y-2">
+        {filtered.slice(0, 3).map((s) => (
+          <li
+            key={s.source_id}
+            className="flex items-center gap-2 bg-bg rounded-md p-2 border border-border"
+          >
+            <div className="relative w-10 h-10 rounded overflow-hidden bg-slate-50 shrink-0">
+              {s.image && (
+                <img
+                  src={s.image}
+                  alt={s.title_en}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11.5px] font-medium leading-tight line-clamp-1">
+                {s.title_en}
+              </p>
+              <p className="text-[10px] text-fg-subtle font-mono tnum">
+                {fmtBdt(
+                  Math.ceil((s.price_cny_fen / 100) * FX_CNY_BDT),
+                )}
+              </p>
+            </div>
+            <button
+              onClick={() =>
+                add({
+                  productId: s.source_id,
+                  title_en: s.title_en,
+                  title_bn: s.title_bn,
+                  image: s.image,
+                  unitPriceCny: s.price_cny_fen,
+                  qty: 1,
+                })
+              }
+              className="text-[10.5px] font-medium text-cyan-600 hover:text-cyan-700 px-2 py-1 rounded hover:bg-cyan-50"
+            >
+              + Add
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

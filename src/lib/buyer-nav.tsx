@@ -10,6 +10,7 @@ import {
   IconSettings,
   IconRFQ,
   IconCart,
+  IconAI,
 } from "@/components/portal-icons";
 import type { NavGroup } from "@/components/portal-shell";
 
@@ -23,6 +24,7 @@ export const buyerNav = (counts: {
     label: "Overview",
     items: [
       { label: "Dashboard", href: "/buyer", icon: <IconHome />, exact: true },
+      { label: "For you", href: "/for-you", icon: <IconAI /> },
     ],
   },
   {

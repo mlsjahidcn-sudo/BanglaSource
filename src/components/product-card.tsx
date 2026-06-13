@@ -36,6 +36,16 @@ export function ProductCard({
             <Badge tone="accent">★ Verified</Badge>
           </div>
         )}
+        {/* Social proof: orders count (bottom-left) */}
+        {product.order_count_30d > 0 && (
+          <div className="absolute bottom-3 left-3">
+            <span className="px-2 py-0.5 rounded bg-bg/90 backdrop-blur-sm border border-border text-[10px] font-medium text-fg-muted">
+              {product.order_count_30d > 999
+                ? `${Math.floor(product.order_count_30d / 100) / 10}k sold`
+                : `${product.order_count_30d} sold`}
+            </span>
+          </div>
+        )}
         <div className="absolute top-3 right-3">
           <SaveButton sourceId={product.source_id} variant="icon" />
         </div>
@@ -48,8 +58,14 @@ export function ProductCard({
         </div>
 
         {!compact && (
-          <p className="mt-1.5 text-[12px] text-fg-subtle line-clamp-1">
+          <p className="mt-1.5 text-[11.5px] text-fg-subtle line-clamp-1 flex items-center gap-1">
+            <span className="inline-block w-1 h-1 rounded-full bg-emerald-500" />
             {product.supplier_city}, {product.supplier_province}
+            {product.rating_overall > 0 && (
+              <span className="ml-auto font-mono tnum">
+                ★ {product.rating_overall.toFixed(1)}
+              </span>
+            )}
           </p>
         )}
 
