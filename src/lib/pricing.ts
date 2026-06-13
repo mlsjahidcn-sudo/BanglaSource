@@ -421,9 +421,22 @@ export type LandedBreakdown = {
   quoteId: string;
   quotedAt: string;
   expiresAt: string;
-  // Payment split (70/30 importer convention)
+  // Payment split (70/30 importer convention).
+  // We track TWO splits because the buyer mental model is:
+  //   "Product price" → 70% now, 30% on delivery (this is the
+  //                       "what you pay for the goods" split)
+  //   Shipping + China Courier Charge → 100% on delivery in Dhaka
+  // (the carrier and the customs broker both want cash in hand
+  // before they release the parcel). This is how skybuybd.com and
+  // every other BD import agent actually invoice the buyer.
+  // We also keep the OLD `depositBdt`/`balanceBdt` (70/30 of the
+  // total landed) for the request-quote / PDF path.
   depositPct: number;
   balancePct: number;
+  // Product-only split (used on the PDP headline).
+  productDepositBdt: number;
+  productBalanceBdt: number;
+  // All-in split (used by the quote PDF / formal quote path).
   depositBdt: number;
   balanceBdt: number;
   // Diagnostic flags (UI shows warnings when truthy)
@@ -549,7 +562,13 @@ export function landedCost(
   const totalBdt = cifBdt + dutyBdt + vatBdt + aitBdt + markupBdt;
   const unitBdt = Math.ceil(totalBdt / qty);
 
-  // 7. Payment split (70/30 importer convention)
+  // 7. Payment split (70/30 importer convention).
+  //    productDepositBdt / productBalanceBdt = 70/30 of productBdt
+  //      (shown on the PDP as "Pay now 70%" / "Pay on delivery 30%")
+  //    depositBdt / balanceBdt = 70/30 of totalBdt
+  //      (shown on the formal PDF quote)
+  //    Both splits are inlined directly in the return object so we
+  //    don't have to repeat the computation.
   const depositBdt = Math.round(totalBdt * DEPOSIT_PCT);
   const balanceBdt = totalBdt - depositBdt;
 
@@ -606,6 +625,11 @@ export function landedCost(
     expiresAt: expires.toISOString(),
     depositPct: DEPOSIT_PCT,
     balancePct: BALANCE_PCT,
+    productDepositBdt: Math.round((cnSubtotalBdt + markupBdt) * DEPOSIT_PCT),
+    productBalanceBdt:
+      cnSubtotalBdt +
+      markupBdt -
+      Math.round((cnSubtotalBdt + markupBdt) * DEPOSIT_PCT),
     depositBdt,
     balanceBdt,
     shippingDominantPct,

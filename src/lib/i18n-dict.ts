@@ -255,6 +255,66 @@ export const dict: Dict = {
     en: "Per-piece product prices are locked at add time. Shipping, customs duty, and VAT are added when you request a quote — see the PDP for the full breakdown.",
     bn: "পণ্যের প্রতি-পিস মূল্য অ্যাড-টাইমে লক থাকে। কোটের সময় শিপিং, শুল্ক এবং ভ্যাট যোগ হবে — সম্পূর্ণ ভাঙ্গনের জন্য PDP দেখুন।",
   },
+  // ── SkyBuy-style PDP price card ──────────────────────────────────────
+  "pdp.product_price": {
+    en: "Product price",
+    bn: "পণ্যের মূল্য",
+  },
+  "pdp.per_piece": {
+    en: "/ pc",
+    bn: "/ পিস",
+  },
+  "pdp.pay_now": {
+    en: "Pay now",
+    bn: "এখনই পেমেন্ট",
+  },
+  "pdp.pay_on_delivery": {
+    en: "Pay on delivery",
+    bn: "ডেলিভারিতে পেমেন্ট",
+  },
+  "pdp.deposit_pct": {
+    en: "70%",
+    bn: "৭০%",
+  },
+  "pdp.balance_pct": {
+    en: "30%",
+    bn: "৩০%",
+  },
+  "pdp.deposit_sub": {
+    en: "on order confirm",
+    bn: "অর্ডার নিশ্চিতকরণে",
+  },
+  "pdp.balance_sub": {
+    en: "on delivery · Dhaka",
+    bn: "ডেলিভারিতে · ঢাকা",
+  },
+  "pdp.shipping_charge_label": {
+    en: "Shipping + China Courier Charge",
+    bn: "শিপিং + চায়না কুরিয়ার চার্জ",
+  },
+  "pdp.weight_card_title": {
+    en: "Approximate weight",
+    bn: "আনুমানিক ওজন",
+  },
+  "pdp.shipping_label_bn": {
+    en: "Shipping charge",
+    bn: "শিপিং চার্জ",
+  },
+  "pdp.shipping_rate": {
+    en: "{min} / {max} Per Kg",
+    bn: "{min} / {max} প্রতি কেজি",
+  },
+  "pdp.details": {
+    en: "Details",
+    bn: "বিস্তারিত",
+  },
+  "pdp.customs_disclaimer": {
+    // Disclaimer below the weight card. Key: framing customs as a
+    // national duty the buyer pays directly to Bangladesh — not
+    // a fee BanglaSource pockets. This matches SkyBuy's text.
+    en: "*** Customs duty is a national duty, not our service fee! Pay the customs duty on your imported goods directly to Bangladesh. ***",
+    bn: "*** উল্লেখিত পণ্যের ওজন সম্পূর্ণ সঠিক নয়, আনুমানিক মাত্র। বাংলাদেশে আসার পর পণ্যটির প্রকৃত ওজন মেপে শিপিং চার্জ হিসাব করা হবে। ***",
+  },
   "cart.view_all": { en: "View full list", bn: "সম্পূর্ণ তালিকা" },
   "cart.request_quote": { en: "Request quote", bn: "কোট চান" },
   "cart.empty.title": { en: "Your order list is empty", bn: "আপনার অর্ডার তালিকা খালি" },

@@ -8,13 +8,13 @@ import {
   fmtCny,
   fmtKg,
   fmtCbm,
-  classLabel,
   type Product,
   type ShippingMode,
   type LandedBreakdown,
 } from "@/lib/pricing";
 import { useCart } from "@/lib/cart";
 import { SaveButton } from "@/components/save-button";
+import { useLang } from "@/lib/i18n";
 
 const BADGE_LABEL: Record<string, { en: string; bn: string }> = {
   verified_factory: { en: "Verified factory", bn: "যাচাইকৃত কারখানা" },
@@ -37,6 +37,7 @@ export function ProductDetail({ product }: { product: Product }) {
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const { add } = useCart();
+  const { t } = useLang();
 
   // Fetch real quote from API whenever qty/mode change (debounced)
   useEffect(() => {
@@ -378,86 +379,115 @@ export function ProductDetail({ product }: { product: Product }) {
 
             <div className="mt-5 hr" />
 
-            {/* ── Price card ────────────────────────────────────────────
-                SkyBuy-style two-line layout:
-                  Product price  = supplier cost + our markup (profit)
-                  + Shipping & delivery = CN first-mile + int'l freight
-                                         + customs duty + VAT + AIT
-                  = Total
-                A "See breakdown" disclosure expands the shipping line
-                into its underlying components (FOB / shipping tier /
-                customs class / VAT). Buyers see one clean number; the
-                audit trail is one click away.
+            {/* ── SkyBuy-style PDP price card ────────────────────────────
+                User's reference: skybuybd.com's PDP layout.
+                Shows three things in the default view:
+                  1. Product price (= supplier FOB × (1 + markup%))
+                  2. Pay now 70%   (deposit, on order confirm)
+                  3. Pay on delivery 30%   (balance, settled in Dhaka)
+                     + "Shipping + China Courier Charge" hint label
+                The full landed breakdown (intl shipping tier, customs
+                class, VAT, AIT) is hidden behind a "Details" link in
+                the weight card — same UX as the reference.
             ─────────────────────────────────────────────────────────── */}
             <div>
-              <div className="flex items-baseline justify-between">
-                <p className="text-[11px] text-emerald-700 uppercase tracking-wider font-semibold">
-                  Pricing for {qty} piece{qty > 1 ? "s" : ""}
-                </p>
-                {quoteLoading && (
-                  <span className="text-[10.5px] text-fg-subtle">
-                    recalculating…
-                  </span>
-                )}
-              </div>
-
-              {quote && quote.warnings.length > 0 && (
-                <div className="mt-3 space-y-1.5">
-                  {quote.warnings.map((w, i) => (
-                    <p
-                      key={i}
-                      className="text-[11.5px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-2.5"
-                    >
-                      {w}
-                    </p>
-                  ))}
+              {quoteLoading && !lc && (
+                <div className="space-y-2 animate-pulse">
+                  <div className="h-5 bg-slate-100 rounded w-full" />
+                  <div className="h-4 bg-slate-100 rounded w-4/5" />
+                  <div className="h-4 bg-slate-100 rounded w-4/5" />
                 </div>
               )}
 
-              {lc ? (
-                <div className="mt-4 space-y-2.5">
-                  {/* ── Line 1: Product price (our markup on supplier FOB) ── */}
-                  <div className="flex items-end justify-between">
-                    <div>
-                      <p className="text-[12.5px] text-fg-muted">
-                        Product price
-                      </p>
-                      <p className="text-[10.5px] text-fg-subtle mt-0.5">
-                        {fmtBdt(Math.round(lc.cnSubtotalBdt / qty))} factory
-                        {lc.markupPct > 0 && (
-                          <> · +{lc.markupPct}% margin</>
-                        )}{" "}
-                        = {fmtBdt(Math.ceil((lc.cnSubtotalBdt / qty) * (1 + lc.markupPct/100)))} / pc
-                      </p>
-                    </div>
+              {lc && (
+                <div className="space-y-3">
+                  {/* ── Line 1: Product price (qty × per-piece product price) ── */}
+                  <div className="flex items-baseline justify-between border-b border-border pb-3">
+                    <p className="text-[13px] font-semibold text-fg-muted uppercase tracking-wider">
+                      {t("pdp.product_price")}
+                    </p>
                     <p className="price-tag text-[20px] font-semibold text-fg">
                       {fmtBdt(lc.productBdt)}
                     </p>
                   </div>
 
-                  {/* ── Line 2: Shipping & delivery (grouped) ── */}
-                  <div className="flex items-end justify-between pt-2 border-t border-border">
-                    <div className="flex-1 min-w-0">
+                  {/* ── Line 2: Pay now 70% (deposit on order confirm) ──
+                       Pay now is computed on the PRODUCT PRICE only, not
+                       the all-in landed total. SkyBuy convention: the
+                       deposit covers the goods, shipping/customs is paid
+                       on delivery in Dhaka to the courier. */}
+                  <div className="flex items-center justify-between">
+                    <p className="text-[13px] text-fg-muted">
+                      {t("pdp.pay_now")}{" "}
+                      <span className="ml-1 px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10.5px] font-semibold uppercase tracking-wider">
+                        {t("pdp.deposit_pct")}
+                      </span>
+                    </p>
+                    <p className="price-tag font-semibold text-fg text-[16px]">
+                      {fmtBdt(lc.productDepositBdt)}
+                    </p>
+                  </div>
+
+                  {/* ── Line 3: Pay on delivery 30% (product balance) ──
+                       The "+ Shipping + China Courier Charge" hint below
+                       tells the buyer the rest of the cost (shipping +
+                       customs + VAT) is settled when the goods arrive in
+                       Dhaka. The exact number is the product balance
+                       only — shipping isn't added to this number. */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex flex-col">
+                      <p className="text-[13px] text-fg-muted">
+                        {t("pdp.pay_on_delivery")}{" "}
+                        <span className="ml-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10.5px] font-semibold uppercase tracking-wider">
+                          {t("pdp.balance_pct")}
+                        </span>
+                      </p>
+                      <p className="mt-1 text-[12px] text-cyan-700 font-medium">
+                        + {t("pdp.shipping_charge_label")}
+                      </p>
+                    </div>
+                    <p className="price-tag font-semibold text-fg text-[16px] whitespace-nowrap">
+                      {fmtBdt(lc.productBalanceBdt)}
+                    </p>
+                  </div>
+
+                  {/* ── Weight + per-kg hint card (skyblue dashed, like skybuybd) ── */}
+                  {lc.rateTier && (
+                    <div className="mt-2 p-3 rounded-md border-2 border-dashed border-cyan-300 bg-cyan-50/40">
                       <div className="flex items-center gap-2">
-                        <p className="text-[12.5px] text-fg-muted">
-                          + Shipping &amp; delivery
+                        <span aria-hidden="true" className="text-amber-600">
+                          🔒
+                        </span>
+                        <p className="text-[12.5px] font-semibold text-amber-700">
+                          {t("pdp.weight_card_title")}: {fmtKg(lc.chargeableKg)}
+                        </p>
+                      </div>
+                      <div className="mt-2 flex items-center justify-between">
+                        <p className="text-[14px] font-semibold text-fg">
+                          {t("pdp.shipping_label_bn")}
                         </p>
                         <button
                           type="button"
                           onClick={() => setShowBreakdown((s) => !s)}
-                          className="text-[10.5px] text-cyan-700 hover:text-cyan-900 underline-offset-2 hover:underline"
+                          className="text-[11.5px] text-cyan-700 hover:text-cyan-900 underline underline-offset-2 font-medium"
                           aria-expanded={showBreakdown}
                         >
-                          {showBreakdown ? "Hide details" : "See breakdown"}
+                          {showBreakdown ? "✕" : t("pdp.details")}
                         </button>
                       </div>
-                      <p className="text-[10.5px] text-fg-subtle mt-0.5">
-                        {modeLabelFor(mode)} · {fmtKg(lc.chargeableKg)} · transit {lc.transitDays}
+                      <p className="mt-1 text-[13px] font-semibold text-cyan-700">
+                        {t("pdp.shipping_rate", {
+                          // Show the range from the worst-case tier (currently
+                          // active, e.g. small-parcel ৳1,348/kg) down to the
+                          // best-case tier (50kg+ at ৳421/kg). This mirrors
+                          // skybuybd's "৳750 / ৳1,150 Per Kg" hint and gives
+                          // the buyer a concrete incentive to order more.
+                          min: `৳${lc.rateTier.rateBdtPerKg.toLocaleString()}`,
+                          max: "৳421",
+                        })}
                       </p>
-
-                      {/* Expanded breakdown — only when the buyer clicks */}
                       {showBreakdown && (
-                        <dl className="mt-2 ml-1 space-y-1 text-[11.5px] text-fg-muted border-l-2 border-slate-200 pl-2.5">
+                        <dl className="mt-3 pt-3 border-t border-cyan-300 space-y-1.5 text-[12px] text-fg-muted">
                           <BreakdownRow
                             label="Factory FOB (CN)"
                             value={fmtBdt(lc.cnSubtotalBdt)}
@@ -481,16 +511,13 @@ export function ProductDetail({ product }: { product: Product }) {
                           />
                           <BreakdownRow
                             label="CN first-mile + sourcing agent"
-                            value={fmtBdt(lc.cnDomesticBdt + lc.agentBdt + lc.consolBdt)}
+                            value={fmtBdt(
+                              lc.cnDomesticBdt + lc.agentBdt + lc.consolBdt,
+                            )}
                           />
                           <BreakdownRow
-                            label={`Customs ৳${lc.dutyPerKg.toLocaleString()}/kg`}
+                            label={`Customs ৳${lc.dutyPerKg.toLocaleString()}/kg (${classLabelStatic(lc.dutyClass)})`}
                             value={fmtBdt(lc.dutyBdt)}
-                            sub={
-                              lc.dutyClass
-                                ? `${classLabel(lc.dutyClass)} · ${lc.chargeableKg.toFixed(2)} kg chargeable`
-                                : undefined
-                            }
                           />
                           <BreakdownRow
                             label="VAT 15% (CIF + duty)"
@@ -500,87 +527,40 @@ export function ProductDetail({ product }: { product: Product }) {
                             label="AIT 5% (CIF)"
                             value={fmtBdt(lc.aitBdt)}
                           />
+                          <div className="pt-2 mt-2 border-t border-cyan-300 flex justify-between font-semibold text-fg">
+                            <dt>Total landed in Dhaka</dt>
+                            <dd className="price-tag">{fmtBdt(lc.totalBdt)}</dd>
+                          </div>
                         </dl>
                       )}
                     </div>
-                    <p className="price-tag text-[20px] font-semibold text-fg whitespace-nowrap pl-3">
-                      {fmtBdt(lc.deliveryBdt)}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-4 space-y-2 animate-pulse">
-                  <div className="h-4 bg-slate-100 rounded w-full" />
-                  <div className="h-4 bg-slate-100 rounded w-4/5" />
+                  )}
+
+                  {/* ── Bengali disclaimer: customs is a national duty ── */}
+                  <p className="mt-3 text-[11.5px] leading-relaxed text-rose-600 font-medium">
+                    {t("pdp.customs_disclaimer")}
+                  </p>
+
+                  {/* Quote ID footer (audit trail) */}
+                  <p className="mt-1 text-[10.5px] text-fg-subtle font-mono tnum">
+                    Quote {lc.quoteId} · {qty} {qty > 1 ? "pcs" : "pc"} ·{" "}
+                    {t("pdp.balance_sub")} · valid until{" "}
+                    {new Date(lc.expiresAt).toLocaleDateString()}
+                  </p>
                 </div>
               )}
 
-              {lc && (
-                <div className="mt-5 pt-5 border-t-2 border-border-strong">
-                  <div className="flex items-end justify-between">
-                    <div>
-                      <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-semibold">
-                        Total
-                      </p>
-                      <p className="price-tag text-[28px] font-semibold mt-0.5 text-fg">
-                        {fmtBdt(lc.totalBdt)}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[11px] text-fg-subtle uppercase tracking-wider">
-                        Per piece
-                      </p>
-                      <p className="price-tag text-[18px] font-medium mt-0.5 text-fg-muted">
-                        {fmtBdt(lc.unitBdt)}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Payment split: 70% deposit, 30% on delivery */}
-                  <div className="mt-4 p-3 bg-slate-50 border border-border rounded-md">
-                    <p className="text-[10.5px] uppercase tracking-wider font-semibold text-fg-muted">
-                      Payment plan
+              {/* Warnings (small-parcel premium, shipping-dominant, etc.) */}
+              {quote && quote.warnings.length > 0 && (
+                <div className="mt-3 space-y-1.5">
+                  {quote.warnings.map((w, i) => (
+                    <p
+                      key={i}
+                      className="text-[11.5px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-2.5"
+                    >
+                      {w}
                     </p>
-                    <div className="mt-2 grid grid-cols-2 gap-3 text-[12.5px]">
-                      <div>
-                        <p className="text-fg-muted text-[11px]">
-                          70% deposit
-                        </p>
-                        <p className="price-tag font-semibold text-fg text-[15px] mt-0.5">
-                          {fmtBdt(lc.depositBdt)}
-                        </p>
-                        <p className="text-[10.5px] text-fg-subtle mt-0.5">
-                          on order confirm
-                        </p>
-                      </div>
-                      <div className="border-l border-border pl-3">
-                        <p className="text-fg-muted text-[11px]">
-                          30% balance
-                        </p>
-                        <p className="price-tag font-semibold text-fg text-[15px] mt-0.5">
-                          {fmtBdt(lc.balanceBdt)}
-                        </p>
-                        <p className="text-[10.5px] text-fg-subtle mt-0.5">
-                          on delivery · Dhaka
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-2.5 h-1.5 bg-slate-200 rounded-full overflow-hidden flex">
-                      <div
-                        className="h-full bg-emerald-500"
-                        style={{ width: `${(lc.depositPct ?? 0.7) * 100}%` }}
-                      />
-                      <div
-                        className="h-full bg-amber-500"
-                        style={{ width: `${(lc.balancePct ?? 0.3) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <p className="mt-2 text-[10.5px] text-fg-subtle font-mono tnum">
-                    Quote {lc.quoteId} · valid until{" "}
-                    {new Date(lc.expiresAt).toLocaleDateString()}
-                  </p>
+                  ))}
                 </div>
               )}
             </div>
@@ -703,4 +683,27 @@ function modeLabelFor(mode: ShippingMode): string {
   if (mode === "air") return "Air freight";
   if (mode === "express") return "Express (DHL/FedEx)";
   return "Sea LCL";
+}
+
+/** Local copy of the customs class label. Kept here because the
+ * inline breakdown uses it only inside the modal; for the default
+ * PDP view we want the short English label so buyers don't have
+ * to expand the details. */
+function classLabelStatic(slug: string): string {
+  const map: Record<string, string> = {
+    "cat-a": "Category A (general)",
+    "cat-b": "Category B (battery / restricted)",
+    "cat-c-high": "Category C (high-specific)",
+    "cat-b-or-c": "Category B/C",
+    "sunglasses-c": "Sunglasses (high specific)",
+    "smart-watch-c": "Smart watch",
+    "bluetooth-c": "Bluetooth headphone",
+    "regular-watch-c": "Regular watch",
+    "liquid-cosmetic-c": "Liquid cosmetics",
+    "powder-c": "Powder",
+    "beauty-electronics-b": "Battery grooming tool",
+    "power-bank-c": "Power bank",
+    "cctv-c": "CCTV camera",
+  };
+  return map[slug] ?? slug;
 }

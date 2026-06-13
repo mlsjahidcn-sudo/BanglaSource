@@ -394,5 +394,49 @@ check(
   ] }, 100) === 232,
 );
 
+// SkyBuy-style product-only 70/30 split (used on the PDP headline).
+// Pay now 70% / Pay on delivery 30% are computed on `productBdt` only —
+// shipping + customs are settled on delivery in Dhaka to the courier.
+// The legacy `depositBdt`/`balanceBdt` (70/30 of total) is still kept
+// for the formal PDF quote path.
+const handProduct: Parameters<typeof landedCost>[0] = {
+  source_id: "x", title_zh: "", title_en: "", title_bn: "",
+  category: "eyewear", price_min_cny: 13, price_max_cny: 13,
+  factory_moq: 1,
+  price_tiers: [{ qty_min: 1, qty_max: 9999, price_cny_fen: 1300 }],
+  weight_kg: 0.05, volume_cbm: 0.0005,
+  supplier_name: "", supplier_province: "", supplier_city: "",
+  stock_total: 0, order_count_30d: 0, rating_overall: 0,
+  badges: [], images: [], description_en: "", description_bn: "",
+  source_url: "", markup_pct: 25, customs_duty_per_kg: 3500,
+  customs_duty_class: "sunglasses-c",
+};
+const hand2 = landedCost(handProduct, 2, "air");
+check(
+  "Hand test: productDepositBdt = round(productBdt × 0.70)",
+  hand2.productDepositBdt === Math.round(hand2.productBdt * 0.7),
+);
+check(
+  "Hand test: productBalanceBdt = productBdt − productDepositBdt",
+  hand2.productBalanceBdt === hand2.productBdt - hand2.productDepositBdt,
+);
+check(
+  "Hand test: productDepositBdt + productBalanceBdt == productBdt (no rounding loss)",
+  hand2.productDepositBdt + hand2.productBalanceBdt === hand2.productBdt,
+);
+check(
+  "Hand test: productDepositBdt is for PRODUCT only — well under depositBdt (all-in)",
+  hand2.productDepositBdt < hand2.depositBdt,
+  `productDeposit=৳${hand2.productDepositBdt} vs all-in deposit=৳${hand2.depositBdt}`,
+);
+check(
+  "Hand test: depositBdt + balanceBdt == totalBdt (legacy split still adds up)",
+  hand2.depositBdt + hand2.balanceBdt === hand2.totalBdt,
+);
+check(
+  "Hand test: depositPct / balancePct are 0.7 / 0.3 (not changed by split math)",
+  hand2.depositPct === 0.7 && hand2.balancePct === 0.3,
+);
+
 console.log(`\n=== ${pass} passed, ${fail} failed ===\n`);
 if (fail > 0) process.exit(1);
