@@ -200,3 +200,26 @@ export const IconImport = ({ size = 16, className }: IconProps) =>
     </>,
     className,
   );
+
+// Camera / image — used by /admin/images
+export const IconImage = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <>
+      <path d="M2 4.5A1.5 1.5 0 013.5 3h9A1.5 1.5 0 0114 4.5v7a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 11.5v-7z" />
+      <path d="M2 11l3-3 3 3 2-2 4 4" />
+      <circle cx="5.5" cy="6.5" r="1" />
+    </>,
+    className,
+  );
+
+// Plus in a square — used by /admin/products/new
+export const IconPlus = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <>
+      <rect x="2.5" y="2.5" width="11" height="11" rx="1.5" />
+      <path d="M8 5.5v5M5.5 8h5" />
+    </>,
+    className,
+  );

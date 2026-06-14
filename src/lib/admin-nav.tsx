@@ -13,6 +13,8 @@ import {
   IconPackage,
   IconAI,
   IconImport,
+  IconImage,
+  IconPlus,
 } from "@/components/portal-icons";
 import type { NavGroup } from "@/components/portal-shell";
 
@@ -51,9 +53,19 @@ export const adminNav = (counts: {
         badge: counts.products,
       },
       {
+        label: "Add product",
+        href: "/admin/products/new",
+        icon: <IconPlus />,
+      },
+      {
         label: "Import",
         href: "/admin/import",
         icon: <IconImport />,
+      },
+      {
+        label: "Image agent",
+        href: "/admin/images",
+        icon: <IconImage />,
       },
       {
         label: "Discoveries",
