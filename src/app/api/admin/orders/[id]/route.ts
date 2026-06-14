@@ -176,5 +176,25 @@ export async function PATCH(
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
+  // Phase 18: fire-and-forget email when admin moves an order to
+  // a buyer-visible state (in_transit, delivered). Skipped for
+  // silent admin-only transitions (cancelled, paid-by-admin in
+  // some flows — paid is sent via /api/orders/[id]/paid only on
+  // the buyer self-mark path, since the admin's "I confirmed
+  // payment in the bank app" path is internal). notifyOrderStatus
+  // Change is a no-op for status values it doesn't care about.
+  if (patch.status === "in_transit" || patch.status === "delivered") {
+    void import("@/lib/email").then(({ notifyOrderStatusChange }) =>
+      notifyOrderStatusChange(
+        orderId,
+        patch.status as "in_transit" | "delivered",
+        patch.tracking_number ?? updated.tracking_number ?? null,
+      ).catch((e) => {
+        // eslint-disable-next-line no-console
+        console.error("[admin.orders] notifyOrderStatusChange failed:", e);
+      }),
+    );
+  }
+
   return NextResponse.json({ ok: true, order: updated });
 }

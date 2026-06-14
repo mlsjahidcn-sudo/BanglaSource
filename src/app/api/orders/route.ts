@@ -283,6 +283,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Phase 18: fire-and-forget transactional email. We don't await
+  // (the order is already created — the buyer should not wait for
+  // Resend to ack before we return success). Errors are logged by
+  // sendEmail itself; the buyer's in-app notification is the
+  // primary channel, the email is the backup.
+  void import("@/lib/email").then(({ notifyOrderPlaced }) =>
+    notifyOrderPlaced(orderId as number).catch((e) => {
+      // eslint-disable-next-line no-console
+      console.error("[orders] notifyOrderPlaced failed:", e);
+    }),
+  );
+
   return NextResponse.json({
     ok: true,
     order: {

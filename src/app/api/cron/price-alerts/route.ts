@@ -278,15 +278,28 @@ export async function POST(req: NextRequest) {
               }
             }
             emailsQueued = emailPayloads.length;
-            // In dev, log would-send emails. In prod, this is where
-            // Resend/Postmark would go.
-            if (process.env.NODE_ENV !== "production") {
-              for (const e of emailPayloads) {
+            // Phase 18: send the emails via Resend. sendEmail falls
+            // back to console.log in dev when RESEND_API_KEY is not
+            // set, so the same code path works in dev and prod.
+            // Fire-and-forget — the in-app notification is the
+            // primary channel; the email is the backup.
+            if (emailPayloads.length > 0) {
+              void import("@/lib/email").then(async ({ sendEmail }) => {
+                for (const e of emailPayloads) {
+                  await sendEmail({
+                    to: e.to,
+                    subject: e.subject,
+                    text: e.body,
+                    tags: [
+                      { name: "type", value: "price_alert" },
+                      { name: "source_id", value: e.source_id },
+                    ],
+                  });
+                }
+              }).catch((err) => {
                 // eslint-disable-next-line no-console
-                console.log(
-                  `[price-alerts] would-send → ${e.to}: ${e.subject}`,
-                );
-              }
+                console.error("[price-alerts] sendEmail failed:", err);
+              });
             }
           }
         }

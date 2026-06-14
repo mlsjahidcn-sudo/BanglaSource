@@ -70,5 +70,14 @@ export async function POST(
       { status: 409 },
     );
   }
+
+  // Phase 18: fire-and-forget email — buyer self-marked paid.
+  void import("@/lib/email").then(({ notifyOrderPaid }) =>
+    notifyOrderPaid(orderId).catch((e) => {
+      // eslint-disable-next-line no-console
+      console.error("[orders.paid] notifyOrderPaid failed:", e);
+    }),
+  );
+
   return NextResponse.json({ ok: true, order: data });
 }
