@@ -11,6 +11,7 @@
 //      bucket and creates the product + price_tiers rows.
 
 import { useState } from "react";
+import { AdminPage, AdminPageHeader } from "@/components/admin-page";
 
 type Source = "pinduoduo" | "taobao";
 
@@ -241,23 +242,14 @@ export function ImportClient() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl space-y-6">
+    <AdminPage size="default" className="space-y-6">
       {/* Header */}
-      <div>
-        <p className="text-[12px] font-medium tracking-wider uppercase text-fg-subtle">
-          Catalog
-        </p>
-        <h1 className="mt-2 text-[32px] md:text-[40px] leading-[1.05] font-semibold tracking-[-0.02em]">
-          Import from Pinduoduo / Taobao
-        </h1>
-        <p className="mt-3 text-[14px] text-fg-muted max-w-2xl">
-          Paste a product URL from pinduoduo.com, yangkeduo.com,
-          temu.com, taobao.com, or tmall.com. We&apos;ll scrape the
-          title, description, and images, you fill in the factory FOB
-          and category, and we create the product row + upload the
-          images to your storage bucket.
-        </p>
-      </div>
+      <AdminPageHeader
+        eyebrow="Catalog"
+        title="Import from Pinduoduo / Taobao"
+        dotColor="emerald"
+        subtitle="Paste a product URL from pinduoduo.com, yangkeduo.com, temu.com, taobao.com, or tmall.com. We'll scrape the title, description, and images, you fill in the factory FOB and category, and we create the product row + upload the images to your storage bucket."
+      />
 
       {/* ── Step 1: URL input ── */}
       <section className="card p-6">
@@ -1048,7 +1040,7 @@ export function ImportClient() {
           font-family: var(--font-sans);
         }
       `}</style>
-    </div>
+    </AdminPage>
   );
 }
 

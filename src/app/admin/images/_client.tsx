@@ -22,6 +22,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { AdminPage, AdminPageHeader } from "@/components/admin-page";
 
 type ProductSummary = {
   id: number;
@@ -190,15 +191,13 @@ export function ImageAgentClient({
   }
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <header>
-        <h1 className="text-[20px] font-semibold">Image agent</h1>
-        <p className="mt-1 text-[12.5px] text-fg-muted">
-          Generate clean, watermark-free, white-background product shots via
-          GPT Image 2. Pick any active product, describe the shot you want,
-          and add the result to the listing.
-        </p>
-      </header>
+    <AdminPage size="narrow">
+      <AdminPageHeader
+        eyebrow="Catalog"
+        title="Image agent"
+        dotColor="cyan"
+        subtitle="Generate clean, watermark-free, white-background product shots via GPT Image 2. Pick any active product, describe the shot you want, and add the result to the listing."
+      />
 
       {/* ── 1. Product picker ── */}
       <section className="card p-6">
@@ -606,7 +605,7 @@ export function ImageAgentClient({
           font-family: -apple-system, system-ui;
         }
       `}</style>
-    </div>
+    </AdminPage>
   );
 }
 

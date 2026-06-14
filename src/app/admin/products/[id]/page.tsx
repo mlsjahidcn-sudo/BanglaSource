@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getServiceRoleClient } from "@/lib/supabase/server";
+import { AdminPage } from "@/components/admin-page";
 import {
   FX_CNY_BDT,
   DEFAULT_BUYER_MARKUP_PCT,
@@ -137,7 +138,7 @@ export default async function AdminProductPage({
   const aiEnabled = Boolean(process.env.DEEPSEEK_API_KEY);
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl">
+    <AdminPage>
       <div className="mb-3 text-[12px] text-fg-subtle font-mono tnum">
         <Link href="/admin/sync" className="hover:text-fg">
           admin
@@ -417,7 +418,7 @@ export default async function AdminProductPage({
           </div>
         </section>
       )}
-    </div>
+    </AdminPage>
   );
 }
 

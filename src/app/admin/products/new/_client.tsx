@@ -19,6 +19,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/catalog-categories";
+import { AdminPage, AdminPageHeader } from "@/components/admin-page";
 
 export function ManualProductClient() {
   const [sourceId, setSourceId] = useState("");
@@ -118,14 +119,13 @@ export function ManualProductClient() {
 
   if (created) {
     return (
-      <div className="space-y-6 max-w-3xl">
-        <header>
-          <h1 className="text-[20px] font-semibold">Product created</h1>
-          <p className="mt-1 text-[12.5px] text-fg-muted">
-            Now live in the catalog. You can fine-tune the markup, factory
-            FOB, image order, and price tiers in the editor.
-          </p>
-        </header>
+      <AdminPage size="narrow">
+        <AdminPageHeader
+          eyebrow="Catalog"
+          title="Product created"
+          dotColor="emerald"
+          subtitle="Now live in the catalog. You can fine-tune the markup, factory FOB, image order, and price tiers in the editor."
+        />
         <section className="card p-6">
           <p className="text-[13px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
             ✓ Created product #{created.id} (source_id=
@@ -176,27 +176,31 @@ export function ManualProductClient() {
             </button>
           </div>
         </section>
-      </div>
-    );
+      </AdminPage>
+  );
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <header>
-        <h1 className="text-[20px] font-semibold">Add product manually</h1>
-        <p className="mt-1 text-[12.5px] text-fg-muted">
-          Paste title, description, factory FOB, supplier, and a list of
-          image URLs. No URL scrape — use{" "}
-          <Link href="/admin/import" className="text-cyan-700 underline">
-            Import
-          </Link>{" "}
-          for Pinduoduo / Taobao. Use{" "}
-          <Link href="/admin/images" className="text-cyan-700 underline">
-            Image agent
-          </Link>{" "}
-          to AI-generate website shots after the product is saved.
-        </p>
-      </header>
+    <AdminPage size="narrow">
+      <AdminPageHeader
+        eyebrow="Catalog"
+        title="Add product manually"
+        dotColor="emerald"
+        subtitle={
+          <>
+            Paste title, description, factory FOB, supplier, and a list of
+            image URLs. No URL scrape — use{" "}
+            <Link href="/admin/import" className="text-cyan-700 underline">
+              Import
+            </Link>{" "}
+            for Pinduoduo / Taobao. Use{" "}
+            <Link href="/admin/images" className="text-cyan-700 underline">
+              Image agent
+            </Link>{" "}
+            to AI-generate website shots after the product is saved.
+          </>
+        }
+      />
 
       <section className="card p-6 space-y-4">
         <Field
@@ -487,7 +491,7 @@ https://example.com/photo-3.webp"
           font-variant-numeric: tabular-nums;
         }
       `}</style>
-    </div>
+    </AdminPage>
   );
 }
 

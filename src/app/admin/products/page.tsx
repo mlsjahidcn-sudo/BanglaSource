@@ -5,6 +5,7 @@ import {
   FX_CNY_BDT,
   effectiveMarkupPct,
 } from "@/lib/pricing";
+import { AdminPage, AdminPageHeader } from "@/components/admin-page";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -82,23 +83,19 @@ export default async function AdminProductsIndex() {
     byCategory.set(p.category, arr);
   }
   return (
-    <div className="p-6 md:p-8 max-w-[1800px]">
-      <div className="mb-8">
-        <div className="flex items-end gap-3">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mb-3" />
-          <p className="text-[12px] font-medium tracking-wider uppercase text-emerald-700">
-            Catalog
-          </p>
-        </div>
-        <h1 className="mt-3 text-[32px] md:text-[40px] leading-[1.05] font-semibold tracking-[-0.02em]">
-          Products
-        </h1>
-        <p className="mt-3 text-[14px] text-fg-muted">
-          {products.length} products across {byCategory.size} categories. The
-          Factory and After-markup columns are the real FOB (¥) and the
-          buyer-facing product price (৳); Markup % is editable per-product.
-        </p>
-      </div>
+    <AdminPage size="wide">
+      <AdminPageHeader
+        eyebrow="Catalog"
+        title="Products"
+        dotColor="emerald"
+        subtitle={
+          <>
+            {products.length} products across {byCategory.size} categories. The
+            Factory and After-markup columns are the real FOB (¥) and the
+            buyer-facing product price (৳); Markup % is editable per-product.
+          </>
+        }
+      />
 
       <div className="space-y-8">
         {Array.from(byCategory.entries()).map(([cat, items]) => (
@@ -235,6 +232,6 @@ export default async function AdminProductsIndex() {
           </section>
         ))}
       </div>
-    </div>
+    </AdminPage>
   );
 }
