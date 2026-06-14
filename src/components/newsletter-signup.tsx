@@ -1,13 +1,16 @@
 "use client";
 // /components/newsletter-signup.tsx
 //
-// Email capture for the "best weekly deals" newsletter. We don't
-// have email infra yet, so the form posts to a public route
-// that just stores the email in a `newsletter_subscribers`
-// table. The admin can later pipe this to Resend/Postmark.
+// Phase 20: email capture for the "best weekly deals" newsletter.
+// Double opt-in flow (the gold standard for deliverability):
+//   1. User pastes email + clicks Subscribe.
+//   2. /api/newsletter/subscribe stores the email with a fresh
+//      confirm_token and emails a one-click confirmation link.
+//   3. User clicks → /api/newsletter/confirm flips confirmed_at.
+//   4. Only confirmed rows are eligible for the weekly campaign.
 //
-// For now: lead-capture only. No double-opt-in, no welcome
-// email — those are a follow-up phase.
+// The success message tells the user to check their inbox —
+// this is the whole point of the double opt-in.
 
 import { useState } from "react";
 
@@ -37,8 +40,10 @@ export function NewsletterSignup() {
         const j = await r.json().catch(() => ({}));
         throw new Error(j.error ?? "Could not subscribe right now.");
       }
+      // Keep the email visible in the success card so the user
+      // knows which inbox to check. They can clear it manually
+      // by typing a new one.
       setStatus("ok");
-      setEmail("");
     } catch (e) {
       setStatus("error");
       setError((e as Error).message);
@@ -79,11 +84,11 @@ export function NewsletterSignup() {
         {status === "ok" ? (
           <div className="card p-6 bg-emerald-50/40 border-emerald-200">
             <p className="text-[14px] font-medium text-emerald-700">
-              You're subscribed.
+              Check your inbox to confirm.
             </p>
             <p className="mt-1 text-[12.5px] text-fg-muted">
-              The next digest goes out Sunday at 9am Dhaka time. Check
-              your inbox.
+              We sent a confirmation link to <span className="font-mono">{email || "your email"}</span>.
+              One click and you're in. (Check spam if it's not there in 2 minutes.)
             </p>
           </div>
         ) : (

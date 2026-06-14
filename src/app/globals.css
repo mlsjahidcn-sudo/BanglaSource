@@ -1,26 +1,195 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   Design tokens — Slate + Emerald, B2B conservative
+   No dark mode (this is a B2B operator site; light-only keeps it trustworthy)
+   ========================================================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Neutrals — slate scale */
+  --slate-50:  #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+
+  /* Accent — emerald */
+  --emerald-50:  #ecfdf5;
+  --emerald-100: #d1fae5;
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+
+  /* Status */
+  --amber-50:  #fffbeb;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --red-50:    #fef2f2;
+  --red-600:   #dc2626;
+
+  /* Surface */
+  --bg:        #ffffff;
+  --bg-soft:   var(--slate-50);
+  --bg-muted:  var(--slate-100);
+  --border:    var(--slate-200);
+  --border-strong: var(--slate-300);
+  --fg:        var(--slate-900);
+  --fg-muted:  var(--slate-600);
+  --fg-subtle: var(--slate-500);
+  --accent:    var(--emerald-600);
+  --accent-fg: #ffffff;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg:         var(--bg);
+  --color-bg-soft:    var(--bg-soft);
+  --color-bg-muted:   var(--bg-muted);
+  --color-border:     var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg:         var(--fg);
+  --color-fg-muted:   var(--fg-muted);
+  --color-fg-subtle:  var(--fg-subtle);
+  --color-accent:     var(--accent);
+  --color-accent-fg:  var(--accent-fg);
+  --color-emerald-50:  var(--emerald-50);
+  --color-emerald-100: var(--emerald-100);
+  --color-emerald-500: var(--emerald-500);
+  --color-emerald-600: var(--emerald-600);
+  --color-emerald-700: var(--emerald-700);
+  --color-amber-50:    var(--amber-50);
+  --color-amber-500:   var(--amber-500);
+  --color-amber-600:   var(--amber-600);
+  --color-red-50:      var(--red-50);
+  --color-red-600:     var(--red-600);
+  --color-slate-50:    var(--slate-50);
+  --color-slate-100:   var(--slate-100);
+  --color-slate-200:   var(--slate-200);
+  --color-slate-300:   var(--slate-300);
+  --color-slate-400:   var(--slate-400);
+  --color-slate-500:   var(--slate-500);
+  --color-slate-600:   var(--slate-600);
+  --color-slate-700:   var(--slate-700);
+  --color-slate-800:   var(--slate-800);
+  --color-slate-900:   var(--slate-900);
+
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+  --font-bn: var(--font-noto-bn), "Kalpurush", var(--font-inter), system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+html { color-scheme: light; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "cv11", "kern";
 }
+
+*:focus-visible {
+  outline: 2px solid var(--emerald-600);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--emerald-100);
+  color: var(--slate-900);
+}
+
+/* Bangla rendering — uses Noto Sans Bengali when lang="bn" */
+[lang="bn"] body, [lang="bn"] p, [lang="bn"] h1, [lang="bn"] h2, [lang="bn"] h3, [lang="bn"] h4, [lang="bn"] li, [lang="bn"] span, [lang="bn"] button {
+  font-family: var(--font-bn);
+}
+
+/* Subtle animated underline for nav */
+.nav-link {
+  position: relative;
+  transition: color 150ms ease;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 200ms ease;
+}
+.nav-link:hover::after { transform: scaleX(1); }
+
+/* Tabular numbers for prices, quantities */
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* Hairline divider */
+.hr {
+  height: 1px;
+  background: var(--border);
+}
+
+/* Subtle data table */
+.table-clean {
+  width: 100%;
+  border-collapse: collapse;
+}
+.table-clean th, .table-clean td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.table-clean th {
+  font-weight: 500;
+  color: var(--fg-muted);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--bg-soft);
+}
+.table-clean tr:last-child td { border-bottom: none; }
+
+/* Print price tag */
+.price-tag {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Card lift on hover (very subtle) */
+.card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+}
+.card:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -8px rgba(15, 23, 42, 0.08);
+}
+
+/* Step indicator (how it works) */
+.step-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: var(--fg-muted);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+}
+
+/* Container widths */
+.container-prose { max-width: 1200px; margin-inline: auto; padding-inline: 24px; }
+@media (min-width: 768px) { .container-prose { padding-inline: 40px; } }

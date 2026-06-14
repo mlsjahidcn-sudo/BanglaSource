@@ -1,4 +1,4 @@
-// POST /api/admin/import/[id]/generate-prompts
+// POST /api/admin/images/[id]/generate-prompts
 //
 // Phase 15d: turn a product's title + description into 6 distinct
 // image-generation prompts via DeepSeek V4-Flash. The prompts are

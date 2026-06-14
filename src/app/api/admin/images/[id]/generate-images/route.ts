@@ -1,10 +1,17 @@
-// POST /api/admin/import/[id]/generate-images
+// POST /api/admin/images/[id]/generate-images
 //
-// Phase 15b: the "image agent" — takes an imported product,
-// runs GPT Image 2 (via apinebula.com) using the imported
-// images as reference, and uploads the generated PNGs to
-// the product-images bucket. Returns the new public URLs
-// so the admin UI can show them.
+// Phase 15b (image agent) + Phase 15d (multi-prompt). Takes a
+// product id, runs GPT Image 2 (via apinebula.com), uploads the
+// generated PNGs to the product-images bucket, and returns the
+// new public URLs. Optionally appends the generated URLs to
+// products.images[].
+//
+// Two modes:
+//   1. Single-prompt (legacy): body { prompt, n, reference_image_urls?,
+//      append_to_product?, style? } — runs n parallel calls.
+//   2. Multi-prompt (Phase 15d): body { prompts: string[],
+//      reference_image_urls?, append_to_product? } — runs one
+//      call per prompt (in parallel), per-prompt failures isolated.
 //
 // Phase 15d: also accepts a `prompts: string[]` array
 // (1-6 entries). When set, runs ONE image-gen call per

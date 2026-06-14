@@ -188,6 +188,127 @@ import { FX_CNY_BDT } from "./pricing";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://banglasource.com";
 
 /**
+ * Phase 20: email sent the moment a buyer signs up. Called
+ * from /api/auth/welcome (the Supabase DB webhook target on
+ * auth.users INSERT). We use a webhook because signup itself
+ * happens client-side via `supabase.auth.signUp` — there's no
+ * server route we can intercept.
+ *
+ * The email introduces BanglaSource + gives the buyer the
+ * 4 most-useful entry points: browse the catalog, save
+ * addresses (Phase 19), check shipping rates, and place a
+ * saved-orders quote.
+ */
+export async function notifyWelcome(userId: string): Promise<EmailResult> {
+  const sb = getServiceRoleClient();
+  // The buyer may not have a `profiles` row yet at this point
+  // (the trigger that creates it fires on auth.users INSERT,
+  // but there's a race — webhook may arrive first). If profiles
+  // is missing, fall back to fetching email from auth.users.
+  const { data: profile } = await sb
+    .from("profiles")
+    .select("email, full_name")
+    .eq("id", userId)
+    .maybeSingle();
+  let email = profile?.email as string | undefined;
+  let fullName = profile?.full_name as string | undefined;
+  if (!email) {
+    // Service-role can read auth.users
+    const { data: authUser } = await sb.auth.admin.getUserById(userId);
+    email = authUser?.user?.email ?? undefined;
+  }
+  if (!email) {
+    return { ok: false, error: "buyer_no_email", to: [], provider: "resend" };
+  }
+  const greet = fullName ? `Hi ${fullName},` : "Hi,";
+
+  const subject = "Welcome to BanglaSource — your wholesale import shortcut";
+  const html = `
+    <div style="font-family: -apple-system, system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #0f172a;">
+      <h1 style="font-size: 22px; margin-bottom: 4px;">${greet}</h1>
+      <p>Welcome to BanglaSource — wholesale from 1688/Pinduoduo/Taobao factories, with landed cost all the way to your Dhaka door.</p>
+
+      <p style="margin-top: 20px;"><strong>Here's the playbook for your first 10 minutes:</strong></p>
+      <ol style="padding-left: 20px; line-height: 1.7;">
+        <li><a href="${SITE_URL}" style="color: #0891b2;">Browse the catalog</a> — 168 verified factories, 7 categories, tier pricing on every product.</li>
+        <li><a href="${SITE_URL}/shipping-rates" style="color: #0891b2;">Check shipping rates</a> — air, sea, and the full BD customs breakdown.</li>
+        <li>Add a few items to cart, then <strong>save a quote</strong> to share with your business partner before paying.</li>
+        <li>When you're ready, place the order — we confirm the landed cost by email within an hour.</li>
+      </ol>
+
+      <p style="margin-top: 20px;">A few small things that are easy to miss:</p>
+      <ul style="padding-left: 20px; line-height: 1.7;">
+        <li>Save your shipping address once at <a href="${SITE_URL}/buyer/addresses" style="color: #0891b2;">/buyer/addresses</a> — every order pre-fills from it.</li>
+        <li>Minimum order weight is 5 kg total (most wholesale orders clear this naturally).</li>
+        <li>Pre-pay 100% of the landed cost at order confirm — no balance on delivery, no surprises.</li>
+      </ul>
+
+      <p>Questions? Reply to this email or hit us on WhatsApp: +86 173 2576 4171.</p>
+
+      <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">BanglaSource · Wholesale from China to Bangladesh</p>
+    </div>`;
+  return sendEmail({
+    to: email,
+    subject,
+    html,
+    tags: [
+      { name: "type", value: "welcome" },
+      { name: "user", value: userId },
+    ],
+  });
+}
+
+/**
+ * Phase 20: newsletter double opt-in. Called from
+ * /api/newsletter/subscribe (when a visitor pastes their email
+ * into the footer signup). Sends a confirmation email with a
+ * one-click link. The link hits /api/newsletter/confirm which
+ * flips `confirmed_at` on the row.
+ *
+ * Tokens are 32-char hex (16 bytes from gen_random_bytes), so
+ * the 2^128 keyspace makes brute-forcing uninteresting.
+ */
+export async function notifyNewsletterConfirm(
+  email: string,
+  confirmToken: string,
+): Promise<EmailResult> {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { ok: false, error: `bad_email:${email}`, to: [email], provider: "resend" };
+  }
+  const confirmHref = `${SITE_URL}/api/newsletter/confirm?token=${encodeURIComponent(confirmToken)}`;
+
+  const subject = "Confirm your BanglaSource newsletter subscription";
+  const html = `
+    <div style="font-family: -apple-system, system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #0f172a;">
+      <h1 style="font-size: 22px; margin-bottom: 4px;">Almost there.</h1>
+      <p>Thanks for signing up for the BanglaSource newsletter. One click to confirm — and we'll send you:</p>
+      <ul style="padding-left: 20px; line-height: 1.7;">
+        <li>New arrivals (2-3 per week, no spam)</li>
+        <li>Price drops on products you're watching</li>
+        <li>Bulk-deal alerts when factories run limited-time offers</li>
+        <li>Monthly landed-cost snapshots (FX, BD customs, shipping)</li>
+      </ul>
+      <p style="margin: 28px 0;">
+        <a href="${confirmHref}" style="display: inline-block; background: #0891b2; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+          Confirm subscription
+        </a>
+      </p>
+      <p style="color: #64748b; font-size: 13px;">If the button doesn't work, paste this link into your browser:<br>
+        <span style="word-break: break-all;">${confirmHref}</span>
+      </p>
+      <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">You can unsubscribe anytime via the link in any email we send. BanglaSource</p>
+    </div>`;
+  return sendEmail({
+    to: email,
+    subject,
+    html,
+    tags: [
+      { name: "type", value: "newsletter_confirm" },
+    ],
+  });
+}
+
+/**
  * Email sent the moment a buyer places an order. Tells them:
  *   - their order number
  *   - the total to wire (Phase 13: 100% of landed cost)
