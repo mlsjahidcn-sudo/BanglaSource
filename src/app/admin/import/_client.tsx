@@ -84,8 +84,60 @@ export function ImportClient() {
   const [genRunning, setGenRunning] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
   const [genResult, setGenResult] = useState<
-    { url: string; slug: string; sizeBytes: number }[]
+    { url: string; slug: string; sizeBytes: number; prompt?: string | null }[]
   >([]);
+
+  // Phase 15d: 6-prompt auto-gen from title
+  const [genPrompts, setGenPrompts] = useState<
+    { index: number; intent: string; prompt: string }[]
+  >([]);
+  const [genPromptsLoading, setGenPromptsLoading] = useState(false);
+  const [genPromptsError, setGenPromptsError] = useState<string | null>(null);
+
+  async function handleAutoPrompts(
+    style: "auto" | "studio" | "lifestyle" | "infographic",
+  ) {
+    if (!savedProduct) return;
+    setGenPromptsError(null);
+    setGenPromptsLoading(true);
+    try {
+      const r = await fetch(
+        `/api/admin/import/${savedProduct.id}/generate-prompts`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ n: 6, style }),
+        },
+      );
+      const t = await r.text();
+      let data: any = {};
+      try {
+        data = JSON.parse(t);
+      } catch {
+        throw new Error(`Server returned non-JSON: ${t.slice(0, 200)}`);
+      }
+      if (!r.ok || !data.ok) {
+        throw new Error(data.message || data.error || `HTTP ${r.status}`);
+      }
+      setGenPrompts(data.prompts ?? []);
+      setGenResult([]);
+    } catch (e) {
+      setGenPromptsError(
+        e instanceof Error ? e.message : "Network error",
+      );
+    } finally {
+      setGenPromptsLoading(false);
+    }
+  }
+
+  function updateGenPrompt(index: number, newPrompt: string) {
+    setGenPrompts((prev) =>
+      prev.map((p) => (p.index === index ? { ...p, prompt: newPrompt } : p)),
+    );
+  }
+  function removeGenPrompt(index: number) {
+    setGenPrompts((prev) => prev.filter((p) => p.index !== index));
+  }
 
   async function handleScrape() {
     setScrapeError(null);
@@ -628,10 +680,112 @@ export function ImportClient() {
           </h2>
           <p className="mt-2 text-[12px] text-fg-muted">
             Run the product through the AI image agent to get clean,
-            watermark-free, white-background shots you can add to the listing.
-            Reference images anchor the style; leave blank for text-only
-            generation.
+            watermark-free shots you can add to the listing. Reference images
+            anchor the style; leave blank for text-only generation.
           </p>
+
+          {/* Phase 15d: 6-prompt auto-gen banner */}
+          <div className="mt-4 p-3 border border-cyan-200 bg-cyan-50/40 rounded-md">
+            <p className="text-[12px] text-fg">
+              <strong className="text-cyan-800">Quick: 6-prompt carousel.</strong>{" "}
+              Have DeepSeek draft 6 distinct shots from the product title
+              (front hero, detail close-up, lifestyle, spec card, scale
+              comparison, alternate angle). Edit any prompt before generating.
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleAutoPrompts("auto")}
+                disabled={genPromptsLoading}
+                className="h-8 px-3 rounded-md bg-cyan-600 text-white text-[12px] font-medium hover:bg-cyan-700 disabled:opacity-60"
+              >
+                {genPromptsLoading ? "Drafting…" : "Auto-generate 6 prompts"}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAutoPrompts("studio")}
+                disabled={genPromptsLoading}
+                className="h-8 px-2.5 rounded-md border border-cyan-300 text-cyan-800 text-[11.5px] hover:bg-cyan-50 disabled:opacity-60"
+              >
+                All studio
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAutoPrompts("lifestyle")}
+                disabled={genPromptsLoading}
+                className="h-8 px-2.5 rounded-md border border-cyan-300 text-cyan-800 text-[11.5px] hover:bg-cyan-50 disabled:opacity-60"
+              >
+                All lifestyle
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAutoPrompts("infographic")}
+                disabled={genPromptsLoading}
+                className="h-8 px-2.5 rounded-md border border-cyan-300 text-cyan-800 text-[11.5px] hover:bg-cyan-50 disabled:opacity-60"
+              >
+                All spec cards
+              </button>
+              {genPrompts.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGenPrompts([]);
+                    setGenResult([]);
+                  }}
+                  disabled={genPromptsLoading}
+                  className="h-8 px-2.5 rounded-md border border-fg/20 text-[11.5px] hover:bg-fg/5 disabled:opacity-40 ml-auto"
+                >
+                  Clear prompts
+                </button>
+              )}
+            </div>
+            {genPromptsError && (
+              <p className="mt-2 text-[11.5px] text-red-600 bg-red-50 border border-red-200 rounded-md px-2.5 py-1.5">
+                {genPromptsError}
+              </p>
+            )}
+          </div>
+
+          {/* Phase 15d: editable prompt cards */}
+          {genPrompts.length > 0 && (
+            <div className="mt-4 space-y-3">
+              <p className="text-[12px] text-fg-muted font-medium">
+                {genPrompts.length} prompt
+                {genPrompts.length === 1 ? "" : "s"} ready — edit inline, then
+                click &quot;Generate {genPrompts.length} image
+                {genPrompts.length === 1 ? "" : "s"}&quot; below.
+              </p>
+              {genPrompts.map((p) => (
+                <div
+                  key={p.index}
+                  className="border border-fg/15 rounded-md p-3 bg-white"
+                >
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <span className="inline-flex items-center gap-1.5 text-[10.5px] uppercase tracking-wider font-medium text-cyan-800 bg-cyan-50 border border-cyan-200 px-2 py-0.5 rounded">
+                      {p.index + 1}. {p.intent}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeGenPrompt(p.index)}
+                      className="text-[11px] text-fg-subtle hover:text-red-600"
+                      title="Remove this prompt"
+                    >
+                      remove
+                    </button>
+                  </div>
+                  <textarea
+                    className="input"
+                    value={p.prompt}
+                    onChange={(e) => updateGenPrompt(p.index, e.target.value)}
+                    rows={2}
+                  />
+                  <p className="mt-1 text-[10.5px] text-fg-subtle font-mono tnum text-right">
+                    {p.prompt.length} chars
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="mt-4 grid gap-4">
             <Field label="Prompt" full>
@@ -695,7 +849,7 @@ export function ImportClient() {
               </Field>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <button
                 type="button"
                 onClick={async () => {
@@ -707,17 +861,23 @@ export function ImportClient() {
                     const refs: string[] = genRefUrl.trim()
                       ? [genRefUrl.trim()]
                       : (scraped?.images ?? []).slice(0, 1);
+                    // Phase 15d: prefer the 6-prompt list if present
+                    const body: Record<string, unknown> = {
+                      referenceImageUrls: refs,
+                      appendToProduct: false, // preview first; admin clicks "Add to product"
+                    };
+                    if (genPrompts.length > 0) {
+                      body.prompts = genPrompts.map((p) => p.prompt);
+                    } else {
+                      body.prompt = genPrompt;
+                      body.n = genN;
+                    }
                     const r = await fetch(
                       `/api/admin/import/${savedProduct.id}/generate-images`,
                       {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          prompt: genPrompt,
-                          n: genN,
-                          referenceImageUrls: refs,
-                          appendToProduct: false, // preview first; admin clicks "Add to product"
-                        }),
+                        body: JSON.stringify(body),
                       },
                     );
                     const t = await r.text();
@@ -737,10 +897,17 @@ export function ImportClient() {
                     setGenRunning(false);
                   }
                 }}
-                disabled={genRunning || !genPrompt.trim()}
+                disabled={
+                  genRunning ||
+                  (genPrompts.length === 0 && !genPrompt.trim())
+                }
                 className="h-10 px-5 rounded-md bg-cyan-600 text-white text-[13px] font-medium hover:bg-cyan-700 disabled:opacity-60"
               >
-                {genRunning ? "Generating…" : `Generate ${genN} image${genN > 1 ? "s" : ""}`}
+                {genRunning
+                  ? "Generating…"
+                  : genPrompts.length > 0
+                    ? `Generate ${genPrompts.length} image${genPrompts.length === 1 ? "" : "s"} from prompts`
+                    : `Generate ${genN} image${genN > 1 ? "s" : ""}`}
               </button>
               {genError && (
                 <p className="text-[12px] text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">

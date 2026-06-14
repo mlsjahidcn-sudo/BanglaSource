@@ -7,9 +7,13 @@
 //   1. Product picker — search-as-you-type dropdown over active
 //      products. Shows id, source_id, title, first image.
 //
-//   2. Generate form — prompt textarea (default = "clean studio
-//      product shot on white bg"), n stepper (1-4), reference
-//      image URL (blank = first product image).
+//   2. Generate form — two modes:
+//      a) "Auto-generate 6 prompts from title" — one click, calls
+//         /api/admin/import/[id]/generate-prompts which uses
+//         DeepSeek V4-Flash to draft 6 distinct prompts (front hero,
+//         detail close-up, lifestyle, spec card, scale comparison,
+//         alternate angle). Admin can edit each prompt inline.
+//      b) Manual — prompt textarea + n stepper (1-4) + reference URL.
 //
 //   3. Preview gallery — shows generated PNGs in a 4-col grid with
 //      size + open link. "Add to product" re-runs the API with
@@ -32,6 +36,13 @@ type GeneratedImage = {
   url: string;
   slug: string;
   sizeBytes: number;
+  prompt?: string | null;
+};
+
+type GeneratedPrompt = {
+  index: number;
+  intent: string;
+  prompt: string;
 };
 
 export function ImageAgentClient({
@@ -46,6 +57,11 @@ export function ImageAgentClient({
   );
   const [genN, setGenN] = useState(1);
   const [genRefUrl, setGenRefUrl] = useState("");
+
+  // Phase 15d: 6-prompt auto-gen state
+  const [genPrompts, setGenPrompts] = useState<GeneratedPrompt[]>([]);
+  const [genPromptsLoading, setGenPromptsLoading] = useState(false);
+  const [genPromptsError, setGenPromptsError] = useState<string | null>(null);
 
   const [genRunning, setGenRunning] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
@@ -71,6 +87,52 @@ export function ImageAgentClient({
   const currentImageCount =
     productImageCount ?? selected?.imageCount ?? 0;
 
+  // Phase 15d: ask DeepSeek to draft 6 prompts for the selected
+  // product. The UI lets the admin edit each before sending to
+  // the image model.
+  async function handleAutoPrompts(style: "auto" | "studio" | "lifestyle" | "infographic") {
+    if (!selected) return;
+    setGenPromptsError(null);
+    setGenPromptsLoading(true);
+    try {
+      const r = await fetch(
+        `/api/admin/import/${selected.id}/generate-prompts`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ n: 6, style }),
+        },
+      );
+      const t = await r.text();
+      let data: any = {};
+      try {
+        data = JSON.parse(t);
+      } catch {
+        throw new Error(`Server returned non-JSON: ${t.slice(0, 200)}`);
+      }
+      if (!r.ok || !data.ok) {
+        throw new Error(data.message || data.error || `HTTP ${r.status}`);
+      }
+      setGenPrompts(data.prompts ?? []);
+      setGenResult([]); // clear any stale preview
+    } catch (e) {
+      setGenPromptsError(e instanceof Error ? e.message : "Network error");
+    } finally {
+      setGenPromptsLoading(false);
+    }
+  }
+
+  // Update one prompt in the editable list
+  function updatePrompt(index: number, newPrompt: string) {
+    setGenPrompts((prev) =>
+      prev.map((p) => (p.index === index ? { ...p, prompt: newPrompt } : p)),
+    );
+  }
+
+  function removePrompt(index: number) {
+    setGenPrompts((prev) => prev.filter((p) => p.index !== index));
+  }
+
   async function handleGenerate(appendToProduct: boolean) {
     if (!selected) return;
     setGenError(null);
@@ -82,17 +144,26 @@ export function ImageAgentClient({
         : selected.firstImage
           ? [selected.firstImage]
           : [];
+      // Phase 15d: if the admin has the 6-prompt list, send it
+      // instead of the single prompt. The backend runs one
+      // image-gen call per prompt in parallel.
+      const usingPrompts = genPrompts.length > 0;
+      const body: Record<string, unknown> = {
+        referenceImageUrls: refs,
+        appendToProduct,
+      };
+      if (usingPrompts) {
+        body.prompts = genPrompts.map((p) => p.prompt);
+      } else {
+        body.prompt = genPrompt;
+        body.n = genN;
+      }
       const r = await fetch(
         `/api/admin/import/${selected.id}/generate-images`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt: genPrompt,
-            n: genN,
-            referenceImageUrls: refs,
-            appendToProduct,
-          }),
+          body: JSON.stringify(body),
         },
       );
       const t = await r.text();
@@ -243,6 +314,112 @@ export function ImageAgentClient({
             </span>
           </h2>
 
+          {/* Phase 15d: 6-prompt auto-gen banner */}
+          <div className="mt-4 p-3 border border-cyan-200 bg-cyan-50/40 rounded-md">
+            <p className="text-[12px] text-fg">
+              <strong className="text-cyan-800">Quick: 6-prompt carousel.</strong>{" "}
+              Have DeepSeek draft 6 different shots from the product title
+              (front hero, detail close-up, lifestyle, spec card, scale
+              comparison, alternate angle). Edit any prompt below before
+              generating.
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleAutoPrompts("auto")}
+                disabled={genPromptsLoading}
+                className="h-8 px-3 rounded-md bg-cyan-600 text-white text-[12px] font-medium hover:bg-cyan-700 disabled:opacity-60"
+              >
+                {genPromptsLoading ? "Drafting…" : "Auto-generate 6 prompts"}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAutoPrompts("studio")}
+                disabled={genPromptsLoading}
+                className="h-8 px-2.5 rounded-md border border-cyan-300 text-cyan-800 text-[11.5px] hover:bg-cyan-50 disabled:opacity-60"
+              >
+                All studio
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAutoPrompts("lifestyle")}
+                disabled={genPromptsLoading}
+                className="h-8 px-2.5 rounded-md border border-cyan-300 text-cyan-800 text-[11.5px] hover:bg-cyan-50 disabled:opacity-60"
+              >
+                All lifestyle
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAutoPrompts("infographic")}
+                disabled={genPromptsLoading}
+                className="h-8 px-2.5 rounded-md border border-cyan-300 text-cyan-800 text-[11.5px] hover:bg-cyan-50 disabled:opacity-60"
+              >
+                All spec cards
+              </button>
+              {genPrompts.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGenPrompts([]);
+                    setGenResult([]);
+                  }}
+                  disabled={genPromptsLoading}
+                  className="h-8 px-2.5 rounded-md border border-fg/20 text-[11.5px] hover:bg-fg/5 disabled:opacity-40 ml-auto"
+                >
+                  Clear prompts
+                </button>
+              )}
+            </div>
+            {genPromptsError && (
+              <p className="mt-2 text-[11.5px] text-red-600 bg-red-50 border border-red-200 rounded-md px-2.5 py-1.5">
+                {genPromptsError}
+              </p>
+            )}
+          </div>
+
+          {/* Phase 15d: editable prompt cards */}
+          {genPrompts.length > 0 && (
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-[12px] text-fg-muted font-medium">
+                  {genPrompts.length} prompt
+                  {genPrompts.length === 1 ? "" : "s"} ready — edit inline, then
+                  click &quot;Generate {genPrompts.length} image
+                  {genPrompts.length === 1 ? "" : "s"}&quot; below.
+                </p>
+              </div>
+              {genPrompts.map((p) => (
+                <div
+                  key={p.index}
+                  className="border border-fg/15 rounded-md p-3 bg-white"
+                >
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <span className="inline-flex items-center gap-1.5 text-[10.5px] uppercase tracking-wider font-medium text-cyan-800 bg-cyan-50 border border-cyan-200 px-2 py-0.5 rounded">
+                      {p.index + 1}. {p.intent}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removePrompt(p.index)}
+                      className="text-[11px] text-fg-subtle hover:text-red-600"
+                      title="Remove this prompt"
+                    >
+                      remove
+                    </button>
+                  </div>
+                  <textarea
+                    className="input"
+                    value={p.prompt}
+                    onChange={(e) => updatePrompt(p.index, e.target.value)}
+                    rows={2}
+                  />
+                  <p className="mt-1 text-[10.5px] text-fg-subtle font-mono tnum text-right">
+                    {p.prompt.length} chars
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="mt-4 grid gap-4">
             <Field label="Prompt" full>
               <textarea
@@ -308,16 +485,21 @@ export function ImageAgentClient({
               </Field>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <button
                 type="button"
                 onClick={() => handleGenerate(false)}
-                disabled={genRunning || !genPrompt.trim()}
+                disabled={
+                  genRunning ||
+                  (genPrompts.length === 0 && !genPrompt.trim())
+                }
                 className="h-10 px-5 rounded-md bg-cyan-600 text-white text-[13px] font-medium hover:bg-cyan-700 disabled:opacity-60"
               >
                 {genRunning
                   ? "Generating…"
-                  : `Generate ${genN} image${genN > 1 ? "s" : ""}`}
+                  : genPrompts.length > 0
+                    ? `Generate ${genPrompts.length} image${genPrompts.length === 1 ? "" : "s"} from prompts`
+                    : `Generate ${genN} image${genN > 1 ? "s" : ""}`}
               </button>
               {genError && (
                 <p className="text-[12px] text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
@@ -348,18 +530,26 @@ export function ImageAgentClient({
                           className="absolute inset-0 w-full h-full object-cover"
                         />
                       </div>
-                      <div className="p-2 flex items-center justify-between gap-1">
-                        <span className="text-[10.5px] text-fg-subtle font-mono tnum truncate">
-                          {(img.sizeBytes / 1024).toFixed(0)} KB
-                        </span>
-                        <a
-                          href={img.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[10.5px] text-cyan-700 underline"
+                      <div className="p-2">
+                        <p
+                          className="text-[10.5px] text-fg-muted line-clamp-2"
+                          title={img.prompt ?? ""}
                         >
-                          open
-                        </a>
+                          {img.prompt ?? `image-${i + 1}`}
+                        </p>
+                        <div className="mt-1 flex items-center justify-between gap-1">
+                          <span className="text-[10px] text-fg-subtle font-mono tnum">
+                            {(img.sizeBytes / 1024).toFixed(0)} KB
+                          </span>
+                          <a
+                            href={img.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-cyan-700 underline"
+                          >
+                            open
+                          </a>
+                        </div>
                       </div>
                     </div>
                   ))}
