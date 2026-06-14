@@ -24,7 +24,7 @@ const notoBn = Noto_Sans_Bengali({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://banglasource.bd"),
+  metadataBase: new URL("https://banglasource.com"),
   title: {
     default: "BanglaSource — Bulk Wholesale Sourcing, Made Simple",
     template: "%s · BanglaSource",
@@ -58,6 +58,24 @@ export default function RootLayout({
         // nothing for the server to predict.
         suppressHydrationWarning
       >
+        {/*
+          Phase 25: skip-to-content link. The first focusable
+          element on the page. Hidden by default via the
+          `sr-only` Tailwind class; becomes visible on focus
+          (the `:focus-visible` global in globals.css styles
+          it). Tab-key users land on this and Enter skips
+          past the nav straight to <main>.
+
+          We link to `#main-content` — the target is rendered
+          by the portal shell (admin/buyer) or the public
+          wrapper (root).
+        */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:rounded-md focus:bg-cyan-600 focus:text-white focus:text-[13px] focus:font-medium focus:shadow-lg"
+        >
+          Skip to content
+        </a>
         <LangProvider>
           <ChromeWrapper>{children}</ChromeWrapper>
         </LangProvider>

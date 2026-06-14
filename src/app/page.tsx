@@ -1,5 +1,10 @@
 import { HomeClient } from "./_home-client";
 import { getServiceRoleClient } from "@/lib/supabase/server";
+import {
+  jsonLdScript,
+  organizationJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo";
 
 // refresh every 5 minutes
 export const revalidate = 60;
@@ -37,5 +42,23 @@ async function loadSyncStats() {
 
 export default async function HomePage() {
   const syncStats = await loadSyncStats();
-  return <HomeClient syncStats={syncStats} />;
+  // Phase 25: Organization + WebSite JSON-LD so Google has
+  // a single canonical entity + a sitelinks search box.
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLdScript(organizationJsonLd()),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLdScript(websiteJsonLd()),
+        }}
+      />
+      <HomeClient syncStats={syncStats} />
+    </>
+  );
 }

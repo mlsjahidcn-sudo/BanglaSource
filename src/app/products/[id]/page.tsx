@@ -7,8 +7,13 @@ import { SameFactory } from "@/components/same-factory";
 import { getCatalog, getProduct, dbProductToLegacy } from "@/lib/catalog";
 import { categories } from "@/lib/categories";
 import { FX_CNY_BDT } from "@/lib/pricing";
+import {
+  breadcrumbJsonLd,
+  jsonLdScript,
+  SITE_URL,
+} from "@/lib/seo";
 
-const SITE = "https://banglasource.bd";
+const SITE = SITE_URL;
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -29,8 +34,9 @@ export async function generateMetadata({ params }: Params) {
     ? Math.min(...p.price_tiers.map((t) => t.price_cny_fen)) / 100
     : 0;
   return {
-    title: `${p.title_en} · from ¥${lowestPriceCny.toFixed(2)} · BanglaSource`,
+    title: `${p.title_en} · from ¥${lowestPriceCny.toFixed(2)}`,
     description: p.description_en,
+    alternates: { canonical: `${SITE_URL}/products/${p.source_id}` },
     openGraph: {
       type: "website",
       title: p.title_en,
@@ -89,11 +95,30 @@ export default async function ProductPage({ params }: Params) {
     countryOfOrigin: { "@type": "Country", name: "China" },
   };
 
+  // BreadcrumbList (Google rich results) — Home > Category > Product
+  const breadcrumb = breadcrumbJsonLd([
+    { name: "Home", href: "/" },
+    { name: "Catalog", href: "/categories" },
+    ...(cat
+      ? [
+          {
+            name: cat.name_en,
+            href: `/categories/${cat.slug}`,
+          },
+        ]
+      : []),
+    { name: db.title_en, href: `/products/${db.source_id}` },
+  ]);
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumb) }}
       />
       <Container className="pt-10 md:pt-14 pb-24">
         {/* Breadcrumbs */}

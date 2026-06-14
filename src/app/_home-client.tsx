@@ -80,6 +80,16 @@ export function HomeClient({
 
   return (
     <>
+      {/* Phase 25: a single visually-hidden h1 for SEO +
+          screen-reader announcement. The hero carousel below
+          is a sequence of h2s (each slide title). The DOM
+          has exactly one h1, which is the right shape for
+          a landing page. */}
+      <h1 className="sr-only">
+        {lang === "bn"
+          ? "বাংলা সোর্স — চীন থেকে বাংলাদেশে পাইকারি আমদানি, বিডিটিতে ল্যান্ডেড খরচসহ"
+          : "BanglaSource — wholesale import from China to Bangladesh with full BDT landed cost"}
+      </h1>
       {/* ───────────────────  TOP RIBBON  ─────────────────── */}
       <div className="border-b border-border bg-bg-soft">
         <Container className="py-2.5 flex items-center justify-between gap-4 text-[12px] text-fg-muted">

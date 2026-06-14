@@ -382,9 +382,16 @@ function CartCrossSell({
           >
             <div className="relative w-10 h-10 rounded overflow-hidden bg-slate-50 shrink-0">
               {s.image && (
+                // The cart drawer is a one-at-a-time interaction
+                // so the image is always near the fold. `decoding="async"`
+                // lets the browser paint the rest of the drawer
+                // before the image finishes decoding (visible speedup
+                // for the typical 200-400ms product-image fetch).
                 <img
                   src={s.image}
                   alt={s.title_en}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
               )}

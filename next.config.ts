@@ -2,6 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    // Phase 25: tell next/image to prefer modern formats. AVIF
+    // is ~30% smaller than WebP at equivalent quality, and
+    // WebP is ~25% smaller than JPEG. Most browsers (Chrome,
+    // Edge, Safari 14+, Firefox 93+) accept AVIF. The fallback
+    // chain is automatic — older browsers still get WebP or
+    // the original.
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       { protocol: "https", hostname: "cbu01.alicdn.com" },
       { protocol: "https", hostname: "img.alicdn.com" },

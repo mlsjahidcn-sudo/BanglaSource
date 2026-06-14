@@ -84,6 +84,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/blog" className="hover:text-fg">
+                  Blog
+                </Link>
+              </li>
+              <li>
                 <Link href="/for-you" className="hover:text-fg">
                   For you
                 </Link>
@@ -120,10 +125,10 @@ export function Footer() {
         <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[12px] text-fg-subtle">
           <p>{t("footer.copyright")}</p>
           <a
-            href="mailto:hello@banglasource.bd"
+            href="mailto:hello@banglasource.com"
             className="hover:text-fg"
           >
-            hello@banglasource.bd
+            hello@banglasource.com
           </a>
         </div>
       </div>
