@@ -20,6 +20,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServiceRoleClient } from "@/lib/supabase/server";
 import { rateLimit, clientKey } from "@/lib/rate-limit";
 import { deepseekJson, sha256 } from "@/lib/deepseek";
+import { NOT_FROM_1688 } from "@/lib/source-filter";
 
 const RATE_LIMIT = 60;
 const RATE_WINDOW_MS = 60_000;
@@ -189,23 +190,27 @@ async function parseQuery(
 // Build the Supabase query for the parsed filters.
 async function runQuery(parsed: ParsedQuery) {
   const supabase = getServiceRoleClient();
-  let q = supabase
-    .from("products")
-    .select(
-      "id, source_id, title_en, title_bn, images, category, supplier_name, supplier_city, supplier_province, factory_moq, markup_pct, badges, rating_overall, order_count_30d, stock_total, price_tiers(price_cny_fen)",
-    )
-    .eq("active", true);
+  // Platform is now hand-picked Pinduoduo / Taobao / trendy
+  // China sources — never the Apify 1688 scraper. Hide those.
+  let q = NOT_FROM_1688(
+    supabase
+      .from("products")
+      .select(
+        "id, source_id, title_en, title_bn, images, category, supplier_name, supplier_city, supplier_province, factory_moq, markup_pct, badges, rating_overall, order_count_30d, stock_total, price_tiers(price_cny_fen)",
+      )
+      .eq("active", true),
+  );
 
   // Category filter
   if (parsed.category) {
     q = q.eq("category", parsed.category);
   }
 
-  // Stock filter: 1688 doesn't publish per-product stock, so most
-  // products have stock_total=0. "in stock" in the NL query just
-  // means "active listing" (already filtered). We DON'T add a hard
-  // stock filter here — it would zero out results. Future work:
-  // backfill stock_total from supplier feed updates.
+  // Stock filter: hand-picked products don't have live per-product
+  // stock, so most rows have stock_total=0. "in stock" in the NL
+  // query just means "active listing" (already filtered). We DON'T
+  // add a hard stock filter here — it would zero out results. Future
+  // work: backfill stock_total from supplier feed updates.
   if (parsed.in_stock_only) {
     /* no-op: active = true is the effective "in stock" filter */
   }

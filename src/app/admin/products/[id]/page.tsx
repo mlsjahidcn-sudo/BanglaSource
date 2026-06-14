@@ -140,12 +140,12 @@ export default async function AdminProductPage({
   return (
     <AdminPage>
       <div className="mb-3 text-[12px] text-fg-subtle font-mono tnum">
-        <Link href="/admin/sync" className="hover:text-fg">
+        <Link href="/admin" className="hover:text-fg">
           admin
         </Link>
         <span className="mx-2 text-slate-300">/</span>
-        <Link href="/admin/sync" className="hover:text-fg">
-          sync
+        <Link href="/admin/products" className="hover:text-fg">
+          products
         </Link>
         <span className="mx-2 text-slate-300">/</span>
         <span className="text-fg-muted">product / {product.source_id}</span>
@@ -179,7 +179,7 @@ export default async function AdminProductPage({
               rel="noreferrer"
               className="underline hover:text-fg"
             >
-              1688 ↗
+              source ↗
             </a>
           </>
         ) : null}
@@ -446,7 +446,7 @@ function LivePriceCard({
   if (tiersRaw.length === 0) {
     return (
       <div className="card p-6 text-[13px] text-fg-muted">
-        No price tiers — sync a fresh 1688 snapshot to populate this card.
+        No price tiers — re-import the product or add tiers manually.
       </div>
     );
   }
@@ -474,7 +474,7 @@ function LivePriceCard({
             ¥{(maxFen / 100).toFixed(2)}
           </p>
           <p className="mt-2 text-[12px] text-fg-muted font-mono tnum">
-            per pc, across all tiers · direct from 1688
+            per pc, across all tiers · factory FOB
           </p>
         </div>
 
@@ -577,12 +577,12 @@ function LivePriceCard({
       </div>
 
       <p className="px-5 md:px-6 py-3 text-[11.5px] text-fg-subtle border-t border-border">
-        Factory FOB is the direct 1688 factory price (before any markup or
-        shipping). The &quot;After markup&quot; value is what appears as
-        &quot;Product price&quot; on the PDP and in the cart; it is the
-        factory FOB × FX (৳{FX_CNY_BDT.toFixed(2)}) × (1 + markup).
-        Edit the markup % in the editor below to change the buyer-facing
-        price.
+        Factory FOB is the supplier&apos;s factory-gate price (before any
+        markup or shipping). The &quot;After markup&quot; value is what
+        appears as &quot;Product price&quot; on the PDP and in the cart;
+        it is the factory FOB × FX (৳{FX_CNY_BDT.toFixed(2)}) ×
+        (1 + markup). Edit the markup % in the editor below to change
+        the buyer-facing price.
       </p>
     </div>
   );

@@ -51,7 +51,7 @@ function fmtFen(fen: number) {
  * "Min factory" = the lowest CNY/pc across all tiers (typically
  * the highest-volume tier). We use that as the headline factory
  * price for the admin list — it's the floor of what the supplier
- * will charge, and the one admin will recognize from the 1688
+ * will charge, and the one admin will recognize from the source
  * listing.
  */
 function factoryMinFen(p: ProductRow): number {

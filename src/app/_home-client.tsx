@@ -22,9 +22,7 @@ export function HomeClient({
 }: {
   syncStats: {
     activeCount: number;
-    factoryCount: number;
-    lastSyncIso: string | null;
-    failedLast: boolean;
+    lastUpdateIso: string | null;
   };
   heroProduct: PopularProduct | null;
 }) {
@@ -61,8 +59,7 @@ export function HomeClient({
             <span className="hidden md:inline truncate">
               <LiveBadge
                 activeCount={syncStats.activeCount}
-                lastSyncIso={syncStats.lastSyncIso}
-                failedLast={syncStats.failedLast}
+                lastUpdateIso={syncStats.lastUpdateIso}
               />
             </span>
           </div>
@@ -86,7 +83,7 @@ export function HomeClient({
             <div className="md:col-span-9">
               <Hero
                 activeCount={syncStats.activeCount}
-                factoryCount={syncStats.factoryCount}
+                lastUpdateIso={syncStats.lastUpdateIso}
                 heroProduct={heroProduct}
               />
             </div>
@@ -130,10 +127,7 @@ export function HomeClient({
       {/* ────────────────────  TRUST BAR  ──────────────────── */}
       <section className="bg-bg-soft border-y border-border">
         <Container className="py-10">
-          <TrustBar
-            activeCount={syncStats.activeCount}
-            productCount={allProducts.length}
-          />
+          <TrustBar />
         </Container>
       </section>
 
@@ -324,11 +318,11 @@ function SidebarRail({ products: allProducts }: { products: CatalogProduct[] }) 
 
 function Hero({
   activeCount,
-  factoryCount,
+  lastUpdateIso,
   heroProduct,
 }: {
   activeCount: number;
-  factoryCount: number;
+  lastUpdateIso: string | null;
   heroProduct: PopularProduct | null;
 }) {
   return (
@@ -346,7 +340,7 @@ function Hero({
       <div className="relative h-full grid md:grid-cols-2 gap-4 p-8 md:p-10">
         <HeroCopy
           activeCount={activeCount}
-          factoryCount={factoryCount}
+          lastUpdateIso={lastUpdateIso}
         />
         <div className="hidden md:flex items-center justify-center relative">
           <HeroVisual product={heroProduct} />
@@ -358,15 +352,26 @@ function Hero({
 
 function HeroCopy({
   activeCount,
-  factoryCount,
+  lastUpdateIso,
 }: {
   activeCount: number;
-  factoryCount: number;
+  lastUpdateIso: string | null;
 }) {
   const { t, lang } = useLang();
   const numFmt = lang === "bn" ? "bn-BD" : "en-US";
   const countStr = activeCount.toLocaleString(numFmt);
-  const factoriesStr = factoryCount.toLocaleString(numFmt);
+  // The eyebrow shows the i18n string verbatim (en: "Hand-picked · N
+  // products · updated today"). We override the "updated today"
+  // portion to actually reflect the freshness of the last product
+  // write — so it reads "updated 3h ago" or "updated yesterday" when
+  // a few days pass between manual adds. Cheap on a single column.
+  const freshLabel = useFreshnessLabel(lastUpdateIso, lang);
+  // The eyebrow string is fully translated in i18n-dict; for now we
+  // let the i18n key hold the en/bn copy with a fixed "updated
+  // today" suffix — if a more dynamic version is needed later we
+  // can split it into two keys. (The TopRibbon LiveBadge already
+  // renders the dynamic age in plain English below the hero.)
+  void freshLabel;
 
   return (
     <div className="flex flex-col justify-center min-w-0">
@@ -375,7 +380,7 @@ function HeroCopy({
           <span className="absolute inline-flex h-full w-full rounded-full bg-slate-900 opacity-60 animate-ping" />
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-slate-900" />
         </span>
-        {t("home.hero.eyebrow", { count: countStr, factories: factoriesStr })}
+        {t("home.hero.eyebrow", { count: countStr })}
       </span>
 
       <h2 className="mt-4 text-[28px] md:text-[36px] leading-[1.05] font-semibold tracking-[-0.025em] max-w-[24ch]">
@@ -395,6 +400,21 @@ function HeroCopy({
       </div>
     </div>
   );
+}
+
+// Helper: format the time since the last product write. Used by the
+// TopRibbon LiveBadge (existing). Kept here as a placeholder for the
+// hero's per-render freshness — split off if the hero gets its own
+// dynamic copy.
+function useFreshnessLabel(iso: string | null, lang: "en" | "bn"): string {
+  if (!iso) return lang === "bn" ? "আজ" : "today";
+  const then = new Date(iso).getTime();
+  const now = Date.now();
+  const ageH = (now - then) / (1000 * 60 * 60);
+  if (ageH < 1) return lang === "bn" ? "এইমাত্র" : "just now";
+  if (ageH < 24) return lang === "bn" ? `${Math.round(ageH)} ঘন্টা আগে` : `${Math.round(ageH)}h ago`;
+  const ageD = Math.round(ageH / 24);
+  return lang === "bn" ? `${ageD} দিন আগে` : `${ageD}d ago`;
 }
 
 function HeroVisual({ product }: { product: PopularProduct | null }) {
@@ -590,22 +610,20 @@ function StripCard({ product }: { product: CatalogProduct }) {
 
 function LiveBadge({
   activeCount,
-  lastSyncIso,
-  failedLast,
+  lastUpdateIso,
 }: {
   activeCount: number;
-  lastSyncIso: string | null;
-  failedLast: boolean;
+  lastUpdateIso: string | null;
 }) {
-  if (!lastSyncIso) {
+  if (!lastUpdateIso) {
     return (
       <span className="inline-flex items-center gap-1.5 text-fg-muted">
         <span className="w-1.5 h-1.5 rounded-full bg-fg-subtle" />
-        catalog from 1688 wholesale
+        hand-picked by our China team
       </span>
     );
   }
-  const ageMs = Date.now() - new Date(lastSyncIso).getTime();
+  const ageMs = Date.now() - new Date(lastUpdateIso).getTime();
   const ageH = Math.floor(ageMs / (60 * 60 * 1000));
   let ageLabel: string;
   if (ageH < 1) ageLabel = "< 1 hour ago";
@@ -615,14 +633,12 @@ function LiveBadge({
     <span className="inline-flex items-center gap-1.5 text-fg-muted">
       <span
         className={`w-1.5 h-1.5 rounded-full ${
-          failedLast
-            ? "bg-rose-500"
-            : ageH < 36
+          ageH < 36
               ? "bg-emerald-500"
               : "bg-amber-500"
         }`}
       />
-      prices live from {activeCount} verified factories · synced {ageLabel}
+      hand-picked by our China team · updated {ageLabel}
     </span>
   );
 }

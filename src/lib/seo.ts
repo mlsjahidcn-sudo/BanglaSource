@@ -10,7 +10,7 @@
 export const SITE_URL = "https://banglasource.com";
 export const SITE_NAME = "BanglaSource";
 export const SITE_DESCRIPTION =
-  "Wholesale from 1688 / Pinduoduo / Taobao factories to Bangladesh. Air, sea, and full BD customs duty included in the landed cost. Pre-pay 100% at order confirm — no balance on delivery.";
+  "Hand-picked wholesale from Chinese factories to Bangladesh. Air, sea, and full BD customs duty included in the landed cost. Pre-pay 100% at order confirm — no balance on delivery.";
 
 /**
  * Build a BreadcrumbList JSON-LD object. The same shape
@@ -66,7 +66,7 @@ export function organizationJsonLd(): Record<string, unknown> {
     ],
     knowsAbout: [
       "Wholesale sourcing",
-      "1688 / Alibaba",
+      "China wholesale",
       "Bangladesh import",
       "Air freight consolidation",
       "Sea LCL shipping",

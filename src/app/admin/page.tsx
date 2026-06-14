@@ -6,10 +6,14 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 async function loadSummary() {
+  // Phase 27 (hand-picked pivot, 2026-06-15): the catalog is no
+  // longer auto-synced. Removed the sync_runs / discovered_products
+  // reads from this dashboard. Recent-activity list now shows the
+  // most recent product edits instead.
   try {
     const supabase = getServiceRoleClient();
     const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const [products, active, quotesPending, quotes, discoveries, openAlerts, views24h, recentSyncs] =
+    const [products, active, quotesPending, quotes, openAlerts, views24h, recentEdits] =
       await Promise.all([
         supabase.from("products").select("id", { count: "exact", head: true }),
         supabase
@@ -22,10 +26,6 @@ async function loadSummary() {
           .eq("status", "pending"),
         supabase.from("quotes").select("id", { count: "exact", head: true }),
         supabase
-          .from("discovered_products")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "new"),
-        supabase
           .from("price_alert_log")
           .select("id", { count: "exact", head: true })
           .is("acknowledged_at", null),
@@ -34,20 +34,19 @@ async function loadSummary() {
           .select("id", { count: "exact", head: true })
           .gte("recorded_at", since24h),
         supabase
-          .from("sync_runs")
-          .select("id,trigger,started_at,finished_at,products_seen,products_changed,api_cost_usd,error")
-          .order("started_at", { ascending: false })
-          .limit(5),
+          .from("products")
+          .select("source_id, title_en, updated_at")
+          .order("updated_at", { ascending: false })
+          .limit(8),
       ]);
     return {
       products: products.count ?? 0,
       active: active.count ?? 0,
       quotesPending: quotesPending.count ?? 0,
       quotes: quotes.count ?? 0,
-      discoveries: discoveries.count ?? 0,
       openAlerts: openAlerts.count ?? 0,
       views24h: views24h.count ?? 0,
-      recentSyncs: recentSyncs.data ?? [],
+      recentEdits: recentEdits.data ?? [],
     };
   } catch {
     return {
@@ -55,10 +54,9 @@ async function loadSummary() {
       active: 0,
       quotesPending: 0,
       quotes: 0,
-      discoveries: 0,
       openAlerts: 0,
       views24h: 0,
-      recentSyncs: [],
+      recentEdits: [],
     };
   }
 }
@@ -72,13 +70,6 @@ function fmtDate(iso: string) {
   });
 }
 
-function fmtDuration(start: string, end: string | null) {
-  if (!end) return "—";
-  const ms = new Date(end).getTime() - new Date(start).getTime();
-  if (ms < 1000) return `${ms}ms`;
-  return `${(ms / 1000).toFixed(1)}s`;
-}
-
 export default async function AdminDashboard() {
   const s = await loadSummary();
   const cards = [
@@ -86,19 +77,19 @@ export default async function AdminDashboard() {
       label: "Catalog",
       value: s.products,
       sub: `${s.active} active`,
-      href: "/admin/sync",
+      href: "/admin/products",
+    },
+    {
+      label: "Add product",
+      value: "+",
+      sub: "Hand-pick from Pinduoduo / Taobao / other",
+      href: "/admin/products/new",
     },
     {
       label: "Quote requests",
       value: s.quotes,
       sub: `${s.quotesPending} pending`,
       href: "/admin/quotes",
-    },
-    {
-      label: "Discoveries",
-      value: s.discoveries,
-      sub: "new from 1688",
-      href: "/admin/discovery",
     },
     {
       label: "Open alerts",
@@ -123,10 +114,10 @@ export default async function AdminDashboard() {
         actions={
           <>
             <Link
-              href="/admin/sync"
-              className="px-3 py-1.5 text-[12px] border border-border rounded-md hover:bg-bg-soft"
+              href="/admin/products/new"
+              className="px-3 py-1.5 text-[12px] border border-emerald-300 text-emerald-700 bg-emerald-50 rounded-md hover:bg-emerald-100"
             >
-              Open sync
+              + Add product
             </Link>
             <Link
               href="/"
@@ -158,53 +149,50 @@ export default async function AdminDashboard() {
         ))}
       </div>
 
-      {/* Recent sync runs */}
+      {/* Recent catalog edits */}
       <div className="mt-10">
         <h2 className="text-[18px] font-semibold tracking-tight mb-4">
-          Recent sync runs
+          Recent catalog edits
         </h2>
         <div className="card overflow-hidden">
           <table className="w-full text-[13px]">
             <thead className="text-[11px] uppercase tracking-wider text-fg-subtle border-b border-border">
               <tr>
-                <th className="text-left font-medium px-4 py-3">Started</th>
-                <th className="text-left font-medium px-4 py-3">Trigger</th>
-                <th className="text-right font-medium px-4 py-3">Seen</th>
-                <th className="text-right font-medium px-4 py-3">Changed</th>
-                <th className="text-right font-medium px-4 py-3">Cost</th>
-                <th className="text-right font-medium px-4 py-3">Duration</th>
+                <th className="text-left font-medium px-4 py-3">Updated</th>
+                <th className="text-left font-medium px-4 py-3">Product</th>
+                <th className="text-left font-medium px-4 py-3">Source ID</th>
+                <th className="text-right font-medium px-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
-              {s.recentSyncs.length === 0 ? (
+              {s.recentEdits.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center text-fg-muted py-8">
-                    No sync runs yet.
+                  <td colSpan={4} className="text-center text-fg-muted py-8">
+                    No catalog edits yet — add a product to get started.
                   </td>
                 </tr>
               ) : (
-                s.recentSyncs.map((r) => (
+                s.recentEdits.map((r) => (
                   <tr
-                    key={r.id}
+                    key={r.source_id}
                     className="border-b border-border last:border-b-0 hover:bg-bg-soft"
                   >
                     <td className="px-4 py-2.5 font-mono tnum text-[12px]">
-                      {fmtDate(r.started_at)}
+                      {fmtDate(r.updated_at)}
                     </td>
-                    <td className="px-4 py-2.5 text-[12px] text-fg-muted">
-                      {r.trigger}
+                    <td className="px-4 py-2.5 text-[13px] line-clamp-1">
+                      {r.title_en}
                     </td>
-                    <td className="px-4 py-2.5 text-right font-mono tnum">
-                      {r.products_seen}
+                    <td className="px-4 py-2.5 font-mono tnum text-[12px] text-fg-muted">
+                      {r.source_id}
                     </td>
-                    <td className="px-4 py-2.5 text-right font-mono tnum">
-                      {r.products_changed}
-                    </td>
-                    <td className="px-4 py-2.5 text-right font-mono tnum text-[12px]">
-                      {r.api_cost_usd ? `$${r.api_cost_usd.toFixed(4)}` : "—"}
-                    </td>
-                    <td className="px-4 py-2.5 text-right font-mono tnum text-[12px]">
-                      {fmtDuration(r.started_at, r.finished_at)}
+                    <td className="px-4 py-2.5 text-right">
+                      <Link
+                        href={`/admin/products/${r.source_id}`}
+                        className="text-emerald-700 hover:underline text-[12px]"
+                      >
+                        Edit →
+                      </Link>
                     </td>
                   </tr>
                 ))
@@ -217,14 +205,14 @@ export default async function AdminDashboard() {
       {/* Quick links */}
       <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <QuickLink
-          href="/admin/sync"
-          label="Sync catalog"
-          desc="Nightly 1688 price refresh + manual trigger."
+          href="/admin/products/new"
+          label="Add a product"
+          desc="Hand-pick a trending item from Pinduoduo, Taobao, or any China source."
         />
         <QuickLink
-          href="/admin/discovery"
-          label="Review discoveries"
-          desc={`${s.discoveries} new SKUs found by 1688 keyword search.`}
+          href="/admin/products"
+          label="Catalog"
+          desc="All products, including legacy stock you can hide or delete."
         />
         <QuickLink
           href="/admin/quotes"

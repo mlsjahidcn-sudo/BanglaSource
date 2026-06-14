@@ -58,20 +58,19 @@ export const dict: Dict = {
   },
   "home.slider.s3.cta": { en: "Talk to us", bn: "আমাদের সাথে কথা বলুন" },
 
-  // ── Home: new single-slide hero (Phase 26) ──────────────────────
-  // Live DB-driven eyebrow (the {count} and {factories} placeholders
-  // are interpolated at render time, in either locale's digit format).
+  // ── Home: single-slide hero (Phase 26, hand-picked since 2026-06-15) ──
+  // Eyebrow no longer references 1688 or live sync — we hand-pick.
   "home.hero.eyebrow": {
-    en: "Live · {count} products · {factories} factories",
-    bn: "লাইভ · {count}টি পণ্য · {factories}টি কারখানা",
+    en: "Hand-picked · {count} products · updated today",
+    bn: "হাতে বাছাই · {count}টি পণ্য · আজ আপডেট",
   },
   "home.hero.title": {
-    en: "Factory prices, in your currency.",
-    bn: "কারখানার দাম, আপনার মুদ্রায়।",
+    en: "Hand-picked China, in your currency.",
+    bn: "হাতে বাছাই চীনা পণ্য, আপনার মুদ্রায়।",
   },
   "home.hero.subhead": {
-    en: "Browse {count} catalog products with one all-in BDT price — factory, freight, customs, and our 3% service fee. Nothing hidden.",
-    bn: "{count}টি ক্যাটালগ পণ্য দেখুন, একটি সব-অন্তর্ভুক্ত বিডিটি মূল্যে — কারখানা, ফ্রেইট, কাস্টমস এবং আমাদের ৩% সার্ভিস ফি। কিছুই লুকানো নেই।",
+    en: "{count} trending products from Pinduoduo, Taobao, and other China sources, hand-curated by our team. One all-in BDT price — factory, freight, customs, and our 3% service fee. Nothing hidden.",
+    bn: "{count}টি ট্রেন্ডি পণ্য পিন্ডুডুও, তাওবাও এবং অন্যান্য চীনা উৎস থেকে, আমাদের টিম সাবধানে বাছাই করেছে। একটি সব-অন্তর্ভুক্ত বিডিটি মূল্যে — কারখানা, ফ্রেইট, কাস্টমস এবং আমাদের ৩% সার্ভিস ফি। কিছুই লুকানো নেই।",
   },
   "home.hero.cta.browse": { en: "Browse {count} products", bn: "{count}টি পণ্য দেখুন" },
 

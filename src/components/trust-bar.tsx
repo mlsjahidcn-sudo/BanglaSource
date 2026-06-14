@@ -22,13 +22,7 @@ const FALLBACK: Stats = {
   total_saved_bdt: 0,
 };
 
-export function TrustBar({
-  activeCount,
-  productCount,
-}: {
-  activeCount?: number;
-  productCount?: number;
-}) {
+export function TrustBar() {
   const [stats, setStats] = useState<Stats>(FALLBACK);
   useEffect(() => {
     let cancelled = false;
@@ -47,7 +41,12 @@ export function TrustBar({
     };
   }, []);
 
-  const ap = stats.active_products || activeCount || productCount || 0;
+  // Phase 27 (hand-picked pivot): the trust-bar's "Live products"
+  // stat now comes from the API (which already filters 1688 out)
+  // — we DON'T fall back to `activeCount` or `productCount` from
+  // props because those still include the hidden 1688 stock and
+  // would over-state the visible catalog.
+  const ap = stats.active_products || 0;
   const vf = stats.verified_factories || 0;
   const tb = stats.total_buyers || 0;
   const saved = stats.total_saved_bdt || 0;
@@ -63,15 +62,15 @@ export function TrustBar({
       <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
         <Stat
           value={ap.toLocaleString()}
-          label="Live products"
-          sub="synced hourly from 1688"
+          label="Hand-picked products"
+          sub="curated by our China team"
           icon="📦"
         />
         <Stat
-          value={vf > 0 ? `${vf}+` : "50+"}
-          label="Verified factories"
-          sub="trade-assured suppliers"
-          icon="🏭"
+          value={vf > 0 ? `${vf}+` : "30+"}
+          label="Trendy sources"
+          sub="Pinduoduo, Taobao, more"
+          icon="✨"
         />
         <Stat
           value={tb > 0 ? `${tb}+` : "1+"}

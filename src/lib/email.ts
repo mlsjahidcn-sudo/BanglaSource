@@ -226,7 +226,7 @@ export async function notifyWelcome(userId: string): Promise<EmailResult> {
   const html = `
     <div style="font-family: -apple-system, system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #0f172a;">
       <h1 style="font-size: 22px; margin-bottom: 4px;">${greet}</h1>
-      <p>Welcome to BanglaSource — wholesale from 1688/Pinduoduo/Taobao factories, with landed cost all the way to your Dhaka door.</p>
+      <p>Welcome to BanglaSource — hand-picked wholesale from Chinese factories (Pinduoduo, Taobao, and other trending China sources), with landed cost all the way to your Dhaka door.</p>
 
       <p style="margin-top: 20px;"><strong>Here's the playbook for your first 10 minutes:</strong></p>
       <ol style="padding-left: 20px; line-height: 1.7;">
@@ -572,7 +572,7 @@ export async function notifyPriceAlert(
     const html = `
       <div style="font-family: -apple-system, system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #0f172a;">
         <h1 style="font-size: 22px; margin-bottom: 4px;">${greet}</h1>
-        <p>The price of <strong>${productTitle}</strong> just ${dir} <strong>${pct}%</strong> on 1688.</p>
+        <p>The price of <strong>${productTitle}</strong> just ${dir} <strong>${pct}%</strong> on the supplier.</p>
         <table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px;">
           <tr style="border-bottom: 1px solid #e2e8f0;">
             <td style="padding: 8px 0; color: #64748b;">Old (FOB ¥)</td>

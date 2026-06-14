@@ -116,13 +116,13 @@ export const TOOL_DEFS: ToolDef[] = [
   {
     name: "product_detail",
     description:
-      "Full detail of a single product by its source_id (the 12-digit 1688 ID) or numeric id. Use when the admin asks about a specific product.",
+      "Full detail of a single product by its source_id (the public URL slug — 12-digit for Pinduoduo/Taobao items, or a short slug for manual entries) or numeric id. Use when the admin asks about a specific product.",
     parameters: {
       type: "object",
       properties: {
         source_id: {
           type: "string",
-          description: "12-digit 1688 source_id, e.g. 873514490218",
+          description: "product source_id (URL slug)",
         },
         id: { type: "integer", description: "numeric products.id" },
       },
@@ -131,7 +131,7 @@ export const TOOL_DEFS: ToolDef[] = [
   {
     name: "sync_history",
     description:
-      "Recent sync_runs (the 1688 ingest runs). Use to see 'when did we last sync?' and how many products were touched.",
+      "Recent product edits (the most recent writes to the products table). Use to see 'what did we add / change lately?'",
     parameters: {
       type: "object",
       properties: {
@@ -341,11 +341,17 @@ export async function runTool(
         return { ok: !error, tool: name, result: data, error: error?.message };
       }
       case "sync_history": {
+        // Phase 27 (hand-picked pivot, 2026-06-15): the catalog is no
+        // longer auto-synced, so sync_runs is mostly empty. The
+        // closest equivalent is "most recent product writes" — a
+        // admin can use this to see what the team added or changed
+        // lately. Kept the name `sync_history` for backwards compat
+        // with any existing tool-calling history.
         const limit = Math.min(50, Math.max(1, (args.limit as number) ?? 10));
         const { data, error } = await supabase
-          .from("sync_runs")
-          .select("id, started_at, finished_at, source, status, products_seen, products_inserted, products_updated, products_failed, error")
-          .order("started_at", { ascending: false })
+          .from("products")
+          .select("source_id, title_en, updated_at, active")
+          .order("updated_at", { ascending: false })
           .limit(limit);
         return { ok: !error, tool: name, result: data ?? [], error: error?.message };
       }

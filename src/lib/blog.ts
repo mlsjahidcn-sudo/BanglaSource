@@ -3,8 +3,15 @@
 // Phase 25: a minimal blog content store. The first post is
 // a deep-dive on Bangladesh import duty (BD customs
 // classification, AT/VAT math, common mistakes). The second
-// is a beginner-friendly "how to import from 1688 to
+// is a beginner-friendly "how to import from China to
 // Bangladesh" guide that ranks for the high-intent keyword.
+//
+// Phase 27 (2026-06-15): the 1688-specific framing was replaced
+// with the actual hand-picked flow — Pinduoduo + Taobao + other
+// trending China sources — since BanglaSource no longer
+// auto-imports from 1688. Use BanglaSource's /admin/products/new
+// flow or a sourcing agent to add a product; the workflow on
+// the buyer side (BDT, landed cost, customs math) is unchanged.
 //
 // We keep posts as code (not in a CMS) because:
 //   1. The volume is 1-2 posts/month, low enough that the
@@ -90,11 +97,11 @@ const POSTS: BlogPost[] = [
       { type: "h2", text: "Where the specific ৳/kg duty comes from" },
       {
         type: "p",
-        text: "Bangladesh uses a per-kilogram specific duty (not the ad-valorem % that the rest of the world uses). Each HS code maps to a ৳/kg number, e.g. 6109 T-shirts = ৳150/kg, 8517 phone accessories = ৳240/kg. The product you import is the duty class it falls into — not the category on the 1688 listing.",
+        text: "Bangladesh uses a per-kilogram specific duty (not the ad-valorem % that the rest of the world uses). Each HS code maps to a ৳/kg number, e.g. 6109 T-shirts = ৳150/kg, 8517 phone accessories = ৳240/kg. The product you import is the duty class it falls into — not the category on the supplier's listing.",
       },
       {
         type: "p",
-        text: "This is the bit that bites new importers. Two products in the same 1688 category (e.g. \"phone case\") can land in completely different HS codes depending on the material (silicone vs leather vs plastic) and the function (case vs stand vs mount). A misclassification can cost you 3-5x the actual duty.",
+        text: "This is the bit that bites new importers. Two products in the same supplier category (e.g. \"phone case\") can land in completely different HS codes depending on the material (silicone vs leather vs plastic) and the function (case vs stand vs mount). A misclassification can cost you 3-5x the actual duty.",
       },
       { type: "h2", text: "Mistake 1 — not adding weight-conditional floors" },
       {
@@ -139,40 +146,46 @@ const POSTS: BlogPost[] = [
     ],
   },
   {
-    slug: "how-to-import-from-1688-to-bangladesh",
-    title: "How to import from 1688 to Bangladesh: a step-by-step first-order guide",
+    slug: "how-to-import-from-china-to-bangladesh",
+    title:
+      "How to import from China to Bangladesh: a first-order guide for new wholesalers",
     description:
-      "From your first 1688 search to the shipment clearing Bangladesh customs — the exact 7-step flow, what to pay in CNY vs BDT, and how to avoid the 3 most common payment scams.",
-    publishedAt: "2026-06-08",
+      "From finding a trending product on Pinduoduo or Taobao to a shipment clearing Bangladesh customs — the exact 7-step flow, what to pay in CNY vs BDT, and how to avoid the 3 most common payment scams.",
+    publishedAt: "2026-06-15",
     author: "BanglaSource",
-    readingMinutes: 7,
+    readingMinutes: 8,
     body: [
       {
         type: "p",
-        text: "1688 is the Alibaba-owned wholesale marketplace where 80% of Bangladesh's importable goods originate. The prices are 30-60% lower than what you'd find locally because there's no middleman — you're buying direct from the factory. But the platform is in Chinese, payments are in CNY, and shipping to Bangladesh requires 3 different freight forwarders. Here's the actual workflow.",
+        text: "Most of the goods on Bangladeshi shelves started as a single product on a Chinese wholesale site — Pinduoduo, Taobao, or one of a dozen smaller ones. The prices are 30-60% lower than what you'd find locally because there's no middleman — you're buying direct from the factory or the wholesaler. But the platforms are in Chinese, payments are in CNY, and shipping to Bangladesh needs a freight forwarder. Here's the actual workflow.",
+      },
+      { type: "h2", text: "Why hand-pick instead of bulk-import" },
+      {
+        type: "p",
+        text: "Scraping the entire 1688 catalog and re-listing it is a 2018 play. The bulk of that inventory is now 2-3 years old, the trending products have moved on, and your competitor already has the same listings. The current play is to spot a trending product on Pinduoduo or Taobao (where Chinese consumers are actually buying), verify it's not yet saturated in Bangladesh, and add it to your catalog before anyone else does. BanglaSource does this curation for you on the home page — every product is hand-picked by our China team, with the price and landed cost pre-computed.",
       },
       { type: "h2", text: "Step 1 — find the right product" },
       {
         type: "p",
-        text: "Search 1688.com in Chinese (or use the Chrome auto-translate extension). Look for products with:",
+        text: "Browse the trending tabs on Pinduoduo (pinduoduo.com) and Taobao (world.taobao.com). Look for products with:",
       },
       {
         type: "ul",
         items: [
-          "≥ 30-day sales volume (the factory is real, not a dropshipper)",
-          "≥ 4.5 star rating with > 50 reviews",
-          "Listed price is per-piece, not per-lot (very common gotcha)",
-          "Tier pricing is visible (lower per-unit at higher quantities)",
+          "≥ 10,000 units sold in the last 30 days (the trend is real, not a flash sale)",
+          "Recent launch (within 6-8 months — older items are saturated)",
+          "Visible tier pricing (lower per-unit at higher quantities)",
+          "Bangladesh-relevant audience: electronics, beauty, watches, jewelry, bags, shoes, sunglasses",
         ],
       },
       {
         type: "p",
-        text: "Cross-check on Alibaba (the international-facing sister site) — if the same factory is on both at 30-50% markup, that's a real factory. If they're only on 1688, ask the factory's rep for their Alibaba URL anyway.",
+        text: "Cross-check on Alibaba (alibaba.com) for the same factory. If the same factory shows up on the international site at a 30-50% markup, the source is real and can be exported.",
       },
       { type: "h2", text: "Step 2 — verify HS code + duty" },
       {
         type: "p",
-        text: "Before you talk price, look up the HS code in the Bangladesh customs tariff. Use the NBR's online search at banglepad.gov.bd or this older fallback: bangladeshcustoms.gov.bd. The HS code tells you the ৳/kg specific duty, which is 30-50% of your landed cost for most goods.",
+        text: "Before you commit, look up the HS code in the Bangladesh customs tariff. Use the NBR's online search at banglepad.gov.bd or this older fallback: bangladeshcustoms.gov.bd. The HS code tells you the ৳/kg specific duty, which is 30-50% of your landed cost for most goods. On BanglaSource, every product's PDP shows the customs class + per-kg duty that's been verified by our team — use it as a sanity check.",
       },
       {
         type: "callout",
@@ -182,16 +195,16 @@ const POSTS: BlogPost[] = [
       { type: "h2", text: "Step 3 — request samples (CNY 100-500)" },
       {
         type: "p",
-        text: "Always sample. The factory's catalog photos are taken under ideal lighting on units they hand-picked. The real production batch is 5-10% off in color, weight, or finish. Sample cost is 1-3% of your bulk order; it prevents 100% of a bad-batch disaster.",
+        text: "Always sample. The catalog photos are taken under ideal lighting on units the supplier hand-picked. The real production batch is 5-10% off in color, weight, or finish. Sample cost is 1-3% of your bulk order; it prevents 100% of a bad-batch disaster.",
       },
       {
         type: "p",
-        text: "Pay for samples via Wise (cheapest FX) or PayPal (most protected for new buyers). DO NOT pay samples via bank wire to a personal account — that's the #1 scam pattern on 1688.",
+        text: "Pay for samples via Wise (cheapest FX) or PayPal (most protected for new buyers). DO NOT pay samples via bank wire to a personal account — that's the #1 scam pattern on Chinese wholesale sites.",
       },
       { type: "h2", text: "Step 4 — negotiate (yes, you can)" },
       {
         type: "p",
-        text: "The listed price is not the final price. Open the chat, send a polite message in Chinese (use Translate), and ask for the \"best price for 1,000 pcs\". The factory will come back 5-15% lower. If you're placing a 5,000+ pcs order, ask for \"VIP price\" — that's another 5-10% off.",
+        text: "The listed price is not the final price. Open the chat, send a polite message in Chinese (use Translate), and ask for the \"best price for 1,000 pcs\". The supplier will come back 5-15% lower. If you're placing a 5,000+ pcs order, ask for \"VIP price\" — that's another 5-10% off.",
       },
       { type: "h2", text: "Step 5 — choose your freight" },
       {
@@ -208,25 +221,21 @@ const POSTS: BlogPost[] = [
       },
       {
         type: "p",
-        text: "You don't book this directly. The 1688 factory or a third-party agent (search \"Bangladesh sourcing agent\" on Google) consolidates orders from 5-10 factories and ships them together. That's how you hit 5kg+ on air and 1+ CBM on sea.",
+        text: "You don't book this directly. A third-party agent (search \"Bangladesh sourcing agent\" on Google) or a platform like BanglaSource consolidates orders from 5-10 factories and ships them together. That's how you hit 5kg+ on air and 1+ CBM on sea.",
       },
-      { type: "h2", text: "Step 6 — pay (CNY 70% deposit, 30% on copy of B/L)" },
+      { type: "h2", text: "Step 6 — pay (100% upfront via BanglaSource, or 30/70 with a sourcing agent)" },
       {
         type: "p",
-        text: "Industry standard is 30% deposit on order, 70% balance against a copy of the Bill of Lading (the ocean shipping receipt). For air shipments it's usually 100% upfront because the order is smaller and the factory's risk is higher.",
+        text: "If you use BanglaSource, the order is 100% upfront in BDT (full prepayment) — you pay once, we pay the factory in CNY, the forwarder in BDT, and the customs broker in BDT. No FX exposure, no multi-currency reconciliation. The order sits in escrow until you confirm delivery.",
       },
       {
         type: "p",
-        text: "Pay via bank wire to the factory's corporate account (verify the account name matches their business license — this catches 95% of the personal-account scams). The factory sends a proforma invoice with their bank details.",
+        text: "If you use a sourcing agent directly, industry standard is 30% deposit on order, 70% balance against a copy of the Bill of Lading. For air shipments it's usually 100% upfront because the order is smaller and the factory's risk is higher. Pay via bank wire to the factory's corporate account (verify the account name matches their business license — this catches 95% of the personal-account scams).",
       },
       { type: "h2", text: "Step 7 — customs clearance + final-mile" },
       {
         type: "p",
-        text: "Your freight forwarder or sourcing agent handles the customs broker in Bangladesh. They file the Import General Manifest (IGM), pay the duty + VAT + AIT on your behalf, and deliver the shipment to your door (or your warehouse in Chittagong / Dhaka).",
-      },
-      {
-        type: "p",
-        text: "Expect to pay the broker 1-2% of the CIF value as a fee. They want the broker fee in cash, in advance. Factor that into your model.",
+        text: "Your freight forwarder or sourcing agent handles the customs broker in Bangladesh. They file the Import General Manifest (IGM), pay the duty + VAT + AIT on your behalf, and deliver the shipment to your door (or your warehouse in Chittagong / Dhaka). Expect to pay the broker 1-2% of the CIF value as a fee, usually cash in advance — factor that into your model.",
       },
       {
         type: "callout",

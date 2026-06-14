@@ -1,10 +1,14 @@
 // /lib/admin-nav.ts
 // Admin portal sidebar config.
+//
+// Phase 27 (hand-picked pivot, 2026-06-15): removed Sync and
+// Discoveries nav items — the catalog is now hand-curated via
+// /admin/products/new, so there's nothing to auto-sync or to
+// review from 1688 keyword search. The `discoveries` count
+// in the counts object is also no longer used.
 
 import {
   IconHome,
-  IconSync,
-  IconSearch,
   IconChart,
   IconAlert,
   IconQuote,
@@ -22,7 +26,6 @@ import type { NavGroup } from "@/components/portal-shell";
 export const adminNav = (counts: {
   products: number;
   openAlerts: number;
-  discoveries: number;
   quotes: number;
   trafficLast7d: number;
   openOrders: number;
@@ -32,12 +35,6 @@ export const adminNav = (counts: {
     label: "Overview",
     items: [
       { label: "Dashboard", href: "/admin", icon: <IconHome />, exact: true },
-      {
-        label: "Sync",
-        href: "/admin/sync",
-        icon: <IconSync />,
-        badge: counts.products,
-      },
       {
         label: "Traffic",
         href: "/admin/traffic",
@@ -64,12 +61,6 @@ export const adminNav = (counts: {
         label: "Image agent",
         href: "/admin/images",
         icon: <IconImage />,
-      },
-      {
-        label: "Discoveries",
-        href: "/admin/discovery",
-        icon: <IconSearch />,
-        badge: counts.discoveries,
       },
     ],
   },

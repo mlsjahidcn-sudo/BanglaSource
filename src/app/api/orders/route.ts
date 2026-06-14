@@ -27,9 +27,8 @@ const RATE_LIMIT = 30;
 const RATE_WINDOW_MS = 60_000;
 
 // Mirrors `CartItem` from src/lib/cart.ts but on the wire we use
-// `source_id` (the 1688-style id string the catalog uses) instead
-// of the Supabase bigint — the product API exposes that. We resolve
-// it server-side.
+// `source_id` (the public product slug) instead of the Supabase
+// bigint — the product API exposes that. We resolve it server-side.
 type WireCartItem = {
   source_id: string;
   qty: number;

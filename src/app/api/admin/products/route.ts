@@ -416,7 +416,7 @@ async function translateAll(
   descriptionEn: string;
   descriptionBn: string;
 }> {
-  const system = `You are a product listing translator for a Bangladesh B2B marketplace. The source is Chinese (1688 / Pinduoduo / Taobao wholesale). Output ONLY valid JSON in this exact shape, no prose:
+  const system = `You are a product listing translator for a Bangladesh B2B marketplace. The source is Chinese wholesale — Pinduoduo, Taobao, or other trending China sources. Output ONLY valid JSON in this exact shape, no prose:
 
 {
   "titleEn": "<English title, max 80 chars, natural for a buyer in Bangladesh>",

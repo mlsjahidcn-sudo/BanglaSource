@@ -16,7 +16,7 @@ import { getServiceRoleClient } from "@/lib/supabase/server";
 import { requireAdminApi } from "@/lib/portal-auth";
 import { deepseekJson, sha256 } from "@/lib/deepseek";
 
-const SYSTEM = `You rewrite 1688.com (Chinese wholesale) product listings for a Bangladesh B2B marketplace.
+const SYSTEM = `You rewrite Chinese wholesale product listings (Pinduoduo, Taobao, or any hand-picked China source) for a Bangladesh B2B marketplace.
 
 Given a Chinese title + supplier + price range, produce a JSON object with:
 - "title_en": string ≤ 90 chars. Natural English a Bangladeshi importer would use. Drop brand codes, "新款", "跨境", "工厂", and supplier-specific codes. Keep technical specs (TWS, ANC, USB-C, IP67, etc.) and color.

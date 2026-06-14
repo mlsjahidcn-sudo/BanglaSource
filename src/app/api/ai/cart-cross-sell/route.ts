@@ -20,6 +20,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceRoleClient } from "@/lib/supabase/server";
 import { rateLimit, clientKey } from "@/lib/rate-limit";
+import { NOT_FROM_1688 } from "@/lib/source-filter";
 
 export const dynamic = "force-dynamic";
 
@@ -55,12 +56,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, items: [] });
   }
   const supabase = getServiceRoleClient();
-  // Step 1: categories of the cart items
-  const { data: inCart } = await supabase
-    .from("products")
-    .select("source_id, category")
-    .in("source_id", sourceIds)
-    .eq("active", true);
+  // Step 1: categories of the cart items. Public surface — never
+  // 1688 source.
+  const { data: inCart } = await NOT_FROM_1688(
+    supabase
+      .from("products")
+      .select("source_id, category"),
+  ).in("source_id", sourceIds).eq("active", true);
   if (!inCart || inCart.length === 0) {
     return NextResponse.json({ ok: true, items: [] });
   }
@@ -69,13 +71,15 @@ export async function POST(req: NextRequest) {
   );
   const excludeIds = new Set(sourceIds);
   // Step 2: top popular in those categories
-  const { data: candidates, error } = await supabase
-    .from("products")
-    .select(
-      "source_id, title_en, title_bn, images, category, markup_pct, weight_kg, volume_cbm, customs_duty_per_kg, price_tiers(price_cny_fen)",
-    )
-    .in("category", categories)
-    .eq("active", true)
+  const { data: candidates, error } = await NOT_FROM_1688(
+    supabase
+      .from("products")
+      .select(
+        "source_id, title_en, title_bn, images, category, markup_pct, weight_kg, volume_cbm, customs_duty_per_kg, price_tiers(price_cny_fen)",
+      )
+      .in("category", categories)
+      .eq("active", true),
+  )
     .order("order_count_30d", { ascending: false })
     .order("rating_overall", { ascending: false })
     .limit(50);

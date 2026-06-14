@@ -3,7 +3,7 @@
 // Phase 25: SEO content surface. The two posts in /lib/blog.ts
 // target the two highest-intent Bangladesh import queries
 // ("bangladesh customs duty import from china" and "how to
-// import from 1688 to bangladesh"). Each post is rendered
+// import from China to bangladesh"). Each post is rendered
 // with Article JSON-LD on its own page; this index just
 // links to them.
 

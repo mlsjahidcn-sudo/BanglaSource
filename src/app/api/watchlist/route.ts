@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     );
   }
   let productId = body.product_id;
-  // Accept source_id (the public 12-digit 1688 ID) too — UI passes
+  // Accept source_id (the public product URL slug) too — UI passes
   // source_id because that's what the product card / PDP knows.
   if (!productId && body.source_id) {
     const { data, error } = await supabase

@@ -14,7 +14,6 @@ async function loadCounts() {
     const [
       products,
       quotes,
-      discoveries,
       alerts,
       since7dViews,
       openOrders,
@@ -22,10 +21,6 @@ async function loadCounts() {
     ] = await Promise.all([
       supabase.from("products").select("id", { count: "exact", head: true }),
       supabase.from("quotes").select("id", { count: "exact", head: true }),
-      supabase
-        .from("discovered_products")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "new"),
       supabase
         .from("price_alert_log")
         .select("id", { count: "exact", head: true })
@@ -54,7 +49,6 @@ async function loadCounts() {
     return {
       products: products.count ?? 0,
       quotes: quotes.count ?? 0,
-      discoveries: discoveries.count ?? 0,
       openAlerts: alerts.count ?? 0,
       openQuotes: 0,
       trafficLast7d: since7dViews.count ?? 0,
@@ -65,7 +59,6 @@ async function loadCounts() {
     return {
       products: 0,
       quotes: 0,
-      discoveries: 0,
       openAlerts: 0,
       openQuotes: 0,
       trafficLast7d: 0,

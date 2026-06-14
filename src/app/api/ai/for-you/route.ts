@@ -31,6 +31,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceRoleClient, getServerClient } from "@/lib/supabase/server";
 import { rateLimit, clientKey } from "@/lib/rate-limit";
+import { NOT_FROM_1688 } from "@/lib/source-filter";
 
 export const dynamic = "force-dynamic";
 
@@ -56,12 +57,14 @@ type Product = {
 
 // Public, anonymous-friendly feed: top by rating × log(orders)
 async function buildAnonFeed(limit: number, supabase: ReturnType<typeof getServiceRoleClient>) {
-  const { data, error } = await supabase
-    .from("products")
-    .select(
-      "id, source_id, title_en, title_bn, images, category, factory_moq, rating_overall, order_count_30d, price_tiers(price_cny_fen), active",
-    )
-    .eq("active", true)
+  const { data, error } = await NOT_FROM_1688(
+    supabase
+      .from("products")
+      .select(
+        "id, source_id, title_en, title_bn, images, category, factory_moq, rating_overall, order_count_30d, price_tiers(price_cny_fen), active",
+      )
+      .eq("active", true),
+  )
     .order("rating_overall", { ascending: false })
     .order("order_count_30d", { ascending: false })
     .limit(200);
@@ -173,10 +176,11 @@ export async function GET(req: NextRequest) {
     viewedSourceIds.add(sid);
   }
   if (viewedSourceIds.size > 0) {
-    const { data: vp } = await supabase
-      .from("products")
-      .select("source_id, category")
-      .in("source_id", Array.from(viewedSourceIds));
+    const { data: vp } = await NOT_FROM_1688(
+      supabase
+        .from("products")
+        .select("source_id, category"),
+    ).in("source_id", Array.from(viewedSourceIds));
     for (const p of vp ?? []) {
       if (p.category) viewedCats.add(p.category);
     }
@@ -187,10 +191,11 @@ export async function GET(req: NextRequest) {
   const coViewed = new Set<string>();
   if (watchedProductIds.size > 0) {
     // Get the source_ids for the watchlist
-    const { data: wl } = await supabase
-      .from("products")
-      .select("id, source_id")
-      .in("id", Array.from(watchedProductIds));
+    const { data: wl } = await NOT_FROM_1688(
+      supabase
+        .from("products")
+        .select("id, source_id"),
+    ).in("id", Array.from(watchedProductIds));
     const wlSourceIds = (wl ?? []).map((p) => p.source_id);
     if (wlSourceIds.length > 0) {
       const { data: cv } = await supabase
@@ -221,12 +226,14 @@ export async function GET(req: NextRequest) {
     ...Array.from(watchedProductIds).map((id) => id.toString()),
     ...Array.from(viewedSourceIds),
   ]);
-  const { data: catalog, error } = await supabase
-    .from("products")
-    .select(
-      "id, source_id, title_en, title_bn, images, category, factory_moq, rating_overall, order_count_30d, price_tiers(price_cny_fen), active",
-    )
-    .eq("active", true)
+  const { data: catalog, error } = await NOT_FROM_1688(
+    supabase
+      .from("products")
+      .select(
+        "id, source_id, title_en, title_bn, images, category, factory_moq, rating_overall, order_count_30d, price_tiers(price_cny_fen), active",
+      )
+      .eq("active", true),
+  )
     .limit(500);
   if (error || !catalog) {
     return NextResponse.json(

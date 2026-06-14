@@ -3,9 +3,15 @@
 //
 // "Why BanglaSource" comparison table — the strongest conversion
 // asset on the home page. Three columns: BanglaSource vs
-// Direct 1688 vs Local Importer. Buyers in Bangladesh often
-// compare these three; this side-by-side answer removes the
-// comparison from their head.
+// going-direct-to-a-factory vs Local Importer. Buyers in
+// Bangladesh often compare these three; this side-by-side answer
+// removes the comparison from their head.
+//
+// Phase 27 (hand-picked pivot, 2026-06-15): the "Direct 1688"
+// column was renamed to "Factory + freight forwarder" since
+// "1688" no longer reflects the recommended source — the model
+// is hand-pick from any China wholesale site (Pinduoduo,
+// Taobao, etc.) plus a sourcing agent.
 
 import Link from "next/link";
 
@@ -32,7 +38,7 @@ const ROWS = [
   {
     feature: "Quality verified",
     bs: "✓ Trade-assurance + manual review",
-    direct: "✗ 1688 quality varies wildly",
+    direct: "✗ Factory quality varies wildly",
     local: "✓ Usually pre-checked",
   },
   {
@@ -92,7 +98,7 @@ export function ValueProps() {
                   </span>
                 </th>
                 <th className="text-left p-4 font-semibold text-fg-muted w-[25%]">
-                  1688 + freight forwarder
+                  Factory + freight forwarder
                 </th>
                 <th className="text-left p-4 font-semibold text-fg-muted w-[25%]">
                   Local Dhaka importer
