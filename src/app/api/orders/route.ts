@@ -55,6 +55,15 @@ type PostBody = {
   shipping_mode: ShippingMode;
   payment_method: "bkash" | "bank" | "cod" | "usdt";
   address: WireAddress;
+  /**
+   * Optional. When the buyer has a saved address (Phase 19)
+   * and pre-filled the checkout from it, this points at the
+   * `public.addresses.id` we should record on the order.
+   * The server validates that this id belongs to the buyer.
+   * The address_snapshot (jsonb) is still the source of truth
+   * for the order's own display — this column is supplementary.
+   */
+  address_id?: number;
   buyer_note?: string;
   items: WireCartItem[];
 };
@@ -139,6 +148,35 @@ export async function POST(req: NextRequest) {
       { error: "bad_address", message: "Address is incomplete." },
       { status: 400 },
     );
+  }
+
+  // ── Optional address_id (Phase 19). If the client passed one,
+  //    verify it actually belongs to this user — RLS will catch
+  //    cross-user access but we want a clean 4xx error.
+  let resolvedAddressId: number | null = null;
+  if (body.address_id != null) {
+    if (!Number.isInteger(body.address_id) || body.address_id <= 0) {
+      return NextResponse.json(
+        { error: "bad_address_id", message: "address_id must be a positive integer." },
+        { status: 400 },
+      );
+    }
+    const { data: addr, error: addrErr } = await sb
+      .from("addresses")
+      .select("id, user_id")
+      .eq("id", body.address_id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (addrErr) {
+      return NextResponse.json({ error: addrErr.message }, { status: 500 });
+    }
+    if (!addr) {
+      return NextResponse.json(
+        { error: "address_not_found", message: "Saved address not found for this user." },
+        { status: 404 },
+      );
+    }
+    resolvedAddressId = addr.id as number;
   }
 
   // ── Minimum weight check (Phase 11).
@@ -255,6 +293,7 @@ export async function POST(req: NextRequest) {
     p_total_bdt: total_bdt,
     p_deposit_bdt: deposit_bdt,
     p_balance_bdt: balance_bdt,
+    p_address_id: resolvedAddressId,
     p_address_snapshot: body.address,
     p_buyer_note: body.buyer_note ?? null,
     p_items: resolved.map((r, i) => ({

@@ -21,6 +21,23 @@ type Address = {
   address_line: string;
 };
 
+type SavedAddress = {
+  id: number;
+  label: "Home" | "Office" | "3PL" | "Factory" | "Other";
+  full_name: string;
+  phone: string;
+  country: string;
+  district: string;
+  address_line: string;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+// Empty sentinel — no saved address selected. User is filling
+// out the form fresh (e.g. first-time buyer, or one-off delivery).
+const SAVED_NONE = -1;
+
 export function CheckoutClient() {
   const { t } = useLang();
   const router = useRouter();
@@ -41,6 +58,12 @@ export function CheckoutClient() {
   const [signedInUserId, setSignedInUserId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [errorKey, setErrorKey] = useState<string | null>(null);
+  // Phase 19: saved addresses. -1 = "type a new one" (default
+  // when the user has no saved addresses, or chooses not to use
+  // one).
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<number>(SAVED_NONE);
+  const [addressesLoaded, setAddressesLoaded] = useState(false);
 
   // Session
   useEffect(() => {
@@ -55,6 +78,68 @@ export function CheckoutClient() {
     });
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  // Phase 19: load saved addresses. The buyer is signed-in here
+  // (sign-in guard above). We pre-select the default so the
+  // buyer doesn't have to do anything; if there's no default
+  // we pre-select the most-recent. If there are no addresses
+  // at all, we leave the form empty.
+  useEffect(() => {
+    if (!signedInUserId) {
+      setAddressesLoaded(false);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/buyer/addresses");
+        if (!res.ok) {
+          setAddressesLoaded(true);
+          return;
+        }
+        const j = await res.json();
+        if (cancelled) return;
+        const list: SavedAddress[] = j.addresses ?? [];
+        setSavedAddresses(list);
+        // Pre-select: default first, else most-recent, else none.
+        const def = list.find((a) => a.is_default) ?? list[0];
+        if (def) {
+          setSelectedAddressId(def.id);
+          setAddress({
+            full_name: def.full_name,
+            phone: def.phone,
+            district: def.district,
+            address_line: def.address_line,
+          });
+        } else {
+          setSelectedAddressId(SAVED_NONE);
+        }
+      } finally {
+        if (!cancelled) setAddressesLoaded(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [signedInUserId]);
+
+  // When the user switches saved addresses, hydrate the form.
+  function applyAddress(id: number) {
+    setSelectedAddressId(id);
+    if (id === SAVED_NONE) {
+      setAddress({ full_name: "", phone: "", district: "", address_line: "" });
+      return;
+    }
+    const a = savedAddresses.find((x) => x.id === id);
+    if (a) {
+      setAddress({
+        full_name: a.full_name,
+        phone: a.phone,
+        district: a.district,
+        address_line: a.address_line,
+      });
+    }
+  }
 
   // Empty-cart guard
   if (hydrated && items.length === 0) {
@@ -150,6 +235,13 @@ export function CheckoutClient() {
             address_line: address.address_line.trim(),
             country: "Bangladesh",
           },
+          // Phase 19: only send address_id if the user actively
+          // selected one of their saved addresses. If they typed
+          // a one-off, we don't claim it came from the address
+          // book.
+          ...(selectedAddressId !== SAVED_NONE
+            ? { address_id: selectedAddressId }
+            : {}),
           buyer_note: buyerNote.trim() || undefined,
           items: items.map((it) => ({
             source_id: it.productId,
@@ -211,6 +303,57 @@ export function CheckoutClient() {
             <p className="mt-1 text-[12.5px] text-fg-muted">
               {t("checkout.address.help")}
             </p>
+            {addressesLoaded && savedAddresses.length > 0 && (
+              <div className="mt-4">
+                <label
+                  htmlFor="saved_address"
+                  className="block text-[10.5px] uppercase tracking-wider text-fg-subtle font-medium mb-1.5"
+                >
+                  Ship to
+                </label>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <select
+                    id="saved_address"
+                    value={selectedAddressId}
+                    onChange={(e) => applyAddress(Number(e.target.value))}
+                    className="flex-1 h-9 px-3 rounded-md border border-border bg-bg text-[13px] outline-none focus:border-cyan-500"
+                  >
+                    {savedAddresses.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.is_default ? "★ " : ""}
+                        {a.label} — {a.full_name}, {a.district}
+                      </option>
+                    ))}
+                    <option value={SAVED_NONE}>+ Use a different address</option>
+                  </select>
+                  <a
+                    href="/buyer/addresses"
+                    className="h-9 px-3 inline-flex items-center justify-center text-[12px] border border-border rounded-md text-fg-muted hover:text-fg hover:bg-bg-soft shrink-0"
+                  >
+                    Manage saved
+                  </a>
+                </div>
+                {selectedAddressId !== SAVED_NONE && (
+                  <p className="mt-2 text-[11.5px] text-fg-muted">
+                    Editing these fields will use the address for this
+                    order only — it won't update your saved address.
+                  </p>
+                )}
+              </div>
+            )}
+            {addressesLoaded && savedAddresses.length === 0 && (
+              <div className="mt-4 text-[12px] text-fg-muted bg-cyan-50 border border-cyan-200 rounded-md p-2.5 flex items-center justify-between gap-3">
+                <span>
+                  Save this address for next time — one tap at /checkout.
+                </span>
+                <a
+                  href="/buyer/addresses?action=new"
+                  className="shrink-0 text-[11.5px] font-medium text-cyan-700 hover:underline"
+                >
+                  Save now →
+                </a>
+              </div>
+            )}
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field
                 id="full_name"
