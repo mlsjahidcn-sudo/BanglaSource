@@ -189,18 +189,6 @@ export const IconAI = ({ size = 16, className }: IconProps) =>
   );
 
 // Icon for the "Import from Pinduoduo / Taobao" admin page.
-// Drawn as a downward arrow into a tray — represents "fetch
-// from a source into our catalog".
-export const IconImport = ({ size = 16, className }: IconProps) =>
-  wrap(
-    size,
-    <>
-      <path d="M8 2v8m0 0l-3-3m3 3l3-3" />
-      <path d="M3 12v1.5A1.5 1.5 0 004.5 15h9a1.5 1.5 0 001.5-1.5V12" />
-    </>,
-    className,
-  );
-
 // Camera / image — used by /admin/images
 export const IconImage = ({ size = 16, className }: IconProps) =>
   wrap(
@@ -220,6 +208,21 @@ export const IconPlus = ({ size = 16, className }: IconProps) =>
     <>
       <rect x="2.5" y="2.5" width="11" height="11" rx="1.5" />
       <path d="M8 5.5v5M5.5 8h5" />
+    </>,
+    className,
+  );
+
+// Clipboard with checkmark — used by /admin/orders.
+// Distinct from IconPackage (which is a 3D box) because orders
+// are a workflow, not inventory.
+export const IconOrders = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <>
+      <rect x="3" y="3" width="10" height="11" rx="1.2" />
+      <path d="M6 1.5h4v2.2H6z" fill="currentColor" stroke="none" />
+      <path d="M5.5 7.5l1.5 1.5L10 6" />
+      <path d="M5 11.5h6" />
     </>,
     className,
   );

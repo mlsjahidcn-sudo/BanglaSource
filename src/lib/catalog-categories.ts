@@ -1,6 +1,6 @@
 // Shared form constants for admin catalog pages.
 //
-// Phase 15c: extracted from /admin/import/_client.tsx so
+// Phase 15c: extracted from the old /admin/import page so
 // /admin/products/new can reuse the same category + label lists.
 
 export const CATEGORIES: { value: string; label: string }[] = [

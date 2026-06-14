@@ -1,10 +1,10 @@
 // /admin/images
 //
-// Phase 15c: image-generation agent UI that works for any product
-// (not just freshly-imported ones). Admin picks a product from a
-// search-as-you-type list, sets a prompt + n + reference URL, and
-// the page calls POST /api/admin/import/[id]/generate-images (which
-// is product-id-based and doesn't care about the import step).
+// Phase 15c + 15d: image-generation agent UI that works for any
+// product. Admin picks a product from a search-as-you-type list,
+// sets a prompt + n + reference URL (single-prompt mode) OR has
+// DeepSeek draft 6 distinct prompts (multi-prompt mode), and the
+// page calls POST /api/admin/images/[id]/generate-{images,prompts}.
 //
 // The page is a thin client; all data fetch happens on the client
 // after admin picks a product. We just hand the client a list of

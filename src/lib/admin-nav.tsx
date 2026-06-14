@@ -12,9 +12,9 @@ import {
   IconTraffic,
   IconPackage,
   IconAI,
-  IconImport,
   IconImage,
   IconPlus,
+  IconOrders,
 } from "@/components/portal-icons";
 import type { NavGroup } from "@/components/portal-shell";
 
@@ -24,6 +24,7 @@ export const adminNav = (counts: {
   discoveries: number;
   quotes: number;
   trafficLast7d: number;
+  openOrders: number;
 }): NavGroup[] => [
   {
     label: "Overview",
@@ -58,11 +59,6 @@ export const adminNav = (counts: {
         icon: <IconPlus />,
       },
       {
-        label: "Import",
-        href: "/admin/import",
-        icon: <IconImport />,
-      },
-      {
         label: "Image agent",
         href: "/admin/images",
         icon: <IconImage />,
@@ -78,6 +74,12 @@ export const adminNav = (counts: {
   {
     label: "Inbound",
     items: [
+      {
+        label: "Orders",
+        href: "/admin/orders",
+        icon: <IconOrders />,
+        badge: counts.openOrders,
+      },
       {
         label: "Quote requests",
         href: "/admin/quotes",

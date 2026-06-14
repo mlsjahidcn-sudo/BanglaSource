@@ -189,11 +189,7 @@ export function ManualProductClient() {
         subtitle={
           <>
             Paste title, description, factory FOB, supplier, and a list of
-            image URLs. No URL scrape — use{" "}
-            <Link href="/admin/import" className="text-cyan-700 underline">
-              Import
-            </Link>{" "}
-            for Pinduoduo / Taobao. Use{" "}
+            image URLs. No URL scrape. Use{" "}
             <Link href="/admin/images" className="text-cyan-700 underline">
               Image agent
             </Link>{" "}

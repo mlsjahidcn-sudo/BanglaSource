@@ -2,14 +2,14 @@
 
 // /admin/images — image-generation agent for any active product.
 //
-// Phase 15c. Three sections:
+// Phase 15c + 15d. Three sections:
 //
 //   1. Product picker — search-as-you-type dropdown over active
 //      products. Shows id, source_id, title, first image.
 //
 //   2. Generate form — two modes:
 //      a) "Auto-generate 6 prompts from title" — one click, calls
-//         /api/admin/import/[id]/generate-prompts which uses
+//         /api/admin/images/[id]/generate-prompts which uses
 //         DeepSeek V4-Flash to draft 6 distinct prompts (front hero,
 //         detail close-up, lifestyle, spec card, scale comparison,
 //         alternate angle). Admin can edit each prompt inline.
@@ -97,7 +97,7 @@ export function ImageAgentClient({
     setGenPromptsLoading(true);
     try {
       const r = await fetch(
-        `/api/admin/import/${selected.id}/generate-prompts`,
+        `/api/admin/images/${selected.id}/generate-prompts`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -160,7 +160,7 @@ export function ImageAgentClient({
         body.n = genN;
       }
       const r = await fetch(
-        `/api/admin/import/${selected.id}/generate-images`,
+        `/api/admin/images/${selected.id}/generate-images`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
