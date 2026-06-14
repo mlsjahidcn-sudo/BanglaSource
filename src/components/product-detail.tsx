@@ -17,6 +17,10 @@ import {
 import { useCart } from "@/lib/cart";
 import { SaveButton } from "@/components/save-button";
 import { useLang } from "@/lib/i18n";
+import {
+  whatsappLink,
+  whatsappProductMessage,
+} from "@/lib/contact";
 
 const BADGE_LABEL: Record<string, { en: string; bn: string }> = {
   verified_factory: { en: "Verified factory", bn: "যাচাইকৃত কারখানা" },
@@ -513,6 +517,34 @@ export function ProductDetail({ product }: { product: Product }) {
                 sourceId={product.source_id}
                 variant="lg"
               />
+              {/* Phase 24: per-product WhatsApp deep link.
+                  Pre-fills a product-context message so
+                  the China desk can pull it up the moment
+                  it lands. Most popular for "I need this
+                  fast" or "can you check stock?". */}
+              <a
+                href={whatsappLink(
+                  whatsappProductMessage(
+                    product.title_en,
+                    product.source_id,
+                    "https://banglasource.com",
+                  ),
+                )}
+                target="_blank"
+                rel="noreferrer"
+                className="h-11 w-full inline-flex items-center justify-center gap-2 rounded-md border border-emerald-300 text-[13.5px] font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M13.6 2.3A7.5 7.5 0 0 0 8 .4 7.5 7.5 0 0 0 1.7 11c.2 1 .5 1.8 1 2.6L1.4 14.6l1.1-.3 2.6-1A7.5 7.5 0 0 0 15.6 8a7.5 7.5 0 0 0-2-5.7zM8 13.5a5.4 5.4 0 0 1-2.7-.7l-.2-.1-1.5.4.4-1.5-.1-.2A5.5 5.5 0 1 1 13.5 8 5.4 5.4 0 0 1 8 13.5zm3-4.1c-.2-.1-1.1-.5-1.3-.6-.2-.1-.3-.1-.5.1l-.6.7c-.1.1-.2.2-.4.1-.2-.1-.8-.3-1.5-1a5.5 5.5 0 0 1-1-1.3c-.1-.2 0-.3.1-.4l.3-.4.2-.3v-.4c0-.1-.5-1.2-.7-1.6-.2-.4-.4-.4-.5-.4h-.4c-.2 0-.4 0-.6.2-.2.2-.8.8-.8 2s.9 2.4 1 2.5c.1.2 1.7 2.6 4.2 3.6.6.2 1 .4 1.4.5.6.2 1.1.1 1.5.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z" />
+                </svg>
+                Talk to us on WhatsApp
+              </a>
               <Button
                 size="md"
                 variant="outline"
