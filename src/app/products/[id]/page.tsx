@@ -4,6 +4,7 @@ import { ProductDetail } from "@/components/product-detail";
 import { RecommendationsCarousel } from "@/components/recommendations-carousel";
 import { ForYou } from "@/components/for-you";
 import { SameFactory } from "@/components/same-factory";
+import { ProductCarousel } from "@/components/product-carousel";
 import { getCatalog, getProduct, dbProductToLegacy } from "@/lib/catalog";
 import { categories } from "@/lib/categories";
 import { FX_CNY_BDT } from "@/lib/pricing";
@@ -12,6 +13,7 @@ import {
   jsonLdScript,
   SITE_URL,
 } from "@/lib/seo";
+import { similarProducts } from "@/lib/popular";
 
 const SITE = SITE_URL;
 
@@ -110,6 +112,22 @@ export default async function ProductPage({ params }: Params) {
     { name: db.title_en, href: `/products/${db.source_id}` },
   ]);
 
+  // Phase 23: similar products (same category + same
+  // supplier ±30% price band). Loaded in parallel with
+  // the page render. Empty list is fine — we just
+  // hide the carousel. (Note: `lowestTier` is already
+  // computed above for the JSON-LD Offer; we reuse it.)
+  const currentMinBdt = lowestTier
+    ? Math.ceil((lowestTier.price_cny_fen / 100) * FX_CNY_BDT)
+    : 0;
+  const similar = await similarProducts(
+    db.category,
+    db.supplier_name ?? "",
+    currentMinBdt,
+    db.source_id,
+    10,
+  ).catch(() => []);
+
   return (
     <>
       <script
@@ -146,6 +164,18 @@ export default async function ProductPage({ params }: Params) {
           supplierName={db.supplier_name ?? ""}
           excludeSourceId={db.source_id}
         />
+        {/* Phase 23: same-category ± price-band + same-
+            supplier candidates. Falls back silently if
+            the query returns empty. */}
+        {similar.length > 0 && (
+          <ProductCarousel
+            eyebrow="You might also like"
+            title="Similar products"
+            items={similar}
+            hrefAll={`/categories/${cat?.slug ?? db.category}`}
+            hrefAllLabel={`Browse all ${cat?.name_en ?? db.category} →`}
+          />
+        )}
         <RecommendationsCarousel productId={db.source_id} />
         <ForYou limit={8} title="More for you" eyebrow="Personalized" className="mt-12" />
       </Container>

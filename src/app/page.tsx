@@ -1,10 +1,17 @@
 import { HomeClient } from "./_home-client";
+import { Container } from "@/components/ui/container";
+import { ProductCarousel } from "@/components/product-carousel";
 import { getServiceRoleClient } from "@/lib/supabase/server";
 import {
   jsonLdScript,
   organizationJsonLd,
   websiteJsonLd,
 } from "@/lib/seo";
+import {
+  popularByViews,
+  recentlyChanged,
+  type PopularProduct,
+} from "@/lib/popular";
 
 // refresh every 5 minutes
 export const revalidate = 60;
@@ -40,8 +47,24 @@ async function loadSyncStats() {
   }
 }
 
+// Phase 23: load both carousels in parallel. Each call is a
+// single SQL query (popular_by_views RPC) or one tight
+// group-by (recentlyChanged). Total wall-time is the
+// slower of the two. Cached for `revalidate` seconds
+// (=60s) at the page level.
+async function loadCarousels() {
+  const [popular, recent] = await Promise.all([
+    popularByViews(7, 12).catch(() => [] as PopularProduct[]),
+    recentlyChanged(7, 12).catch(() => [] as PopularProduct[]),
+  ]);
+  return { popular, recent };
+}
+
 export default async function HomePage() {
-  const syncStats = await loadSyncStats();
+  const [syncStats, carousels] = await Promise.all([
+    loadSyncStats(),
+    loadCarousels(),
+  ]);
   // Phase 25: Organization + WebSite JSON-LD so Google has
   // a single canonical entity + a sitelinks search box.
   return (
@@ -59,6 +82,32 @@ export default async function HomePage() {
         }}
       />
       <HomeClient syncStats={syncStats} />
+      {/* Phase 23: the two new home carousels. Both are
+          server-rendered (data fetched above) and rendered
+          with the same client component the PDP uses. The
+          carousels fall back silently to nothing when
+          the queries return empty (early days of the
+          site) — that's by design, not an error. */}
+      <Container className="pb-20">
+        {carousels.popular.length > 0 && (
+          <ProductCarousel
+            eyebrow="Trending"
+            title="Popular this week"
+            items={carousels.popular}
+            hrefAll="/search?sort=popularity"
+            hrefAllLabel="See all popular →"
+          />
+        )}
+        {carousels.recent.length > 0 && (
+          <ProductCarousel
+            eyebrow="Just moved"
+            title="Recently restocked"
+            items={carousels.recent}
+            hrefAll="/search?sort=newest"
+            hrefAllLabel="See all recent →"
+          />
+        )}
+      </Container>
     </>
   );
 }

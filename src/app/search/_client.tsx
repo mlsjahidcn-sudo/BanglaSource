@@ -237,19 +237,16 @@ function SearchPageInner() {
         <p className="text-[12px] text-rose-600 font-mono">error: {err}</p>
       )}
 
+      {/* Phase 23: when there's no query, show a helper
+          with category quick-picks instead of an empty box.
+          When the query has no matches, show "did you mean"
+          suggestions + browse-all fallback. */}
+      {!loading && q.length < 2 && (
+        <NoQueryHelper />
+      )}
+
       {!loading && q.length >= 2 && results.length === 0 && (
-        <div className="card p-10 text-center">
-          <p className="text-[15px] font-medium">{t("search.empty")}</p>
-          <p className="mt-2 text-[12px] text-fg-muted">
-            Try a different category or remove some filters.
-          </p>
-          <Link
-            href="/categories"
-            className="mt-4 inline-flex h-10 items-center px-4 text-[13px] font-medium rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
-          >
-            {t("cart.empty.cta")}
-          </Link>
-        </div>
+        <NoResultsHelper query={q} parsed={parsed} />
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -290,5 +287,164 @@ export function SearchClient() {
     <Suspense fallback={<Container className="py-10">Loading…</Container>}>
       <SearchPageInner />
     </Suspense>
+  );
+}
+
+// ── Phase 23 helpers ──────────────────────────────────────
+
+const SUGGESTED_QUERIES = [
+  "wireless earphones",
+  "phone case",
+  "sunglasses",
+  "leather bag",
+  "smart watch",
+  "cotton t-shirt",
+];
+
+/**
+ * Shown when the user opens /search without a query
+ * (or types <2 chars). Goal: give them a way to start
+ * searching without first having to know the right
+ * keyword. We surface:
+ *   - The 7 categories as one-click "browse X" chips
+ *   - 6 suggested queries (the most popular search
+ *     intents per the home's product mix)
+ */
+function NoQueryHelper() {
+  const { t, lang } = useLang();
+  return (
+    <div className="space-y-8">
+      <div>
+        <p className="text-[11px] uppercase tracking-wider text-fg-subtle font-medium">
+          {lang === "bn" ? "ক্যাটাগরি" : "Browse by category"}
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {(
+            [
+              { slug: "gadgets", label: lang === "bn" ? "গ্যাজেট" : "Gadgets" },
+              { slug: "eyewear", label: lang === "bn" ? "চশমা" : "Eyewear" },
+              { slug: "shoes", label: lang === "bn" ? "জুতা" : "Shoes" },
+              { slug: "bags", label: lang === "bn" ? "ব্যাগ" : "Bags" },
+              { slug: "watches", label: lang === "bn" ? "ঘড়ি" : "Watches" },
+              { slug: "beauty", label: lang === "bn" ? "বিউটি" : "Beauty" },
+              { slug: "jewelry", label: lang === "bn" ? "গয়না" : "Jewelry" },
+            ] as const
+          ).map((c) => (
+            <Link
+              key={c.slug}
+              href={`/categories/${c.slug}`}
+              className="h-9 px-4 inline-flex items-center text-[13px] rounded-md border border-border bg-bg hover:border-cyan-300 hover:text-cyan-700"
+            >
+              {c.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p className="text-[11px] uppercase tracking-wider text-fg-subtle font-medium">
+          {lang === "bn" ? "চেষ্টা করুন" : "Or try searching for"}
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {SUGGESTED_QUERIES.map((s) => (
+            <Link
+              key={s}
+              href={`/search?q=${encodeURIComponent(s)}`}
+              className="h-8 px-3 inline-flex items-center text-[12px] rounded-full bg-bg-soft text-fg-muted hover:text-fg hover:bg-cyan-50"
+            >
+              {s}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <p className="text-[12.5px] text-fg-muted">
+        Or paste a natural-language query like{" "}
+        <Link
+          href="/search?q=cheap+wireless+earphones+for+running+under+%E0%A7%B3+500"
+          className="text-cyan-700 hover:underline"
+        >
+          cheap wireless earphones under ৳500
+        </Link>
+        {" "}— we use smart search to find what fits.
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Shown when the user has typed a query that returned
+ * zero results. Goal: don't leave them at a dead end.
+ * We surface:
+ *   - The AI-parsed filters (if any) so the user can
+ *     see what we heard and adjust
+ *   - "Did you mean" — a few of the catalog's most-
+ *     common keywords, so the user can pick something
+ *     to start with
+ *   - Browse-all fallback as the always-there
+ *     exit ramp
+ */
+function NoResultsHelper({
+  query,
+  parsed,
+}: {
+  query: string;
+  parsed: Parsed | null;
+}) {
+  const { t, lang } = useLang();
+  return (
+    <div className="card p-8">
+      <p className="text-[15px] font-medium text-fg">
+        {lang === "bn"
+          ? `"${query}" এর জন্য কোনো ফলাফল নেই`
+          : `No results for "${query}"`}
+      </p>
+      <p className="mt-1.5 text-[12.5px] text-fg-muted">
+        {lang === "bn"
+          ? "আলাদা কীওয়ার্ড চেষ্টা করুন অথবা নিচের পরামর্শ থেকে বেছে নিন।"
+          : "Try a different keyword, or pick one of these common searches."}
+      </p>
+
+      {parsed && parsed.keywords.length > 0 && (
+        <p className="mt-4 text-[12px] text-fg-subtle">
+          {lang === "bn" ? "আমরা যা শুনেছি" : "We heard"}:{" "}
+          <span className="font-mono">
+            {parsed.keywords.slice(0, 4).join(", ")}
+          </span>
+        </p>
+      )}
+
+      <div className="mt-5">
+        <p className="text-[10.5px] uppercase tracking-wider text-fg-subtle font-medium">
+          {lang === "bn" ? "চেষ্টা করুন" : "Did you mean"}
+        </p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {SUGGESTED_QUERIES.slice(0, 4).map((s) => (
+            <Link
+              key={s}
+              href={`/search?q=${encodeURIComponent(s)}`}
+              className="h-8 px-3 inline-flex items-center text-[12px] rounded-full bg-bg-soft text-fg-muted hover:text-fg hover:bg-cyan-50"
+            >
+              {s}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-6 flex flex-wrap items-center gap-2">
+        <Link
+          href="/categories"
+          className="h-10 px-4 inline-flex items-center text-[13px] font-medium rounded-md bg-cyan-600 text-white hover:bg-cyan-700"
+        >
+          {lang === "bn" ? "ক্যাটাগরি ব্রাউজ করুন" : "Browse all categories"}
+        </Link>
+        <Link
+          href="/"
+          className="h-10 px-4 inline-flex items-center text-[13px] font-medium rounded-md border border-border text-fg hover:bg-bg-soft"
+        >
+          {lang === "bn" ? "হোমে ফিরুন" : "Back to home"}
+        </Link>
+      </div>
+    </div>
   );
 }
