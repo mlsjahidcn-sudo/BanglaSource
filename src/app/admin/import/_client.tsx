@@ -75,6 +75,18 @@ export function ImportClient() {
     imageCount: number;
   } | null>(null);
 
+  // ── Phase 15b: image-generation agent state ──
+  const [genPrompt, setGenPrompt] = useState(
+    "A clean studio product shot on a pure white background, soft natural lighting, no watermarks, professional ecommerce photography, 4K, sharp focus",
+  );
+  const [genN, setGenN] = useState(1);
+  const [genRefUrl, setGenRefUrl] = useState("");
+  const [genRunning, setGenRunning] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
+  const [genResult, setGenResult] = useState<
+    { url: string; slug: string; sizeBytes: number }[]
+  >([]);
+
   async function handleScrape() {
     setScrapeError(null);
     setScraped(null);
@@ -589,7 +601,7 @@ export function ImportClient() {
                   Edit listing →
                 </a>{" "}
                 <a
-                  href={`/products/${savedProduct.sourceId}`}
+                  href={`/products/${savedProduct.source_id}`}
                   className="underline"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -597,6 +609,251 @@ export function ImportClient() {
                   View on site →
                 </a>
               </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ── Step 4 (Phase 15b): Generate website images ── */}
+      {savedProduct && (
+        <section className="card p-6">
+          <h2 className="text-[15px] font-semibold flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-cyan-600 text-white text-[12px] font-semibold flex items-center justify-center">
+              4
+            </span>
+            Generate website images
+            <span className="ml-2 text-[10.5px] uppercase tracking-wider font-medium text-cyan-700 bg-cyan-50 border border-cyan-200 px-2 py-0.5 rounded">
+              GPT Image 2
+            </span>
+          </h2>
+          <p className="mt-2 text-[12px] text-fg-muted">
+            Run the product through the AI image agent to get clean,
+            watermark-free, white-background shots you can add to the listing.
+            Reference images anchor the style; leave blank for text-only
+            generation.
+          </p>
+
+          <div className="mt-4 grid gap-4">
+            <Field label="Prompt" full>
+              <textarea
+                className="input"
+                value={genPrompt}
+                onChange={(e) => setGenPrompt(e.target.value)}
+                maxLength={1500}
+                rows={3}
+                placeholder="Describe the shot you want…"
+              />
+              <p className="mt-1 text-[11px] text-fg-subtle font-mono tnum">
+                {genPrompt.length} / 1500 chars
+              </p>
+            </Field>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Number of images (n)">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setGenN(Math.max(1, genN - 1))}
+                    disabled={genN <= 1}
+                    className="h-9 w-9 rounded-md border border-fg/20 hover:bg-fg/5 disabled:opacity-40"
+                  >
+                    −
+                  </button>
+                  <input
+                    type="number"
+                    className="input text-center"
+                    value={genN}
+                    min={1}
+                    max={4}
+                    onChange={(e) =>
+                      setGenN(
+                        Math.min(4, Math.max(1, parseInt(e.target.value) || 1)),
+                      )
+                    }
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setGenN(Math.min(4, genN + 1))}
+                    disabled={genN >= 4}
+                    className="h-9 w-9 rounded-md border border-fg/20 hover:bg-fg/5 disabled:opacity-40"
+                  >
+                    +
+                  </button>
+                  <span className="text-[11px] text-fg-subtle">
+                    1–4 (each call billed separately; parallelized server-side)
+                  </span>
+                </div>
+              </Field>
+              <Field label="Reference image URL (optional)">
+                <input
+                  type="url"
+                  className="input"
+                  value={genRefUrl}
+                  onChange={(e) => setGenRefUrl(e.target.value)}
+                  placeholder="https://… (blank = first product image)"
+                />
+              </Field>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!savedProduct) return;
+                  setGenError(null);
+                  setGenResult([]);
+                  setGenRunning(true);
+                  try {
+                    const refs: string[] = genRefUrl.trim()
+                      ? [genRefUrl.trim()]
+                      : (scraped?.images ?? []).slice(0, 1);
+                    const r = await fetch(
+                      `/api/admin/import/${savedProduct.id}/generate-images`,
+                      {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          prompt: genPrompt,
+                          n: genN,
+                          referenceImageUrls: refs,
+                          appendToProduct: false, // preview first; admin clicks "Add to product"
+                        }),
+                      },
+                    );
+                    const t = await r.text();
+                    let data: any = {};
+                    try {
+                      data = JSON.parse(t);
+                    } catch {
+                      throw new Error(`Server returned non-JSON: ${t.slice(0, 200)}`);
+                    }
+                    if (!r.ok || !data.ok) {
+                      throw new Error(data.error || `HTTP ${r.status}`);
+                    }
+                    setGenResult(data.images ?? []);
+                  } catch (e) {
+                    setGenError(e instanceof Error ? e.message : "Network error");
+                  } finally {
+                    setGenRunning(false);
+                  }
+                }}
+                disabled={genRunning || !genPrompt.trim()}
+                className="h-10 px-5 rounded-md bg-cyan-600 text-white text-[13px] font-medium hover:bg-cyan-700 disabled:opacity-60"
+              >
+                {genRunning ? "Generating…" : `Generate ${genN} image${genN > 1 ? "s" : ""}`}
+              </button>
+              {genError && (
+                <p className="text-[12px] text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                  {genError}
+                </p>
+              )}
+            </div>
+
+            {genResult.length > 0 && (
+              <div className="mt-2">
+                <p className="text-[12px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
+                  ✓ Generated {genResult.length} image{genResult.length > 1 ? "s" : ""}.
+                  Preview below — click &quot;Add to product&quot; to push them to
+                  the listing&apos;s <code className="font-mono">images[]</code>{" "}
+                  and bust the catalog cache.
+                </p>
+                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {genResult.map((img, i) => (
+                    <div
+                      key={i}
+                      className="border border-fg/15 rounded-md overflow-hidden bg-white"
+                    >
+                      <div className="aspect-square relative bg-fg/5">
+                        <img
+                          src={img.url}
+                          alt={`generated-${i + 1}`}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-2 flex items-center justify-between gap-1">
+                        <span className="text-[10.5px] text-fg-subtle font-mono tnum truncate">
+                          {(img.sizeBytes / 1024).toFixed(0)} KB
+                        </span>
+                        <a
+                          href={img.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10.5px] text-cyan-700 underline"
+                        >
+                          open
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!savedProduct) return;
+                      setGenRunning(true);
+                      setGenError(null);
+                      try {
+                        const refs: string[] = genRefUrl.trim()
+                          ? [genRefUrl.trim()]
+                          : (scraped?.images ?? []).slice(0, 1);
+                        const r = await fetch(
+                          `/api/admin/import/${savedProduct.id}/generate-images`,
+                          {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              prompt: genPrompt,
+                              n: genN,
+                              referenceImageUrls: refs,
+                              appendToProduct: true,
+                            }),
+                          },
+                        );
+                        const t = await r.text();
+                        let data: any = {};
+                        try {
+                          data = JSON.parse(t);
+                        } catch {
+                          throw new Error(`Server returned non-JSON: ${t.slice(0, 200)}`);
+                        }
+                        if (!r.ok || !data.ok) {
+                          throw new Error(data.error || `HTTP ${r.status}`);
+                        }
+                        setSavedProduct((prev) =>
+                          prev && data.product
+                            ? { ...prev, imageCount: data.product.totalImages ?? prev.imageCount + (data.imagesAdded ?? 1) }
+                            : prev,
+                        );
+                        // Clear preview after successful add
+                        setGenResult([]);
+                      } catch (e) {
+                        setGenError(e instanceof Error ? e.message : "Network error");
+                      } finally {
+                        setGenRunning(false);
+                      }
+                    }}
+                    disabled={genRunning}
+                    className="h-9 px-4 rounded-md bg-emerald-600 text-white text-[12.5px] font-medium hover:bg-emerald-700 disabled:opacity-60"
+                  >
+                    {genRunning ? "Adding…" : "Add to product"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGenResult([])}
+                    disabled={genRunning}
+                    className="h-9 px-3 rounded-md border border-fg/20 text-[12.5px] hover:bg-fg/5 disabled:opacity-40"
+                  >
+                    Discard preview
+                  </button>
+                  <a
+                    href={`/admin/products/${savedProduct.id}`}
+                    className="text-[12.5px] text-cyan-700 underline ml-auto"
+                  >
+                    Open admin editor →
+                  </a>
+                </div>
+              </div>
             )}
           </div>
         </section>
