@@ -12,7 +12,7 @@ export const revalidate = 0;
 async function loadCounts(userId: string) {
   try {
     const supabase = getServiceRoleClient();
-    const [openQuotes, watchlist, addresses] = await Promise.all([
+    const [openQuotes, watchlist, addresses, openRFQs] = await Promise.all([
       supabase
         .from("quotes")
         .select("id", { count: "exact", head: true })
@@ -22,14 +22,24 @@ async function loadCounts(userId: string) {
         .from("watchlist")
         .select("id", { count: "exact", head: true })
         .eq("user_id", userId),
-      // The "addresses" table doesn't exist yet; we read from profiles
-      // for the count placeholder. Once the addresses table is added,
-      // swap this.
-      Promise.resolve({ count: 0 }),
+      // Phase 19: addresses table. Counts the buyer's saved
+      // destinations for the sidebar badge.
+      supabase
+        .from("addresses")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId),
+      // Phase 22: open RFQs (status=open or quoted — the
+      // states where the buyer is still waiting for a
+      // factory answer).
+      supabase
+        .from("rfqs")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .in("status", ["open", "quoted"]),
     ]);
     return {
       openQuotes: openQuotes.count ?? 0,
-      rfqs: 0,
+      rfqs: openRFQs.count ?? 0,
       addresses: (addresses as { count: number }).count ?? 0,
       watchlist: watchlist.count ?? 0,
     };

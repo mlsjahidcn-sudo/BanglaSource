@@ -603,3 +603,177 @@ export async function notifyPriceAlert(
   }
   return results;
 }
+
+/**
+ * Phase 22: RFQ — buyer-submitted. Email sent to the
+ * buyer confirming we got the request, and a separate
+ * alert-style email to ops so an admin can pick it up
+ * fast.
+ */
+export async function notifyRFQReceived(rfqId: number): Promise<EmailResult[]> {
+  const sb = getServiceRoleClient();
+  const { data: rfq } = await sb
+    .from("rfqs")
+    .select("id, user_id, title, target_qty, target_price_cny_fen, destination_country, created_at")
+    .eq("id", rfqId)
+    .maybeSingle();
+  if (!rfq) return [{ ok: false, error: "rfq_not_found", to: [], provider: "resend" }];
+  const { data: profile } = await sb
+    .from("profiles")
+    .select("email, full_name")
+    .eq("id", rfq.user_id)
+    .maybeSingle();
+  if (!profile?.email) {
+    return [{ ok: false, error: "buyer_no_email", to: [], provider: "resend" }];
+  }
+  const num = `RFQ-${String(rfqId).padStart(6, "0")}`;
+  const greet = profile.full_name ? `Hi ${profile.full_name},` : "Hi,";
+  const targetCny = rfq.target_price_cny_fen
+    ? `¥${(Number(rfq.target_price_cny_fen) / 100).toFixed(2)} / unit`
+    : "no target price";
+
+  const results: EmailResult[] = [];
+
+  // 1. To the buyer — receipt confirmation
+  const buyerSubject = `RFQ ${num} received — we'll get back to you in 48h`;
+  const buyerHtml = `
+    <div style="font-family: -apple-system, system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #0f172a;">
+      <h1 style="font-size: 22px; margin-bottom: 4px;">${greet}</h1>
+      <p>We got your custom Request-for-Quote <strong>${num}</strong>. We're forwarding the spec to 3-5 verified factories and will send you sealed bids within 48 hours.</p>
+
+      <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 20px 0;">
+        <p style="margin: 0 0 4px; color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Your spec</p>
+        <p style="margin: 0 0 8px; font-size: 16px; font-weight: 600;">${rfq.title}</p>
+        <p style="margin: 0; color: #475569; font-size: 13px;">Target: ${rfq.target_qty.toLocaleString()} units @ ${targetCny}</p>
+        <p style="margin: 0; color: #475569; font-size: 13px;">Ships to: ${rfq.destination_country}</p>
+      </div>
+
+      <p>Track anytime:<br>
+        <a href="${SITE_URL}/buyer/rfqs/${rfqId}" style="color: #0891b2;">${SITE_URL}/buyer/rfqs/${rfqId}</a>
+      </p>
+
+      <p style="color: #64748b; font-size: 13px;">While you wait, you can browse the catalog for in-stock alternatives. If a factory has something close, we'll include it in the bid round.</p>
+
+      <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">BanglaSource · Custom sourcing</p>
+    </div>`;
+  results.push(
+    await sendEmail({
+      to: profile.email,
+      subject: buyerSubject,
+      html: buyerHtml,
+      tags: [
+        { name: "type", value: "rfq_received" },
+        { name: "rfq", value: num },
+      ],
+    }),
+  );
+
+  // 2. To ops — alert that a new RFQ needs pickup. We don't
+  // have a separate "ops email" yet; send to a designated
+  // OPS_EMAIL env var, defaulting to support@banglasource.com.
+  const opsTo = process.env.OPS_EMAIL ?? "support@banglasource.com";
+  const opsSubject = `New RFQ ${num} — ${rfq.target_qty.toLocaleString()} units — needs pickup`;
+  const opsHtml = `
+    <div style="font-family: -apple-system, system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #0f172a;">
+      <h1 style="font-size: 18px; margin-bottom: 4px;">New RFQ pickup</h1>
+      <p><strong>${rfq.title}</strong> from ${profile.full_name ?? profile.email}</p>
+      <p>Target: ${rfq.target_qty.toLocaleString()} units @ ${targetCny} → ${rfq.destination_country}</p>
+      <p>Buyer email: <a href="mailto:${profile.email}" style="color: #0891b2;">${profile.email}</a></p>
+      <p>View + reply: <a href="${SITE_URL}/admin/rfqs/${rfqId}" style="color: #0891b2;">${SITE_URL}/admin/rfqs/${rfqId}</a></p>
+    </div>`;
+  results.push(
+    await sendEmail({
+      to: opsTo,
+      subject: opsSubject,
+      html: opsHtml,
+      replyTo: profile.email,
+      tags: [
+        { name: "type", value: "rfq_ops_alert" },
+        { name: "rfq", value: num },
+      ],
+    }),
+  );
+
+  return results;
+}
+
+/**
+ * Phase 22: RFQ — admin sent a quote. Email the buyer with
+ * the price + MOQ + lead time. Includes a clear "accept"
+ * CTA pointing at /buyer/rfqs/[id] where they can flip the
+ * RFQ to accepted and start the order.
+ */
+export async function notifyRFQQuoted(rfqId: number): Promise<EmailResult> {
+  const sb = getServiceRoleClient();
+  const { data: rfq } = await sb
+    .from("rfqs")
+    .select("id, user_id, title, quoted_price_cny_fen, quoted_min_qty, quoted_lead_days, quoted_notes")
+    .eq("id", rfqId)
+    .maybeSingle();
+  if (!rfq) {
+    return { ok: false, error: "rfq_not_found", to: [], provider: "resend" };
+  }
+  const { data: profile } = await sb
+    .from("profiles")
+    .select("email, full_name")
+    .eq("id", rfq.user_id)
+    .maybeSingle();
+  if (!profile?.email) {
+    return { ok: false, error: "buyer_no_email", to: [], provider: "resend" };
+  }
+  const num = `RFQ-${String(rfqId).padStart(6, "0")}`;
+  const greet = profile.full_name ? `Hi ${profile.full_name},` : "Hi,";
+
+  const priceCny = rfq.quoted_price_cny_fen
+    ? (Number(rfq.quoted_price_cny_fen) / 100).toFixed(2)
+    : "—";
+  const minQty = rfq.quoted_min_qty?.toLocaleString() ?? "—";
+  const lead = rfq.quoted_lead_days ?? "—";
+
+  const subject = `RFQ ${num} — your factory quote is in`;
+  const html = `
+    <div style="font-family: -apple-system, system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #0f172a;">
+      <h1 style="font-size: 22px; margin-bottom: 4px;">${greet}</h1>
+      <p>We've got a quote back from the factory for your <strong>${rfq.title}</strong> request. Here are the numbers:</p>
+
+      <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 20px 0;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 8px 0; color: #64748b;">FOB per unit (CNY)</td>
+            <td style="padding: 8px 0; text-align: right; font-family: ui-monospace, monospace; font-weight: 600;">¥${priceCny}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 8px 0; color: #64748b;">Minimum order qty</td>
+            <td style="padding: 8px 0; text-align: right; font-family: ui-monospace, monospace; font-weight: 600;">${minQty}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #64748b;">Lead time (days)</td>
+            <td style="padding: 8px 0; text-align: right; font-family: ui-monospace, monospace; font-weight: 600;">${lead}</td>
+          </tr>
+        </table>
+      </div>
+
+      ${rfq.quoted_notes
+        ? `<p><strong>Notes from our side:</strong><br>${rfq.quoted_notes}</p>`
+        : ""}
+
+      <p style="margin: 24px 0;">
+        <a href="${SITE_URL}/buyer/rfqs/${rfqId}" style="display: inline-block; background: #0891b2; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+          View and accept
+        </a>
+      </p>
+
+      <p style="color: #64748b; font-size: 13px;">Quote is valid for 7 days. After that, factory prices may shift — let us know if you need an extension.</p>
+
+      <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">BanglaSource · Custom sourcing</p>
+    </div>`;
+  return sendEmail({
+    to: profile.email,
+    subject,
+    html,
+    tags: [
+      { name: "type", value: "rfq_quoted" },
+      { name: "rfq", value: num },
+    ],
+  });
+}

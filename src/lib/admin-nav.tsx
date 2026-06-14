@@ -8,6 +8,7 @@ import {
   IconChart,
   IconAlert,
   IconQuote,
+  IconRFQ,
   IconUsers,
   IconTraffic,
   IconPackage,
@@ -25,6 +26,7 @@ export const adminNav = (counts: {
   quotes: number;
   trafficLast7d: number;
   openOrders: number;
+  openRFQs: number;
 }): NavGroup[] => [
   {
     label: "Overview",
@@ -85,6 +87,12 @@ export const adminNav = (counts: {
         href: "/admin/quotes",
         icon: <IconQuote />,
         badge: counts.quotes,
+      },
+      {
+        label: "RFQs",
+        href: "/admin/rfqs",
+        icon: <IconRFQ />,
+        badge: counts.openRFQs,
       },
       {
         label: "Price alerts",
