@@ -36,14 +36,32 @@ async function loadSyncStats() {
     if (activeErr) {
       console.error("[loadSyncStats] products count failed:", activeErr.message);
     }
+    // Phase 26: count distinct factories. Cheap on 168 rows;
+    // the products table has supplier_name indexed. Cast the
+    // row shape because the supabase client types are loose
+    // without a generated Database type.
+    const { data: suppliers, error: supErr } = await supabase
+      .from("products")
+      .select("supplier_name")
+      .eq("active", true)
+      .not("supplier_name", "is", null);
+    if (supErr) {
+      console.error("[loadSyncStats] suppliers query failed:", supErr.message);
+    }
+    const uniqueSuppliers = new Set(
+      ((suppliers ?? []) as Array<{ supplier_name: string | null }>).map(
+        (r) => r.supplier_name,
+      ).filter(Boolean),
+    ).size;
     return {
       activeCount: active ?? 0,
+      factoryCount: uniqueSuppliers,
       lastSyncIso: last?.finished_at ?? last?.started_at ?? null,
       failedLast: !!last?.error,
     };
   } catch (e) {
     console.error("[loadSyncStats] thrown:", (e as Error).message);
-    return { activeCount: 0, lastSyncIso: null, failedLast: false };
+    return { activeCount: 0, factoryCount: 0, lastSyncIso: null, failedLast: false };
   }
 }
 
@@ -81,7 +99,10 @@ export default async function HomePage() {
           __html: jsonLdScript(websiteJsonLd()),
         }}
       />
-      <HomeClient syncStats={syncStats} />
+      <HomeClient
+        syncStats={syncStats}
+        heroProduct={carousels.popular[0] ?? null}
+      />
       {/* Phase 23: the two new home carousels. Both are
           server-rendered (data fetched above) and rendered
           with the same client component the PDP uses. The

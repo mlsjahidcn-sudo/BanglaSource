@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useLang } from "@/lib/i18n";
 import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
@@ -14,66 +14,19 @@ import { NewsletterSignup } from "@/components/newsletter-signup";
 import { TrustBar } from "@/components/trust-bar";
 import { ValueProps } from "@/components/value-props";
 import { Testimonials } from "@/components/testimonials";
-
-const SLIDES: Array<{
-  eyebrowKey: string;
-  titleKey: string;
-  bodyKey: string;
-  ctaKey: string;
-  href: string;
-  bg: string;
-  accent: string;
-  visual:
-    | "earbuds"
-    | "earrings"
-    | "kitchen"
-    | "led"
-    | "tshirt"
-    | "juicer"
-    | "tws"
-    | "kurti"
-    | "charger";
-}> = [
-  {
-    eyebrowKey: "home.slider.s1.eyebrow",
-    titleKey: "home.slider.s1.title",
-    bodyKey: "home.slider.s1.body",
-    ctaKey: "home.slider.s1.cta",
-    href: "/categories",
-    bg: "from-slate-900 to-slate-800",
-    accent: "bg-emerald-500",
-    visual: "earbuds",
-  },
-  {
-    eyebrowKey: "home.slider.s2.eyebrow",
-    titleKey: "home.slider.s2.title",
-    bodyKey: "home.slider.s2.body",
-    ctaKey: "home.slider.s2.cta",
-    href: "/how-it-works",
-    bg: "from-emerald-900 to-slate-900",
-    accent: "bg-amber-400",
-    visual: "kitchen",
-  },
-  {
-    eyebrowKey: "home.slider.s3.eyebrow",
-    titleKey: "home.slider.s3.title",
-    bodyKey: "home.slider.s3.body",
-    ctaKey: "home.slider.s3.cta",
-    href: "/contact",
-    bg: "from-slate-800 to-emerald-900",
-    accent: "bg-emerald-400",
-    visual: "led",
-  },
-];
+import type { PopularProduct } from "@/lib/popular";
 
 export function HomeClient({
   syncStats,
+  heroProduct,
 }: {
   syncStats: {
     activeCount: number;
+    factoryCount: number;
     lastSyncIso: string | null;
     failedLast: boolean;
   };
+  heroProduct: PopularProduct | null;
 }) {
   const { t, lang } = useLang();
   const { products: allProducts, loaded } = useCatalog();
@@ -125,13 +78,17 @@ export function HomeClient({
         </Container>
       </div>
 
-      {/* ─────────────────  RAIL + HERO SLIDER  ──────────────── */}
+      {/* ─────────────────  RAIL + HERO  ──────────────── */}
       <section className="bg-bg-soft border-b border-border">
         <Container className="py-5 overflow-visible">
           <div className="grid md:grid-cols-12 gap-4 overflow-visible">
             <SidebarRail products={allProducts} />
             <div className="md:col-span-9">
-              <HeroSlider />
+              <Hero
+                activeCount={syncStats.activeCount}
+                factoryCount={syncStats.factoryCount}
+                heroProduct={heroProduct}
+              />
             </div>
           </div>
         </Container>
@@ -355,200 +312,143 @@ function SidebarRail({ products: allProducts }: { products: CatalogProduct[] }) 
   );
 }
 
-/* ───────────────────────────  HERO SLIDER  ─────────────────────────── */
+/* ───────────────────────────  HERO  (Phase 26)  ──────────────────────────
+ * Simple single-slide hero. Two columns:
+ *   left  — eyebrow (live DB stats), headline, subhead, 1 CTA
+ *   right — real popular-product image with a landed-cost chip
+ *
+ * The nav already has a search box, the categories rail gives browsing,
+ * and /shipping-rates owns the calculator. So the hero stays focused
+ * on the value prop + the most popular SKU right now.
+ */
 
-function HeroSlider() {
-  const { t } = useLang();
-  const [idx, setIdx] = useState(0);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    timer.current = setInterval(() => {
-      setIdx((i) => (i + 1) % SLIDES.length);
-    }, 6000);
-    return () => {
-      if (timer.current) clearInterval(timer.current);
-    };
-  }, []);
-
-  return (
-    <div className="relative overflow-hidden rounded-xl border border-border h-[420px]">
-      {SLIDES.map((s, i) => (
-        <div
-          key={i}
-          className={`absolute inset-0 transition-opacity duration-700 ${
-            i === idx ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
-          aria-hidden={i !== idx}
-        >
-          <HeroSlide
-            eyebrow={t(s.eyebrowKey)}
-            title={t(s.titleKey)}
-            body={t(s.bodyKey)}
-            cta={t(s.ctaKey)}
-            href={s.href}
-            bg={s.bg}
-            accent={s.accent}
-            visual={s.visual}
-          />
-        </div>
-      ))}
-
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
-        {SLIDES.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setIdx(i)}
-            aria-label={`Go to slide ${i + 1}`}
-            className={`h-1.5 rounded-full transition-all ${
-              i === idx ? "w-8 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70"
-            }`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function HeroSlide({
-  eyebrow,
-  title,
-  body,
-  cta,
-  href,
-  bg,
-  accent,
-  visual,
+function Hero({
+  activeCount,
+  factoryCount,
+  heroProduct,
 }: {
-  eyebrow: string;
-  title: string;
-  body: string;
-  cta: string;
-  href: string;
-  bg: string;
-  accent: string;
-  visual: (typeof SLIDES)[number]["visual"];
+  activeCount: number;
+  factoryCount: number;
+  heroProduct: PopularProduct | null;
 }) {
   return (
-    <div
-      className={`relative h-full bg-gradient-to-br ${bg} text-white overflow-hidden`}
-    >
+    <div className="relative overflow-hidden rounded-xl border border-border h-[420px] bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+      {/* Faint grid backdrop — same as before, lower opacity so the
+          product image on the right reads cleanly. */}
       <div
-        className="absolute inset-0 opacity-[0.05]"
+        className="absolute inset-0 opacity-[0.04]"
         style={{
           backgroundImage:
             "linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px)",
           backgroundSize: "56px 56px",
         }}
       />
-      <div className="relative h-full grid md:grid-cols-2 gap-6 p-8 md:p-12">
-        <div className="flex flex-col justify-center">
-          <span
-            className={`inline-flex w-fit items-center gap-2 px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase rounded-full ${accent} text-slate-900`}
-          >
-            <span className="w-1 h-1 rounded-full bg-slate-900" />
-            {eyebrow}
-          </span>
-          <h2 className="mt-4 text-[30px] md:text-[40px] leading-[1.05] font-semibold tracking-[-0.025em] max-w-md">
-            {title}
-          </h2>
-          <p className="mt-4 text-[15px] text-slate-300 leading-relaxed max-w-md">
-            {body}
-          </p>
-          <div className="mt-7 flex items-center gap-3">
-            <Link
-              href={href}
-              className="inline-flex items-center h-11 px-5 text-[14px] font-medium rounded-md bg-white text-slate-900 hover:bg-slate-100 transition-colors"
-            >
-              {cta} →
-            </Link>
-            <Link
-              href="/how-it-works"
-              className="inline-flex items-center h-11 px-4 text-[14px] font-medium rounded-md text-white/90 hover:text-white"
-            >
-              Learn more
-            </Link>
-          </div>
-        </div>
+      <div className="relative h-full grid md:grid-cols-2 gap-4 p-8 md:p-10">
+        <HeroCopy
+          activeCount={activeCount}
+          factoryCount={factoryCount}
+        />
         <div className="hidden md:flex items-center justify-center relative">
-          <HeroVisual kind={visual} />
+          <HeroVisual product={heroProduct} />
         </div>
       </div>
     </div>
   );
 }
 
-function HeroVisual({ kind }: { kind: (typeof SLIDES)[number]["visual"] }) {
-  if (kind === "earbuds") {
+function HeroCopy({
+  activeCount,
+  factoryCount,
+}: {
+  activeCount: number;
+  factoryCount: number;
+}) {
+  const { t, lang } = useLang();
+  const numFmt = lang === "bn" ? "bn-BD" : "en-US";
+  const countStr = activeCount.toLocaleString(numFmt);
+  const factoriesStr = factoryCount.toLocaleString(numFmt);
+
+  return (
+    <div className="flex flex-col justify-center min-w-0">
+      <span className="inline-flex w-fit items-center gap-2 px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase rounded-full bg-emerald-500 text-slate-900">
+        <span className="relative flex h-1.5 w-1.5">
+          <span className="absolute inline-flex h-full w-full rounded-full bg-slate-900 opacity-60 animate-ping" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-slate-900" />
+        </span>
+        {t("home.hero.eyebrow", { count: countStr, factories: factoriesStr })}
+      </span>
+
+      <h2 className="mt-4 text-[28px] md:text-[36px] leading-[1.05] font-semibold tracking-[-0.025em] max-w-[24ch]">
+        {t("home.hero.title")}
+      </h2>
+      <p className="mt-3 text-[14px] text-slate-300 leading-relaxed max-w-[44ch]">
+        {t("home.hero.subhead", { count: countStr })}
+      </p>
+
+      <div className="mt-6">
+        <Link
+          href="/categories"
+          className="inline-flex items-center h-11 px-5 text-[14px] font-medium rounded-md bg-white text-slate-900 hover:bg-slate-100 transition-colors"
+        >
+          {t("home.hero.cta.browse", { count: countStr })} →
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function HeroVisual({ product }: { product: PopularProduct | null }) {
+  if (!product) {
+    // Fallback: a "popular this week" placeholder card with the
+    // same shape, so the layout doesn't collapse if the popular
+    // carousel is empty (very first page render before server
+    // has any view history).
     return (
       <div className="relative w-full h-full flex items-center justify-center">
-        <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-white">
-          <Image
-            src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80"
-            alt=""
-            fill
-            sizes="320px"
-            className="object-cover"
-            priority
-          />
-        </div>
-        <div className="absolute -bottom-2 -right-2 md:right-4 bg-white text-slate-900 px-4 py-3 rounded-lg shadow-2xl border border-slate-200">
-          <p className="text-[10px] font-semibold tracking-wider uppercase text-emerald-600">
-            Bulk deal
-          </p>
-          <p className="price-tag text-[20px] font-semibold leading-none mt-0.5">
-            ৳329
-          </p>
-          <p className="text-[10px] text-fg-muted mt-0.5">landed in Dhaka · 500+ pcs</p>
+        <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-slate-700/50 flex items-center justify-center">
+          <div className="text-center px-4">
+            <p className="text-[10px] font-semibold tracking-wider uppercase text-slate-400">
+              Popular this week
+            </p>
+            <p className="mt-2 text-[20px] font-semibold text-slate-200">
+              Top picks soon
+            </p>
+          </div>
         </div>
       </div>
     );
   }
-  if (kind === "kitchen") {
-    return (
-      <div className="relative w-full h-full flex items-center justify-center">
-        <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-white">
-          <Image
-            src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&auto=format&fit=crop&q=80"
-            alt=""
-            fill
-            sizes="320px"
-            className="object-cover"
-          />
-        </div>
-        <div className="absolute top-4 -left-2 md:-left-4 bg-emerald-500 text-slate-900 px-3 py-2 rounded-lg shadow-2xl">
-          <p className="text-[10px] font-semibold tracking-wider uppercase">
-            QC passed
-          </p>
-          <p className="text-[12px] font-medium mt-0.5">
-            100/100 · Color matched
-          </p>
-        </div>
-      </div>
-    );
-  }
-  // led / payment
   return (
     <div className="relative w-full h-full flex items-center justify-center">
-      <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-white">
+      <Link
+        href={`/products/${product.source_id}`}
+        className="relative w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-white block group"
+      >
         <Image
-          src="https://images.unsplash.com/photo-1565538810643-b5bdb714032a?w=800&auto=format&fit=crop&q=80"
-          alt=""
+          src={product.image}
+          alt={product.title_en}
           fill
           sizes="320px"
-          className="object-cover"
+          className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
+          priority
         />
-      </div>
-      <div className="absolute bottom-4 left-4 md:left-8 bg-white text-slate-900 px-4 py-3 rounded-lg shadow-2xl border border-slate-200">
-        <p className="text-[10px] font-semibold tracking-wider uppercase text-fg-subtle">
-          Escrow balance
+      </Link>
+      {/* landed cost chip — sits below the image, NOT overlapping it.
+          Real number from the DB (min_bdt is the BDT product price
+          the buyer would pay for the starting MOQ). NOT a fabricated
+          marketing number. */}
+      <div className="absolute left-1/2 -translate-x-1/2 -bottom-3 bg-white text-slate-900 px-4 py-2.5 rounded-lg shadow-2xl border border-slate-200 w-[300px]">
+        <p className="text-[10px] font-semibold tracking-wider uppercase text-emerald-600">
+          Popular this week
         </p>
-        <p className="price-tag text-[22px] font-semibold leading-none mt-1">
-          ৳44,665
-        </p>
-        <p className="text-[10.5px] text-fg-muted mt-1">
-          Holds until you confirm
-        </p>
+        <div className="flex items-baseline gap-2 mt-0.5">
+          <p className="price-tag text-[20px] font-semibold leading-none shrink-0">
+            ৳{product.min_bdt.toLocaleString("en-IN")}
+          </p>
+          <p className="text-[10.5px] text-fg-muted truncate min-w-0 flex-1">
+            {product.title_en}
+          </p>
+        </div>
       </div>
     </div>
   );

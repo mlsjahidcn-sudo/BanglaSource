@@ -58,6 +58,23 @@ export const dict: Dict = {
   },
   "home.slider.s3.cta": { en: "Talk to us", bn: "আমাদের সাথে কথা বলুন" },
 
+  // ── Home: new single-slide hero (Phase 26) ──────────────────────
+  // Live DB-driven eyebrow (the {count} and {factories} placeholders
+  // are interpolated at render time, in either locale's digit format).
+  "home.hero.eyebrow": {
+    en: "Live · {count} products · {factories} factories",
+    bn: "লাইভ · {count}টি পণ্য · {factories}টি কারখানা",
+  },
+  "home.hero.title": {
+    en: "Factory prices, in your currency.",
+    bn: "কারখানার দাম, আপনার মুদ্রায়।",
+  },
+  "home.hero.subhead": {
+    en: "Browse {count} catalog products with one all-in BDT price — factory, freight, customs, and our 3% service fee. Nothing hidden.",
+    bn: "{count}টি ক্যাটালগ পণ্য দেখুন, একটি সব-অন্তর্ভুক্ত বিডিটি মূল্যে — কারখানা, ফ্রেইট, কাস্টমস এবং আমাদের ৩% সার্ভিস ফি। কিছুই লুকানো নেই।",
+  },
+  "home.hero.cta.browse": { en: "Browse {count} products", bn: "{count}টি পণ্য দেখুন" },
+
   // ── Home: left rail + strip layout ───────────────────────────────
   "home.rail.title": { en: "Shop by category", bn: "ক্যাটাগরি" },
   "home.rail.all": { en: "All categories", bn: "সব ক্যাটাগরি" },

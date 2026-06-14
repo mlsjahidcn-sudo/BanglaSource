@@ -12,7 +12,7 @@ import { dict, type Lang } from "./i18n-dict";
 type LangCtx = {
   lang: Lang;
   setLang: (l: Lang) => void;
-  t: (key: string) => string;
+  t: (key: string, replacements?: Record<string, string | number>) => string;
 };
 
 const Ctx = createContext<LangCtx | null>(null);
