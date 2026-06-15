@@ -12,7 +12,6 @@
 
 import "server-only";
 import { getServiceRoleClient } from "./supabase/server";
-import { isNotFrom1688, NOT_FROM_1688 } from "./source-filter";
 
 export type PopularProduct = {
   source_id: string;
@@ -52,20 +51,18 @@ export async function similarProducts(
   // trivial.
   const priceLow = Math.max(1, Math.round(currentMinBdt * 0.7));
   const priceHigh = Math.round(currentMinBdt * 1.3);
-  const { data: rows, error } = await NOT_FROM_1688(
-    sb
-      .from("products")
-      .select("source_id, title_en, title_bn, images, category, supplier_name, source_url, price_tiers(price_cny_fen, qty_min)")
-      .eq("active", true)
-      .neq("source_id", excludeSourceId)
-      .or(
-        `category.eq.${category},supplier_name.eq.${supplierName}`,
-      ),
-  ).limit(80);
+  const { data: rows, error } = await sb
+    .from("products")
+    .select("source_id, title_en, title_bn, images, category, supplier_name, price_tiers(price_cny_fen, qty_min)")
+    .eq("active", true)
+    .neq("source_id", excludeSourceId)
+    .or(
+      `category.eq.${category},supplier_name.eq.${supplierName}`,
+    )
+    .limit(80);
   if (error || !rows) return [];
   const FX_CNY_BDT = 1.65;
   const scored = (rows as any[])
-    .filter((p) => isNotFrom1688(p))
     .map((p) => {
       const lowest = (p.price_tiers ?? []).reduce(
         (a: any, b: any) =>
@@ -124,18 +121,9 @@ export async function popularByViews(
   // and count distinct views (id) per source_id.
   // We only count views that successfully resolved to a
   // current product (inner join on products.source_id).
-  //
-  // We over-fetch from the RPC (limit * 3) so we can
-  // filter 1688-source products on the JS side after the
-  // RPC returns. The RPC itself doesn't return source_url,
-  // so we have to look it up. (Migration 0030 adds the
-  // same filter on the SQL side, but the JS filter works
-  // even if the migration hasn't been applied yet — useful
-  // for environments where the operator hasn't run the
-  // latest migration.)
   const { data, error } = await sb.rpc("popular_by_views", {
     p_since: sinceIso(days),
-    p_limit: limit * 3,
+    p_limit: limit,
   });
   if (error) {
     // Fall back to a JS-side group-by if the RPC isn't
@@ -143,18 +131,7 @@ export async function popularByViews(
     // operator hasn't run the migration).
     return popularByViewsFallback(days, limit);
   }
-  const rows = (data ?? []) as PopularProduct[];
-  if (rows.length === 0) return [];
-  // Look up source_url for each source_id to apply the
-  // 1688 filter. Cheap — small N, indexed source_id.
-  const { data: products } = await NOT_FROM_1688(
-    sb.from("products").select("source_id, source_url"),
-  ).in(
-    "source_id",
-    rows.map((r) => r.source_id),
-  );
-  const okIds = new Set((products ?? []).map((p) => p.source_id));
-  return rows.filter((r) => okIds.has(r.source_id)).slice(0, limit);
+  return (data ?? []) as PopularProduct[];
 }
 
 async function popularByViewsFallback(
@@ -186,15 +163,14 @@ async function popularByViewsFallback(
     .slice(0, limit)
     .map(([source_id, count]) => ({ source_id, count }));
   if (top.length === 0) return [];
-  const { data: products } = await NOT_FROM_1688(
-    sb
-      .from("products")
-      .select("source_id, title_en, title_bn, images, category, source_url, price_tiers(price_cny_fen, qty_min)")
-      .eq("active", true),
-  ).in(
-    "source_id",
-    top.map((t) => t.source_id),
-  );
+  const { data: products } = await sb
+    .from("products")
+    .select("source_id, title_en, title_bn, images, category, price_tiers(price_cny_fen, qty_min)")
+    .eq("active", true)
+    .in(
+      "source_id",
+      top.map((t) => t.source_id),
+    );
   if (!products) return [];
   const byId = new Map(products.map((p) => [p.source_id, p]));
   const FX_CNY_BDT = 1.65; // mirror src/lib/pricing.ts default
@@ -202,7 +178,6 @@ async function popularByViewsFallback(
     .map((t) => {
       const p = byId.get(t.source_id) as any;
       if (!p) return null;
-      if (!isNotFrom1688(p)) return null; // 1688 source — skip
       const lowest = (p.price_tiers ?? []).reduce(
         (a: any, b: any) =>
           !a || b.price_cny_fen < a.price_cny_fen ? b : a,
@@ -240,14 +215,12 @@ export async function recentlyChanged(
   const sb = getServiceRoleClient();
   // DISTINCT ON trick: pick the most recent price_history
   // row per product_id.
-  const { data, error } = await NOT_FROM_1688(
-    sb
-      .from("price_history")
-      .select(
-        "product_id, source_id, recorded_at, products!inner(source_id, title_en, title_bn, images, category, active, source_url, price_tiers(price_cny_fen, qty_min))",
-      )
-      .gte("recorded_at", sinceIso(days)),
-  )
+  const { data, error } = await sb
+    .from("price_history")
+    .select(
+      "product_id, source_id, recorded_at, products!inner(source_id, title_en, title_bn, images, category, active, price_tiers(price_cny_fen, qty_min))",
+    )
+    .gte("recorded_at", sinceIso(days))
     .order("recorded_at", { ascending: false })
     .limit(limit * 4); // overscan because some products are inactive
   if (error || !data) return [];
@@ -257,7 +230,6 @@ export async function recentlyChanged(
   for (const row of data as any[]) {
     const p = row.products;
     if (!p || p.active === false) continue;
-    if (!isNotFrom1688(p)) continue; // 1688 source — skip
     if (seen.has(p.source_id)) continue;
     seen.add(p.source_id);
     const lowest = (p.price_tiers ?? []).reduce(

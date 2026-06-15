@@ -17,35 +17,24 @@ import {
 export const revalidate = 60;
 
 async function loadSyncStats() {
-  // Phase 27 (hand-picked pivot, 2026-06-15): the catalog is no
-  // longer auto-synced from 1688. We show the live count of
-  // hand-picked + still-active products and a "last updated"
-  // stamp from the most recent product write. No more sync_runs
-  // queries (we kept the table for ops history but it isn't
-  // authoritative anymore).
+  // Phase 27 (hand-picked pivot, 2026-06-15): the catalog still
+  // shows all active products (the 1688 imports stay visible until
+  // they're hand-replaced via /admin/products/new). The "last
+  // updated" stamp is the most recent product write — admin
+  // edits, image regens, or 1688 syncs all count.
   try {
     const supabase = getServiceRoleClient();
-    // Count only the products that are actually visible to public
-    // buyers — i.e. NOT from 1688. (Phase 27 hand-picked pivot:
-    // 1688 imports are kept in the DB for ops history but hidden
-    // from the catalog.) Without this filter, the eyebrow would
-    // claim "168 products" but the public surface would show 1.
     const { count: active, error: activeErr } = await supabase
       .from("products")
       .select("id", { count: "exact", head: true })
-      .eq("active", true)
-      .not("source_url", "ilike", "%1688.com%");
+      .eq("active", true);
     if (activeErr) {
       console.error("[loadSyncStats] products count failed:", activeErr.message);
     }
-    // Most recent write, also restricted to non-1688 so we don't
-    // show "updated 11h ago" when the only update was an admin
-    // deactivating 1688 stock.
     const { data: lastWrite, error: lastErr } = await supabase
       .from("products")
       .select("updated_at")
       .eq("active", true)
-      .not("source_url", "ilike", "%1688.com%")
       .order("updated_at", { ascending: false })
       .limit(1)
       .maybeSingle();

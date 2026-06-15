@@ -20,7 +20,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServiceRoleClient } from "@/lib/supabase/server";
 import { rateLimit, clientKey } from "@/lib/rate-limit";
 import { deepseekJson, sha256 } from "@/lib/deepseek";
-import { NOT_FROM_1688 } from "@/lib/source-filter";
 
 const RATE_LIMIT = 60;
 const RATE_WINDOW_MS = 60_000;
@@ -190,16 +189,12 @@ async function parseQuery(
 // Build the Supabase query for the parsed filters.
 async function runQuery(parsed: ParsedQuery) {
   const supabase = getServiceRoleClient();
-  // Platform is now hand-picked Pinduoduo / Taobao / trendy
-  // China sources — never the Apify 1688 scraper. Hide those.
-  let q = NOT_FROM_1688(
-    supabase
-      .from("products")
-      .select(
-        "id, source_id, title_en, title_bn, images, category, supplier_name, supplier_city, supplier_province, factory_moq, markup_pct, badges, rating_overall, order_count_30d, stock_total, price_tiers(price_cny_fen)",
-      )
-      .eq("active", true),
-  );
+  let q = supabase
+    .from("products")
+    .select(
+      "id, source_id, title_en, title_bn, images, category, supplier_name, supplier_city, supplier_province, factory_moq, markup_pct, badges, rating_overall, order_count_30d, stock_total, price_tiers(price_cny_fen)",
+    )
+    .eq("active", true);
 
   // Category filter
   if (parsed.category) {

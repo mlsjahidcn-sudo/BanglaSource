@@ -20,7 +20,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceRoleClient } from "@/lib/supabase/server";
 import { rateLimit, clientKey } from "@/lib/rate-limit";
-import { NOT_FROM_1688 } from "@/lib/source-filter";
 
 const RATE_LIMIT = 200;
 const RATE_WINDOW_MS = 60_000;
@@ -57,14 +56,12 @@ async function getCatalogLite(): Promise<RecRow[]> {
     return _catalog.list;
   }
   const supabase = getServiceRoleClient();
-  const { data: prods, error: pErr } = await NOT_FROM_1688(
-    supabase
-      .from("products")
-      .select(
-        "id, source_id, source_url, title_en, title_bn, images, category, supplier_name, supplier_city, supplier_province, factory_moq, markup_pct, badges, rating_overall, order_count_30d, price_tiers(price_cny_fen)",
-      )
-      .eq("active", true),
-  );
+  const { data: prods, error: pErr } = await supabase
+    .from("products")
+    .select(
+      "id, source_id, title_en, title_bn, images, category, supplier_name, supplier_city, supplier_province, factory_moq, markup_pct, badges, rating_overall, order_count_30d, price_tiers(price_cny_fen)",
+    )
+    .eq("active", true);
   if (pErr) throw pErr;
   const list: RecRow[] = (prods ?? []).map((p: any) => {
     const tiers = (p.price_tiers ?? []) as Array<{ price_cny_fen: number }>;
@@ -215,15 +212,14 @@ export async function GET(
     const supabase = getServiceRoleClient();
     let seed: RecRow | null = null;
     // Always look up by source_id (the public URL slug).
-    const { data } = await NOT_FROM_1688(
-      supabase
-        .from("products")
-        .select(
-          "source_id, title_en, title_bn, images, category, supplier_name, supplier_city, supplier_province, factory_moq, markup_pct, badges, rating_overall, order_count_30d, price_tiers(price_cny_fen)",
-        )
-        .eq("source_id", raw)
-        .eq("active", true),
-    ).maybeSingle();
+    const { data } = await supabase
+      .from("products")
+      .select(
+        "source_id, title_en, title_bn, images, category, supplier_name, supplier_city, supplier_province, factory_moq, markup_pct, badges, rating_overall, order_count_30d, price_tiers(price_cny_fen)",
+      )
+      .eq("source_id", raw)
+      .eq("active", true)
+      .maybeSingle();
     if (data) {
       const tiers = (data.price_tiers ?? []) as Array<{
         price_cny_fen: number;

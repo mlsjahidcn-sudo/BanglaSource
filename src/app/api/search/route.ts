@@ -4,7 +4,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceRoleClient } from "@/lib/supabase/server";
-import { NOT_FROM_1688 } from "@/lib/source-filter";
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -22,16 +21,13 @@ export async function GET(req: NextRequest) {
   const pat = `%${q}%`;
 
   // Hit 3 columns with ilike, dedupe by id, take the limit. For each row,
-  // the lowest price tier is the "headline" price. Public search surface
-  // — never returns 1688-source products.
-  const { data, error } = await NOT_FROM_1688(
-    supabase
-      .from("products")
-      .select(
-        "id,source_id,title_en,title_bn,category,images,price_tiers!inner(qty_min,qty_max,price_cny_fen)",
-      )
-      .eq("active", true),
-  )
+  // the lowest price tier is the "headline" price.
+  const { data, error } = await supabase
+    .from("products")
+    .select(
+      "id,source_id,title_en,title_bn,category,images,price_tiers!inner(qty_min,qty_max,price_cny_fen)",
+    )
+    .eq("active", true)
     .or(
       `title_en.ilike.${pat},title_bn.ilike.${pat},supplier_city.ilike.${pat},description_en.ilike.${pat}`,
     )

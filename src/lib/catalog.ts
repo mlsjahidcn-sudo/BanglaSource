@@ -1,7 +1,6 @@
 import "server-only";
 import { unstable_cache as cache } from "next/cache";
 import { getServiceRoleClient } from "./supabase/server";
-import { NOT_FROM_1688 } from "./source-filter";
 
 export type DbPriceTier = {
   qty_min: number;
@@ -51,14 +50,13 @@ export const getCatalog = cache(
   async (): Promise<DbProduct[]> => {
     const supabase = getServiceRoleClient();
 
-    const { data: products, error: pErr } = await NOT_FROM_1688(
-      supabase
-        .from("products")
-        .select(
-          "id,source_id,title_en,title_bn,title_zh,category,factory_moq,weight_kg,volume_cbm,markup_pct,quality_score,supplier_name,supplier_province,supplier_city,stock_total,order_count_30d,rating_overall,badges,images,description_en,description_bn,source_url,customs_duty_per_kg,customs_duty_class",
-        )
-        .eq("active", true),
-    ).order("id", { ascending: true });
+    const { data: products, error: pErr } = await supabase
+      .from("products")
+      .select(
+        "id,source_id,title_en,title_bn,title_zh,category,factory_moq,weight_kg,volume_cbm,markup_pct,quality_score,supplier_name,supplier_province,supplier_city,stock_total,order_count_30d,rating_overall,badges,images,description_en,description_bn,source_url,customs_duty_per_kg,customs_duty_class",
+      )
+      .eq("active", true)
+      .order("id", { ascending: true });
 
     if (pErr) {
       throw new Error(`getCatalog products: ${pErr.message}`);
@@ -106,15 +104,14 @@ export const getProduct = cache(
   async (sourceId: string): Promise<DbProduct | null> => {
     const supabase = getServiceRoleClient();
 
-    const { data: product, error: pErr } = await NOT_FROM_1688(
-      supabase
-        .from("products")
-        .select(
-          "id,source_id,title_en,title_bn,title_zh,category,factory_moq,weight_kg,volume_cbm,markup_pct,quality_score,supplier_name,supplier_province,supplier_city,stock_total,order_count_30d,rating_overall,badges,images,description_en,description_bn,source_url,customs_duty_per_kg,customs_duty_class",
-        )
-        .eq("source_id", sourceId)
-        .eq("active", true),
-    ).maybeSingle();
+    const { data: product, error: pErr } = await supabase
+      .from("products")
+      .select(
+        "id,source_id,title_en,title_bn,title_zh,category,factory_moq,weight_kg,volume_cbm,markup_pct,quality_score,supplier_name,supplier_province,supplier_city,stock_total,order_count_30d,rating_overall,badges,images,description_en,description_bn,source_url,customs_duty_per_kg,customs_duty_class",
+      )
+      .eq("source_id", sourceId)
+      .eq("active", true)
+      .maybeSingle();
 
     if (pErr) {
       throw new Error(`getProduct: ${pErr.message}`);
