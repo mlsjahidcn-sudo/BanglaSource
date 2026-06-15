@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getServiceRoleClient } from "@/lib/supabase/server";
+import { BulkActionsBar } from "./_bulk-bar";
 import {
   DEFAULT_BUYER_MARKUP_PCT,
   FX_CNY_BDT,
@@ -27,15 +28,89 @@ type ProductRow = {
   price_tiers: PriceTier[];
 };
 
-async function loadProducts() {
+const KNOWN_CATEGORIES = [
+  "gadgets",
+  "eyewear",
+  "shoes",
+  "bags",
+  "watches",
+  "beauty",
+] as const;
+type CategoryFilter = (typeof KNOWN_CATEGORIES)[number] | "all";
+type StatusFilter = "all" | "active" | "inactive";
+
+/**
+ * Phase 33: filters added. 167 rows was unusable. URL-driven
+ * (server-rendered, no client JS):
+ *   ?q=<text>        — matches title_en, source_id, supplier_name
+ *   ?status=active|inactive|all
+ *   ?cat=<category>  — single category or "all"
+ *
+ * All filters are server-side. The "clear filters" link appears
+ * whenever any filter is active.
+ */
+async function loadProducts(
+  q: string,
+  status: StatusFilter,
+  cat: CategoryFilter,
+): Promise<{
+  rows: ProductRow[];
+  totalAll: number;
+  totalActive: number;
+  allActiveSourceIds: string[];
+  allInactiveSourceIds: string[];
+}> {
   const supabase = getServiceRoleClient();
-  const { data: products } = await supabase
-    .from("products")
-    .select(
-      "id,source_id,title_zh,title_en,category,factory_moq,supplier_name,supplier_city,active,images,markup_pct,price_tiers(qty_min,qty_max,price_cny_fen)",
-    )
-    .order("id", { ascending: true });
-  return (products ?? []) as ProductRow[];
+  const [rowsRes, totalAllRes, totalActiveRes] = await Promise.all([
+    supabase
+      .from("products")
+      .select(
+        "id,source_id,title_zh,title_en,category,factory_moq,supplier_name,supplier_city,active,images,markup_pct,price_tiers(qty_min,qty_max,price_cny_fen)",
+      )
+      .order("id", { ascending: true })
+      .limit(500),
+    supabase
+      .from("products")
+      .select("id", { count: "exact", head: true }),
+    supabase
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("active", true),
+  ]);
+  const allRows = (rowsRes.data ?? []) as unknown as ProductRow[];
+  // JS-side filter: the dataset is 167 rows, so an in-memory filter
+  // is trivially fast (sub-ms) and lets us OR across text columns
+  // without relying on Supabase's `or()` syntax quirks.
+  const ql = q.trim().toLowerCase();
+  const filtered = allRows.filter((p) => {
+    if (status === "active" && !p.active) return false;
+    if (status === "inactive" && p.active) return false;
+    if (cat !== "all" && p.category !== cat) return false;
+    if (ql) {
+      const hay = [
+        p.title_en ?? "",
+        p.title_zh,
+        p.source_id,
+        p.supplier_name ?? "",
+        p.supplier_city ?? "",
+      ]
+        .join(" ")
+        .toLowerCase();
+      if (!hay.includes(ql)) return false;
+    }
+    return true;
+  });
+  return {
+    rows: filtered,
+    totalAll: totalAllRes.count ?? 0,
+    totalActive: totalActiveRes.count ?? 0,
+    // For the bulk-action bar: source_ids in the active/inactive
+    // buckets across the WHOLE catalog (not just the current
+    // filter). Admin uses this to mass-deactivate an inactive
+    // batch or mass-activate a fresh batch.
+    allActiveSourceIds: allRows.filter((p) => p.active).map((p) => p.source_id),
+    allInactiveSourceIds: allRows.filter((p) => !p.active).map((p) => p.source_id),
+  };
 }
 
 function fmtMoq(moq: number) {
@@ -74,14 +149,45 @@ function afterMarkupBdt(p: ProductRow): number {
   return Math.ceil(unitBdt * mul);
 }
 
-export default async function AdminProductsIndex() {
-  const products = await loadProducts();
+export default async function AdminProductsIndex({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    q?: string;
+    status?: string;
+    cat?: string;
+  }>;
+}) {
+  const sp = await searchParams;
+  const q = (sp.q ?? "").toString();
+  const status: StatusFilter = (
+    ["active", "inactive", "all"].includes(sp.status ?? "")
+      ? (sp.status as StatusFilter)
+      : "all"
+  );
+  const cat: CategoryFilter = (
+    [...KNOWN_CATEGORIES, "all"].includes(sp.cat ?? "")
+      ? (sp.cat as CategoryFilter)
+      : "all"
+  );
+
+  const {
+    rows: products,
+    totalAll,
+    totalActive,
+    allActiveSourceIds,
+    allInactiveSourceIds,
+  } = await loadProducts(q, status, cat);
+
   const byCategory = new Map<string, ProductRow[]>();
   for (const p of products) {
     const arr = byCategory.get(p.category) ?? [];
     arr.push(p);
     byCategory.set(p.category, arr);
   }
+
+  const hasFilters = q !== "" || status !== "all" || cat !== "all";
+
   return (
     <AdminPage size="wide">
       <AdminPageHeader
@@ -90,14 +196,117 @@ export default async function AdminProductsIndex() {
         dotColor="emerald"
         subtitle={
           <>
-            {products.length} products across {byCategory.size} categories. The
-            Factory and After-markup columns are the real FOB (¥) and the
-            buyer-facing product price (৳); Markup % is editable per-product.
+            {totalActive} active of {totalAll} total
+            {hasFilters ? (
+              <>
+                {" "}
+                · showing <span className="text-fg font-medium">{products.length}</span>{" "}
+                after filters
+              </>
+            ) : null}
+            . Factory FOB is the supplier-listed ¥/pc; the After-markup
+            column is the buyer-facing product price (৳); Markup % is
+            editable per-product.
           </>
         }
       />
 
-      <div className="space-y-8">
+      {/* Filter bar (Phase 33) — URL-driven, server-rendered. */}
+      <form
+        action="/admin/products"
+        method="GET"
+        className="mt-6 card p-3 flex flex-wrap items-end gap-3"
+      >
+        <div className="flex-1 min-w-[220px]">
+          <label className="block text-[10.5px] uppercase tracking-wider font-medium text-fg-subtle mb-1">
+            Search
+          </label>
+          <input
+            type="text"
+            name="q"
+            defaultValue={q}
+            placeholder="title, source_id, supplier, city…"
+            className="w-full h-9 px-3 text-[13px] rounded-md border border-border bg-bg focus:border-border-strong outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-[10.5px] uppercase tracking-wider font-medium text-fg-subtle mb-1">
+            Status
+          </label>
+          <select
+            name="status"
+            defaultValue={status}
+            className="h-9 px-2 text-[13px] rounded-md border border-border bg-bg"
+          >
+            <option value="all">All ({totalAll})</option>
+            <option value="active">Active ({totalActive})</option>
+            <option value="inactive">
+              Inactive ({Math.max(0, totalAll - totalActive)})
+            </option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-[10.5px] uppercase tracking-wider font-medium text-fg-subtle mb-1">
+            Category
+          </label>
+          <select
+            name="cat"
+            defaultValue={cat}
+            className="h-9 px-2 text-[13px] rounded-md border border-border bg-bg"
+          >
+            <option value="all">All categories</option>
+            {KNOWN_CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="submit"
+            className="h-9 px-4 text-[13px] rounded-md bg-emerald-600 text-white hover:bg-emerald-700 font-medium"
+          >
+            Apply
+          </button>
+          {hasFilters && (
+            <Link
+              href="/admin/products"
+              className="h-9 px-3 text-[13px] text-fg-muted hover:text-fg flex items-center"
+            >
+              Clear
+            </Link>
+          )}
+        </div>
+      </form>
+
+      <BulkActionsBar
+        sourceIds={products.map((p) => p.source_id)}
+        activeSourceIds={allActiveSourceIds}
+        inactiveSourceIds={allInactiveSourceIds}
+        totalActive={totalActive}
+        totalAll={totalAll}
+      />
+
+      {products.length === 0 && (
+        <div className="mt-6 card p-8 text-center text-[13px] text-fg-muted">
+          No products match these filters.
+          {hasFilters && (
+            <>
+              {" "}
+              <Link
+                href="/admin/products"
+                className="text-emerald-700 hover:underline"
+              >
+                Clear filters
+              </Link>
+              .
+            </>
+          )}
+        </div>
+      )}
+
+      <div className="space-y-8 mt-6">
         {Array.from(byCategory.entries()).map(([cat, items]) => (
           <section key={cat}>
             <div className="flex items-end justify-between mb-3">

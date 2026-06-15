@@ -93,6 +93,42 @@ export async function requireAdminApi(
   };
 }
 
+/**
+ * API-route-friendly user guard. Same shape as requireAdminApi but
+ * for any signed-in user (not just admin). Use this in /api/buyer/*
+ * routes that need a session but don't need an admin check.
+ */
+export async function requireUserApi(
+  req: Request,
+): Promise<
+  | { ok: true; user: PortalUser }
+  | { ok: false; status: 401; error: string }
+> {
+  const supabase = await getServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, status: 401, error: "unauthenticated" };
+  }
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("email, full_name, is_admin, country, company")
+    .eq("id", user.id)
+    .maybeSingle();
+  return {
+    ok: true,
+    user: {
+      id: user.id,
+      email: profile?.email ?? user.email ?? "",
+      fullName: profile?.full_name ?? null,
+      isAdmin: profile?.is_admin ?? false,
+      country: profile?.country ?? null,
+      company: profile?.company ?? null,
+    },
+  };
+}
+
 async function loadPortalUser(
   user: User,
   returnTo: string,

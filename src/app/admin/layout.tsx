@@ -2,8 +2,9 @@ import { requireAdmin } from "@/lib/portal-auth";
 import { adminNav } from "@/lib/admin-nav";
 import { getServiceRoleClient } from "@/lib/supabase/server";
 import { PortalShell } from "@/components/portal-shell";
+import { TopbarSearch } from "@/components/topbar-search";
 import Link from "next/link";
-import { IconBell, IconSearch } from "@/components/portal-icons";
+import { IconBell } from "@/components/portal-icons";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -88,21 +89,7 @@ export default async function AdminLayout({
       switchToLabel="Switch to buyer view"
       topbar={
         <>
-          <div className="flex-1 max-w-md">
-            <div className="flex items-center gap-2 h-9 px-3 rounded-md bg-bg-soft border border-border focus-within:border-border-strong transition-colors">
-              <span className="text-fg-subtle">
-                <IconSearch size={14} />
-              </span>
-              <input
-                type="text"
-                placeholder="Search products, users, orders…"
-                className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-fg-subtle"
-              />
-              <span className="text-[10px] text-fg-subtle font-mono px-1.5 py-0.5 rounded border border-border">
-                ⌘K
-              </span>
-            </div>
-          </div>
+          <TopbarSearch />
           <div className="flex-1" />
           <Link
             href="/admin/alerts"

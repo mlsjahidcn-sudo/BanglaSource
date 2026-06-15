@@ -63,7 +63,9 @@ export type Database = {
           updated_at?: Timestamp;
         };
         Update: Partial<Database["public"]["Tables"]["addresses"]["Insert"]>;
-        Relationships: [],
+        Relationships: [
+          { foreignKeyName: "profiles_implicit_user_id", columns: ["user_id"], referencedRelation: "profiles", referencedColumns: ["id"] },
+        ],
       };
       ai_runs: {
         Row: {
@@ -120,7 +122,9 @@ export type Database = {
           updated_at?: Timestamp;
         };
         Update: Partial<Database["public"]["Tables"]["contact_messages"]["Insert"]>;
-        Relationships: [],
+        Relationships: [
+          { foreignKeyName: "profiles_implicit_user_id", columns: ["user_id"], referencedRelation: "profiles", referencedColumns: ["id"] },
+        ],
       };
       discovered_products: {
         Row: {
@@ -200,7 +204,9 @@ export type Database = {
           created_at?: Timestamp;
         };
         Update: Partial<Database["public"]["Tables"]["notifications"]["Insert"]>;
-        Relationships: [],
+        Relationships: [
+          { foreignKeyName: "profiles_implicit_user_id", columns: ["user_id"], referencedRelation: "profiles", referencedColumns: ["id"] },
+        ],
       };
       order_items: {
         Row: {
@@ -227,7 +233,9 @@ export type Database = {
           "id"
         > & { id?: number };
         Update: Partial<Database["public"]["Tables"]["order_items"]["Insert"]>;
-        Relationships: [],
+        Relationships: [
+          { foreignKeyName: "products_implicit_product_id", columns: ["product_id"], referencedRelation: "products", referencedColumns: ["id"] },
+        ],
       };
       orders: {
         Row: {
@@ -285,6 +293,34 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["page_views"]["Insert"]>;
         Relationships: [],
       };
+      price_history: {
+        Row: {
+          id: number;
+          product_id: number;
+          source_id: string;
+          qty_min: number;
+          qty_max: number | null;
+          old_price_cny_fen: number | null;
+          new_price_cny_fen: number;
+          change_pct: Numeric | null;
+          sync_run_id: Uuid;
+          source: string;
+          recorded_at: Timestamp;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["price_history"]["Row"],
+          "id" | "recorded_at" | "source" | "sync_run_id"
+        > & {
+          id?: number;
+          recorded_at?: Timestamp;
+          source?: string;
+          sync_run_id?: Uuid;
+        };
+        Update: Partial<Database["public"]["Tables"]["price_history"]["Insert"]>;
+        Relationships: [
+          { foreignKeyName: "products_implicit_product_id", columns: ["product_id"], referencedRelation: "products", referencedColumns: ["id"] },
+        ],
+      };
       price_alert_log: {
         Row: {
           id: number;
@@ -302,27 +338,9 @@ export type Database = {
           "id"
         > & { id?: number };
         Update: Partial<Database["public"]["Tables"]["price_alert_log"]["Insert"]>;
-        Relationships: [],
-      };
-      price_history: {
-        Row: {
-          id: number;
-          product_id: number;
-          source_id: string;
-          qty_min: number;
-          qty_max: number | null;
-          price_cny_fen: number;
-          recorded_at: Timestamp;
-        };
-        Insert: Omit<
-          Database["public"]["Tables"]["price_history"]["Row"],
-          "id" | "recorded_at"
-        > & {
-          id?: number;
-          recorded_at?: Timestamp;
-        };
-        Update: Partial<Database["public"]["Tables"]["price_history"]["Insert"]>;
-        Relationships: [],
+        Relationships: [
+          { foreignKeyName: "products_implicit_product_id", columns: ["product_id"], referencedRelation: "products", referencedColumns: ["id"] },
+        ],
       };
       price_tiers: {
         Row: {
@@ -337,7 +355,9 @@ export type Database = {
           "id"
         > & { id?: number };
         Update: Partial<Database["public"]["Tables"]["price_tiers"]["Insert"]>;
-        Relationships: [],
+        Relationships: [
+          { foreignKeyName: "products_implicit_product_id", columns: ["product_id"], referencedRelation: "products", referencedColumns: ["id"] },
+        ],
       };
       products: {
         Row: {
@@ -528,7 +548,9 @@ export type Database = {
           saved_at?: Timestamp;
         };
         Update: Partial<Database["public"]["Tables"]["watchlist"]["Insert"]>;
-        Relationships: [],
+        Relationships: [
+          { foreignKeyName: "products_implicit_product_id", columns: ["product_id"], referencedRelation: "products", referencedColumns: ["id"] },
+        ],
       };
     };
     Views: { [_ in never]: never };
@@ -548,3 +570,50 @@ export type Inserts<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Insert"];
 export type Updates<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Update"];
+
+// Relationship declarations for supabase-js's embedded-resource
+// syntax (`.select("..., parent_table(col, col)")`). Without these,
+// TS can't infer the foreign-key join and falls back to `never`.
+// Each entry: { foreignKeyName, columns, referencedRelation, referencedColumns }
+//   - `foreignKeyName`: matches a real FK constraint in the DB
+//   - `columns`: local column(s)
+//   - `referencedRelation`: the parent table
+//   - `referencedColumns`: parent column(s)
+// These are the relationships that the public schema actually
+// uses (verified via pg_constraint queries during Phase 33).
+type Relationship = {
+  foreignKeyName: string;
+  columns: string[];
+  referencedRelation: string;
+  referencedColumns: string[];
+};
+
+// Manually-declared relationships for the embedded-resource syntax
+// (`.select("..., price_tiers(col, col)")`). The public schema has
+// no FK constraints (verified Phase 33), so supabase-js can't
+// infer the joins from the DB. We declare them here so the TS
+// types resolve to the right shape.
+const PRODUCTS_REL: Relationship = {
+  foreignKeyName: "products_implicit_product_id",
+  columns: ["product_id"],
+  referencedRelation: "products",
+  referencedColumns: ["id"],
+};
+const PROFILES_REL: Relationship = {
+  foreignKeyName: "profiles_implicit_user_id",
+  columns: ["user_id"],
+  referencedRelation: "profiles",
+  referencedColumns: ["id"],
+};
+const ORDERS_REL: Relationship = {
+  foreignKeyName: "orders_implicit_user_id",
+  columns: ["user_id"],
+  referencedRelation: "orders",
+  referencedColumns: ["id"],
+};
+const ADDRESSES_REL: Relationship = {
+  foreignKeyName: "addresses_implicit_user_id",
+  columns: ["user_id"],
+  referencedRelation: "addresses",
+  referencedColumns: ["id"],
+};

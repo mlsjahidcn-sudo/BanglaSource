@@ -5,14 +5,19 @@
 // price-change chips.
 //
 // For the price-change chip we use a *best-effort* heuristic:
-//   1. Take the latest price_history entry for each product
-//      recorded at-or-before the saved_at timestamp.
+//   1. For each watchlist row, take the latest price_history
+//      entry for that product recorded at-or-before saved_at.
 //   2. If that exists, compare its BDT price to the current one.
 //   3. Otherwise, no chip.
 //
 // This isn't perfect (the watchlist row itself is the only
 // authoritative record of "price when saved"), but it gives
 // useful signal in 80% of cases and degrades gracefully.
+//
+// Phase 33 (2026-06-15): the price-drop chip is now actually
+// computed (the loader used to be a no-op). The chip lights up
+// whenever the product's current min-tier price is < the
+// saved-time price.
 
 import { requireUser } from "@/lib/portal-auth";
 import { getServiceRoleClient } from "@/lib/supabase/server";
@@ -62,29 +67,50 @@ async function loadWatchlist(userId: string): Promise<WatchlistRow[]> {
 }
 
 async function loadSavedPrices(
-  productIds: number[],
+  watchlistRows: WatchlistRow[],
 ): Promise<Map<number, number>> {
   // productId (not source_id) → price_cny_fen at the time of save
-  // Best-effort: latest price_history row at-or-before the watchlist's
-  // saved_at. We can't join by saved_at in a single query, so we
-  // take the most recent history row per product, then filter in
-  // JS using the saved_at we already have on the watchlist row.
-  if (productIds.length === 0) return new Map();
+  // (best-effort): the LATEST price_history row per product whose
+  // recorded_at is <= the watchlist's saved_at.
+  //
+  // Phase 33 (2026-06-15): this used to return an empty Map —
+  // the price-drop chip on the saved-items page never lit up.
+  // Now we actually do the JS-side filter that the previous
+  // comment described.
+  if (watchlistRows.length === 0) return new Map();
   try {
     const supabase = getServiceRoleClient();
+    const productIds = Array.from(
+      new Set(watchlistRows.map((r) => r.product_id)),
+    );
+    // Over-fetch (40 per product) and reduce client-side.
     const { data, error } = await supabase
       .from("price_history")
-      .select("product_id, price_cny_fen, recorded_at")
+      .select("product_id, new_price_cny_fen, recorded_at")
       .in("product_id", productIds)
       .order("recorded_at", { ascending: false })
-      .limit(productIds.length * 20);
+      .limit(productIds.length * 40);
     if (error || !data) return new Map();
-    // For each product, take the most recent price (we can't filter
-    // by saved_at cleanly here, so the chip will compare current
-    // vs. earliest-history. This is a Phase 9 fix; for now we just
-    // null it out by not using it).
-    void data;
-    return new Map();
+    // For each watchlist row, find the latest history row
+    // recorded at-or-before the saved_at. price_history is a
+    // log of *changes* — each row has the new price after the
+    // change. So the latest at-or-before saved_at is the price
+    // the user saw when they hit Save.
+    const out = new Map<number, number>();
+    for (const w of watchlistRows) {
+      const savedAtMs = new Date(w.saved_at).getTime();
+      for (const h of data as Array<{
+        product_id: number;
+        new_price_cny_fen: number;
+        recorded_at: string;
+      }>) {
+        if (h.product_id !== w.product_id) continue;
+        if (new Date(h.recorded_at).getTime() > savedAtMs) continue;
+        out.set(w.product_id, h.new_price_cny_fen);
+        break;
+      }
+    }
+    return out;
   } catch {
     return new Map();
   }
@@ -93,7 +119,7 @@ async function loadSavedPrices(
 export default async function BuyerSavedPage() {
   const user = await requireUser("/buyer/saved");
   const items = await loadWatchlist(user.id);
-  await loadSavedPrices(items.map((i) => i.product_id));
+  const savedPrices = await loadSavedPrices(items);
 
   // Enrich with BDT prices for the list view
   const enriched: SavedItem[] = items
@@ -103,6 +129,7 @@ export default async function BuyerSavedPage() {
       const minFen = tiers.length
         ? Math.min(...tiers.map((t) => t.price_cny_fen))
         : 0;
+      const savedFen = savedPrices.get(i.product_id) ?? null;
       return {
         id: i.id,
         product_id: i.product_id,
@@ -116,7 +143,9 @@ export default async function BuyerSavedPage() {
         min_bdt: Math.ceil((minFen / 100) * FX_CNY_BDT),
         rating_overall: i.products!.rating_overall ?? 0,
         order_count_30d: i.products!.order_count_30d ?? 0,
-        saved_price_bdt: null, // Phase 9
+        saved_price_bdt: savedFen
+          ? Math.ceil((savedFen / 100) * FX_CNY_BDT)
+          : null,
       };
     });
 
