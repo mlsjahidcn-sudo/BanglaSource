@@ -68,7 +68,7 @@ For each product, produce a JSON object with these fields:
 - "title_bn": string, ≤ 90 chars. Same meaning in Bengali script. Use natural Bangla for product type. Transliterate brand names phonetically (e.g. "Pro6" → "Pro6", "JBL" → "JBL"). Do not translate brand names.
 - "description_en": 2-3 short sentences (≤ 280 chars total) describing what this product IS and its key selling point for a Bangladeshi buyer. No marketing fluff, no "high quality" / "best choice" / "factory price". Just facts: type, key feature, ideal use case.
 - "description_bn": same content in Bengali.
-- "category_suggestion": one of "gadgets|eyewear|shoes|bags|watches|beauty|jewelry". Pick the closest. If the title is ambiguous, pick the one that matches how the buyer would search for it.
+- "category_suggestion": one of "gadgets|eyewear|shoes|bags|watches|beauty". Pick the closest. If the title is ambiguous, pick the one that matches how the buyer would search for it.
 
 Output ONLY a JSON object. No prose.`;
 
@@ -200,7 +200,6 @@ async function main() {
         "bags",
         "watches",
         "beauty",
-        "jewelry",
       ]);
       if (
         r.result.category_suggestion &&

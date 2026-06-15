@@ -3,7 +3,7 @@
 // One-time title-keyword backfill of products.customs_duty_per_kg
 // based on the Bangladesh air-cargo specific duty schedule:
 //
-//   Category A — 750 ৳/kg  (default for shoes, bags, jewelry,
+//   Category A — 750 ৳/kg  (default for shoes, bags,
 //                              regular electronics, etc.)
 //   Category B — 1,150 ৳/kg  (battery-operated electronics,
 //                              networking/magnet/laser items,
@@ -114,7 +114,6 @@ function classify(
   // ── Default per category ──
   if (category === "shoes") return { per_kg: 750, class: "cat-a" };
   if (category === "bags") return { per_kg: 750, class: "cat-a" };
-  if (category === "jewelry") return { per_kg: 750, class: "cat-a" };
 
   return { per_kg: 750, class: "cat-a" };
 }

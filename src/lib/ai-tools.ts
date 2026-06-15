@@ -61,7 +61,6 @@ export const TOOL_DEFS: ToolDef[] = [
             "bags",
             "watches",
             "beauty",
-            "jewelry",
           ],
         },
         limit: { type: "integer", description: "1-50, default 10" },
@@ -220,7 +219,6 @@ export async function runTool(
           "bags",
           "watches",
           "beauty",
-          "jewelry",
         ];
         const results = await Promise.all(
           cats.map(async (c) => {

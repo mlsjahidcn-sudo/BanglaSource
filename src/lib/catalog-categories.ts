@@ -10,7 +10,6 @@ export const CATEGORIES: { value: string; label: string }[] = [
   { value: "bags", label: "Bags & wallets" },
   { value: "watches", label: "Watches" },
   { value: "beauty", label: "Beauty & personal care" },
-  { value: "jewelry", label: "Jewelry" },
 ];
 
 export const ALLOWED_CATEGORIES = new Set(CATEGORIES.map((c) => c.value));

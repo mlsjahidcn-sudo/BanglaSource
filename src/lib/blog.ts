@@ -175,7 +175,7 @@ const POSTS: BlogPost[] = [
           "≥ 10,000 units sold in the last 30 days (the trend is real, not a flash sale)",
           "Recent launch (within 6-8 months — older items are saturated)",
           "Visible tier pricing (lower per-unit at higher quantities)",
-          "Bangladesh-relevant audience: electronics, beauty, watches, jewelry, bags, shoes, sunglasses",
+          "Bangladesh-relevant audience: electronics, beauty, watches, bags, shoes, sunglasses",
         ],
       },
       {

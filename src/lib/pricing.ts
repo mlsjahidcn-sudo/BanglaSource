@@ -44,7 +44,7 @@ export const SIDE_SERVICE_RATES_PUBLIC = {
 // duty schedule for air cargo. The duty is **specific** (per kg of
 // imported weight), not ad-valorem (% of CIF).
 //
-//   Category A — ৳750/kg  (shoes, bags, jewelry, machinery, stickers,
+//   Category A — ৳750/kg  (shoes, bags, machinery, stickers,
 //                            regular electronics, computer accessories,
 //                            ceramic, metal, leather, rubber, plastic,
 //                            toys excluding battery-operated)
@@ -77,7 +77,6 @@ export const DUTY_BY_CATEGORY: Record<string, number> = {
   bags: 750,
   watches: 1150,
   beauty: 1150,
-  jewelry: 750,
 };
 
 // Bangladesh supplementary duty is folded into CD for our category buckets above.

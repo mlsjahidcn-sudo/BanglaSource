@@ -34,7 +34,6 @@ CATEGORIES (one of these, or null):
 - "bags"     → backpacks, handbags, luggage, wallets
 - "watches"  → analog watches, mechanical watches (NOT smart watches — those are gadgets)
 - "beauty"   → cosmetics, skincare, lipsticks, perfumes
-- "jewelry"  → rings, earrings, necklaces, bracelets
 
 PRICE: amounts are BDT. "under ৳500", "below ৳1000", "less than 500 taka" → price_max_bdt. "over ৳1000", "৳2000+" → price_min_bdt. Both can be set. Range like "৳300-৳500" → both.
 
@@ -85,7 +84,6 @@ const ALLOWED_CATEGORIES = new Set([
   "bags",
   "watches",
   "beauty",
-  "jewelry",
 ]);
 
 const ALLOWED_SORTS = new Set([

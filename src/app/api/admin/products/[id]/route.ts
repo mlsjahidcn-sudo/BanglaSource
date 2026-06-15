@@ -36,7 +36,6 @@ const ALLOWED_CATEGORIES = new Set([
   "bags",
   "watches",
   "beauty",
-  "jewelry",
 ]);
 
 const MAX_TITLE_LEN = 200;

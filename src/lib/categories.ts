@@ -6,8 +6,7 @@ export type CategoryKey =
   | "shoes"
   | "bags"
   | "watches"
-  | "beauty"
-  | "jewelry";
+  | "beauty";
 
 export type Subcategory = { slug: string; name_en: string; name_bn: string };
 
@@ -119,22 +118,6 @@ export const categories: Record<
       { slug: "tools", name_en: "Beauty tools", name_bn: "বিউটি টুলস" },
       { slug: "haircare", name_en: "Hair care", name_bn: "হেয়ার কেয়ার" },
       { slug: "oem", name_en: "OEM / white label", name_bn: "OEM / হোয়াইট লেবেল" },
-    ],
-  },
-  jewelry: {
-    key: "jewelry",
-    slug: "jewelry",
-    name_en: "Jewelry",
-    name_bn: "গয়না",
-    blurb_en: "18K-plated, pearl studs.",
-    blurb_bn: "18K-প্লেটেড, মুক্তা স্টাড।",
-    accent: "bg-amber-400",
-    cover: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=200&h=200&fit=crop&q=80",
-    subs: [
-      { slug: "bracelet", name_en: "Bracelets", name_bn: "ব্রেসলেট" },
-      { slug: "earring", name_en: "Earrings", name_bn: "কানের দুল" },
-      { slug: "necklace", name_en: "Necklaces", name_bn: "নেকলেস" },
-      { slug: "ring", name_en: "Rings", name_bn: "রিং" },
     ],
   },
 };

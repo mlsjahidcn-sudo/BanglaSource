@@ -19,7 +19,7 @@
 //     descriptionBn?: string,
 //     descriptionZh?: string,
 //     category: "gadgets" | "eyewear" | "shoes" | "bags" |
-//               "watches" | "beauty" | "jewelry",
+//               "watches" | "beauty",
 //     weightKg: number,                  // kg per piece
 //     volumeCbm: number,                 // m³ per piece
 //     factoryCnyPerPc: number,           // ¥/pc, factory FOB
@@ -66,7 +66,6 @@ const ALLOWED_CATEGORIES = new Set([
   "bags",
   "watches",
   "beauty",
-  "jewelry",
 ]);
 
 type ManualBody = {

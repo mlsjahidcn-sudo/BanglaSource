@@ -327,7 +327,6 @@ function NoQueryHelper() {
               { slug: "bags", label: lang === "bn" ? "ব্যাগ" : "Bags" },
               { slug: "watches", label: lang === "bn" ? "ঘড়ি" : "Watches" },
               { slug: "beauty", label: lang === "bn" ? "বিউটি" : "Beauty" },
-              { slug: "jewelry", label: lang === "bn" ? "গয়না" : "Jewelry" },
             ] as const
           ).map((c) => (
             <Link
