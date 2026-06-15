@@ -48,7 +48,6 @@ const CATEGORIES = [
   "bags",
   "watches",
   "beauty",
-  "jewelry",
 ] as const;
 
 type SaveState = "idle" | "saving" | "ok" | "err";

@@ -7,7 +7,7 @@ export const revalidate = 0;
 
 async function loadDashboard(userId: string, userName: string) {
   const supabase = getServiceRoleClient();
-  const [quotes, totalQuotes, totalQty, totalBdt, totalOrders, recentOrders] =
+  const [quotes, totalQuotes, totalQty, totalBdt, totalOrders, recentOrders, activeProducts] =
     await Promise.all([
       supabase
         .from("quotes")
@@ -39,6 +39,12 @@ async function loadDashboard(userId: string, userName: string) {
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(5),
+      // Live catalog count for the "Browse catalog" quick-link.
+      // Replaces the stale "1,200+" hardcode — Phase 32 hygiene.
+      supabase
+        .from("products")
+        .select("id", { count: "exact", head: true })
+        .eq("active", true),
     ]);
   const sumQty = (totalQty.data ?? []).reduce(
     (s, r) => s + (r.total_qty ?? 0),
@@ -64,6 +70,7 @@ async function loadDashboard(userId: string, userName: string) {
     sumBdt,
     userName,
     totalOrders: totalOrders.count ?? 0,
+    activeProductCount: activeProducts.count ?? 0,
       recentOrders: (recentOrders.data ?? []) as Array<{
       id: number;
       status: string;
@@ -139,7 +146,7 @@ export default async function BuyerDashboard() {
         <QuickLink
           href="/categories"
           label="Browse catalog"
-          desc="1,200+ verified products, all-in BDT price."
+          desc={`${d.activeProductCount.toLocaleString()} verified products, all-in BDT price.`}
         />
         <QuickLink
           href="/cart"

@@ -20,44 +20,6 @@ export const dict: Dict = {
     bn: "পণ্য খুঁজুন · TWS ইয়ারবাড, সানগ্লাস, হ্যান্ডব্যাগ…",
   },
 
-  // ── Home: hero slider (Amazon-style carousel) ─────────────────────
-  "home.slider.eyebrow": {
-    en: "Bulk wholesale, made simple",
-    bn: "বাল্ক হোলসেল, সহজ করা",
-  },
-  "home.slider.s1.eyebrow": { en: "New · Spring 2026 catalog", bn: "নতুন · বসন্ত ২০২৬ ক্যাটালগ" },
-  "home.slider.s1.title": {
-    en: "Factory prices, in your currency.",
-    bn: "কারখানার দাম, আপনার মুদ্রায়।",
-  },
-  "home.slider.s1.body": {
-    en: "1,200+ verified factories. One all-in price. Shipped to your shop in 12–18 days.",
-    bn: "১,২০০+ যাচাইকৃত কারখানা। একটি সব-অন্তর্ভুক্ত মূল্য। ১২-১৮ দিনে আপনার দোকানে।",
-  },
-  "home.slider.s1.cta": { en: "Browse the catalog", bn: "ক্যাটালগ দেখুন" },
-
-  "home.slider.s2.eyebrow": { en: "Quality you can verify", bn: "আপনি যাচাই করতে পারেন এমন মান" },
-  "home.slider.s2.title": {
-    en: "Photo QC on every order.",
-    bn: "প্রতিটি অর্ডারে ছবি QC।",
-  },
-  "home.slider.s2.body": {
-    en: "Our team opens, counts, and photographs your goods before shipping. Discrepancies caught before payment.",
-    bn: "আমাদের টিম পাঠানোর আগে আপনার পণ্য খোলে, গণনা করে এবং ছবি তোলে।",
-  },
-  "home.slider.s2.cta": { en: "See how it works", bn: "কীভাবে কাজ করে দেখুন" },
-
-  "home.slider.s3.eyebrow": { en: "Pay the way you want", bn: "আপনি যেভাবে চান পেমেন্ট করুন" },
-  "home.slider.s3.title": {
-    en: "Pay in bKash, Nagad, or bank.",
-    bn: "বিকাশ, নগদ, বা ব্যাংকে পেমেন্ট।",
-  },
-  "home.slider.s3.body": {
-    en: "Escrow holds your money until you confirm receipt. Open a dispute within 48 hours if anything is wrong.",
-    bn: "আপনি রসিদ নিশ্চিত না হওয়া পর্যন্ত এসক্রো আপনার টাকা ধরে রাখে।",
-  },
-  "home.slider.s3.cta": { en: "Talk to us", bn: "আমাদের সাথে কথা বলুন" },
-
   // ── Home: single-slide hero (Phase 26, hand-picked since 2026-06-15) ──
   // Eyebrow no longer references 1688 or live sync — we hand-pick.
   "home.hero.eyebrow": {
@@ -147,14 +109,14 @@ export const dict: Dict = {
   // ── How it works page ─────────────────────────────────────────────
   "how.title": { en: "How BanglaSource works", bn: "বাংলাসোর্স কীভাবে কাজ করে" },
   "how.subtitle": {
-    en: "Seven steps from a factory search to your shop counter. Most buyers receive their first order in 12–18 days.",
-    bn: "১৬৮৮ অনুসন্ধান থেকে আপনার দোকানের কাউন্টারে সাতটি ধাপে। বেশিরভাগ ক্রেতা তাদের প্রথম অর্ডার ১২-১৮ দিনে পান।",
+    en: "Seven steps from a hand-picked product to your shop counter. Most buyers receive their first order in 12–18 days.",
+    bn: "হাতে-বাছাই করা পণ্য থেকে আপনার দোকানের কাউন্টারে সাতটি ধাপে। বেশিরভাগ ক্রেতা তাদের প্রথম অর্ডার ১২-১৮ দিনে পান।",
   },
 
   "how.s1.title": { en: "You search or browse", bn: "আপনি অনুসন্ধান বা ব্রাউজ করুন" },
   "how.s1.body": {
-    en: "Our catalog mirrors 1,200+ verified factory products, translated to English and Bangla with BDT pricing.",
-    bn: "আমাদের ক্যাটালগ ইংরেজি ও বাংলায় অনুবাদ সহ ১,২০০+ যাচাইকৃত ১৬৮৮ পণ্য প্রতিফলিত করে।",
+    en: "Our catalog is curated by our China team — every product is hand-picked, verified for quality, and translated to English and Bangla with BDT pricing.",
+    bn: "আমাদের ক্যাটালগ আমাদের চীন টিম দ্বারা কিউরেট করা হয়েছে — প্রতিটি পণ্য হাতে বাছাই করা, মানের জন্য যাচাইকৃত, এবং ইংরেজি ও বাংলায় অনুবাদ সহ BDT মূল্যে।",
   },
   "how.s2.title": { en: "Pick qty and add to order", bn: "পরিমাণ চয়েস করুন এবং অর্ডারে যোগ করুন" },
   "how.s2.body": {
@@ -277,31 +239,6 @@ export const dict: Dict = {
   "ship.sides.consol_help": {
     en: "If your order has items from multiple factories, we consolidate them into one shipment. Single-supplier orders skip this fee.",
     bn: "আপনার অর্ডারে একাধিক কারখানার পণ্য থাকলে আমরা এক শিপমেন্টে কনসোলিডেট করি। একক-সরবরাহকারী অর্ডারে এই ফি নেই।",
-  },
-  "ship.calc.title": { en: "Landed cost calculator", bn: "ল্যান্ডেড খরচ ক্যালকুলেটর" },
-  "ship.calc.subtitle": {
-    en: "Plug in your factory FOB (¥/pc), quantity, and total weight. Pick a mode. We show the per-kg tier, the floor, and the all-in BDT landed cost.",
-    bn: "আপনার কারখানা FOB (¥/পিস), পরিমাণ ও মোট ওজন দিন। একটি মোড বেছে নিন। আমরা প্রতি-কেজির হার, ফ্লোর ও সব-অন্তর্ভুক্ত BDT ল্যান্ডেড খরচ দেখাই।",
-  },
-  "ship.calc.weight": { en: "Total weight (kg)", bn: "মোট ওজন (কেজি)" },
-  "ship.calc.qty": { en: "Quantity (pcs)", bn: "পরিমাণ (পিস)" },
-  "ship.calc.cnypc": { en: "CNY / pc (factory FOB)", bn: "CNY / পিস (কারখানা FOB)" },
-  "ship.calc.mode": { en: "Mode", bn: "মোড" },
-  "ship.calc.tier": { en: "Tier (per-kg)", bn: "টায়ার (প্রতি কেজি)" },
-  "ship.calc.floor": { en: "Service min (small parcel)", bn: "সার্ভিস ন্যূনতম (ছোট পার্সেল)" },
-  "ship.calc.intl": { en: "Int'l shipping (BDT)", bn: "আন্তর্জাতিক শিপিং (BDT)" },
-  "ship.calc.cn_subtotal_bdt": { en: "Factory FOB (BDT)", bn: "কারখানা FOB (BDT)" },
-  "ship.calc.cn_first_mile": { en: "CN first-mile", bn: "CN প্রথম-মাইল" },
-  "ship.calc.agent_fee": { en: "Sourcing agent (3%)", bn: "সোর্সিং এজেন্ট (৩%)" },
-  "ship.calc.cif": { en: "CIF landed (before duty)", bn: "CIF ল্যান্ডেড (শুল্কের আগে)" },
-  "ship.calc.duty": { en: "Customs duty (per-kg specific)", bn: "কাস্টমস শুল্ক (প্রতি কেজি)" },
-  "ship.calc.vat": { en: "VAT 15%", bn: "ভ্যাট ১৫%" },
-  "ship.calc.ait": { en: "AIT 5%", bn: "AIT ৫%" },
-  "ship.calc.total": { en: "Total landed in Dhaka", bn: "ঢাকায় মোট ল্যান্ডেড" },
-  "ship.calc.deposit": { en: "70% deposit", bn: "৭০% ডিপোজিট" },
-  "ship.calc.disclaimer": {
-    en: "Estimate only. Final rate locks at order time; the order detail page shows the locked amount.",
-    bn: "শুধুমাত্র আনুমানিক। চূড়ান্ত হার অর্ডারের সময় লক হয়; অর্ডার ডিটেইল পেজে লক পরিমাণ দেখানো হয়।",
   },
   "ship.disclaimer.title": { en: "Things to know", bn: "জানা দরকার" },
   "ship.disclaimer.1": {
