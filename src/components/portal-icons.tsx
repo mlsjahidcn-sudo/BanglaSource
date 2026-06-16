@@ -226,3 +226,20 @@ export const IconOrders = ({ size = 16, className }: IconProps) =>
     </>,
     className,
   );
+
+// Three small people — used by /admin/group-buys. Distinguishes
+// from IconUsers (single person circle) by being 3 bust silhouettes,
+// which reads as "group/team/collective". The admin config is about
+// orchestrating many buyers into one order, not editing one user.
+export const IconGroupBuy = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <>
+      <circle cx="5" cy="6" r="1.7" />
+      <circle cx="11" cy="6" r="1.7" />
+      <circle cx="8" cy="4" r="1.5" />
+      <path d="M2 12.5c.5-1.7 1.7-2.5 3-2.5s2.5.8 3 2.5" />
+      <path d="M8 11.5c.5-1.4 1.5-2 2.5-2s2 .6 2.5 2" />
+    </>,
+    className,
+  );

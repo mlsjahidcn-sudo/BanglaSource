@@ -577,6 +577,68 @@ export const dict: Dict = {
     bn: "আপনি অর্ডার তালিকায় যোগ করতে পারবেন। কোটের আগে আমরা ইমেইল চাইব।",
   },
   "login.out": { en: "Sign out", bn: "সাইন আউট" },
+
+  // ── Group buy (Phase 37) ──────────────────────────────────────────
+  // The admin + public surfaces use a mix of these. Status labels
+  // (open/forming/formed/expired/cancelled) are intentionally kept
+  // in English-only via the STATUS_LABEL map in the page — they're
+  // operators, not end-user copy. The buyer-facing copy lives
+  // under group_buy.public.* (Phase 39 adds the rest).
+  "group_buy.admin.title": {
+    en: "Group buys",
+    bn: "গ্রুপ বায়",
+  },
+  "group_buy.admin.subtitle": {
+    en: "Pay-on-success bulk deals. Buyers commit a qty; when the group's target is met by the deadline, every member is charged at the final tiered price.",
+    bn: "পে-অন-সাকসেস বাল্ক ডিল। ক্রেতারা পরিমাণ কমিট করে; ডেডলাইনের মধ্যে গ্রুপের টার্গেট পূরণ হলে প্রতিটি সদস্যকে চূড়ান্ত টায়ার্ড মূল্যে চার্জ করা হয়।",
+  },
+  "group_buy.admin.create": {
+    en: "+ Create group buy",
+    bn: "+ গ্রুপ বায় তৈরি করুন",
+  },
+  "group_buy.admin.create_title": {
+    en: "Create group buy",
+    bn: "গ্রুপ বায় তৈরি করুন",
+  },
+  "group_buy.admin.create_subtitle": {
+    en: "Set a target quantity, a deadline, and a tiered step-down price ladder. Buyers commit a qty; when SUM of all members hits target, every member is charged at the final tiered price.",
+    bn: "একটি টার্গেট পরিমাণ, ডেডলাইন এবং টায়ার্ড স্টেপ-ডাউন মূল্য সেট করুন। ক্রেতারা পরিমাণ কমিট করে; সব সদস্যের মোট টার্গেটে পৌঁছালে প্রতিটি সদস্যকে চূড়ান্ত মূল্যে চার্জ করা হয়।",
+  },
+  "group_buy.admin.field.product": { en: "Product", bn: "পণ্য" },
+  "group_buy.admin.field.target_qty": {
+    en: "Target quantity (pcs)",
+    bn: "টার্গেট পরিমাণ (পিস)",
+  },
+  "group_buy.admin.field.target_qty_hint": {
+    en: "Sum of all members' qty to form the group",
+    bn: "গ্রুপ গঠনের জন্য সব সদস্যের মোট পরিমাণ",
+  },
+  "group_buy.admin.field.min_qty": {
+    en: "Min per buyer (pcs)",
+    bn: "প্রতি ক্রেতা সর্বনিম্ন (পিস)",
+  },
+  "group_buy.admin.field.deadline": { en: "Deadline", bn: "ডেডলাইন" },
+  "group_buy.admin.field.tiers": { en: "Price tiers", bn: "মূল্য স্তর" },
+  "group_buy.admin.cancel": { en: "Cancel group buy", bn: "গ্রুপ বায় বাতিল" },
+  "group_buy.admin.cancel_confirm": {
+    en: "Cancel this group buy? This is final — buyers will be notified and no charge will happen.",
+    bn: "এই গ্রুপ বায় বাতিল করবেন? এটি চূড়ান্ত — ক্রেতাদের জানানো হবে এবং কোনো চার্জ হবে না।",
+  },
+  "group_buy.admin.empty": {
+    en: "No group buys yet.",
+    bn: "এখনও কোনো গ্রুপ বায় নেই।",
+  },
+  "group_buy.admin.members": { en: "Members", bn: "সদস্য" },
+  "group_buy.admin.committed": { en: "Committed", bn: "কমিটেড" },
+  "group_buy.admin.progress": { en: "Progress", bn: "অগ্রগতি" },
+  "group_buy.admin.preview_title": {
+    en: "Buyer view preview",
+    bn: "ক্রেতা ভিউ প্রিভিউ",
+  },
+  "group_buy.admin.pricing_ladder": {
+    en: "Pricing ladder",
+    bn: "মূল্য সিঁড়ি",
+  },
 };
 
 /** Server-safe: render a key in a chosen language. */

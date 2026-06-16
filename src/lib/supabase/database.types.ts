@@ -610,6 +610,7 @@ export type Database = {
         Relationships: [
           { foreignKeyName: "group_buy_members_group_buy_id_fkey", columns: ["group_buy_id"], referencedRelation: "group_buys", referencedColumns: ["id"] },
           { foreignKeyName: "group_buy_members_order_id_fkey", columns: ["order_id"], referencedRelation: "orders", referencedColumns: ["id"] },
+          { foreignKeyName: "profiles_implicit_user_id", columns: ["user_id"], referencedRelation: "profiles", referencedColumns: ["id"] },
         ];
       };
     };

@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/portal-auth";
-import { adminNav } from "@/lib/admin-nav";
+import { adminNav, groupBuyNavCounts } from "@/lib/admin-nav";
 import { getServiceRoleClient } from "@/lib/supabase/server";
 import { PortalShell } from "@/components/portal-shell";
 import { TopbarSearch } from "@/components/topbar-search";
@@ -19,6 +19,7 @@ async function loadCounts() {
       since7dViews,
       openOrders,
       openRFQs,
+      gbCounts,
     ] = await Promise.all([
       supabase.from("products").select("id", { count: "exact", head: true }),
       supabase.from("quotes").select("id", { count: "exact", head: true }),
@@ -46,6 +47,7 @@ async function loadCounts() {
         .from("rfqs")
         .select("id", { count: "exact", head: true })
         .eq("status", "open"),
+      groupBuyNavCounts(supabase),
     ]);
     return {
       products: products.count ?? 0,
@@ -55,6 +57,7 @@ async function loadCounts() {
       trafficLast7d: since7dViews.count ?? 0,
       openOrders: openOrders.count ?? 0,
       openRFQs: openRFQs.count ?? 0,
+      openGroupBuys: gbCounts.open,
     };
   } catch {
     return {
@@ -65,6 +68,7 @@ async function loadCounts() {
       trafficLast7d: 0,
       openOrders: 0,
       openRFQs: 0,
+      openGroupBuys: 0,
     };
   }
 }

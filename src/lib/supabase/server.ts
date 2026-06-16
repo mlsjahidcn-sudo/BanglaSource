@@ -46,7 +46,7 @@ export async function getServerClient() {
  * Never expose to the browser. Never use to "log in" — that's the
  * publishable key + signed-in cookies.
  */
-type ServiceClient = ReturnType<typeof createSupabaseClient<Database>>;
+export type ServiceClient = ReturnType<typeof createSupabaseClient<Database>>;
 let _service: ServiceClient | null = null;
 export function getServiceRoleClient(): ServiceClient {
   if (_service) return _service;
