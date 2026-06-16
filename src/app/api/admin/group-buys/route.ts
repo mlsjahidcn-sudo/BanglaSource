@@ -136,7 +136,35 @@ export async function POST(req: NextRequest) {
     } as never)
     .select("id")
     .single();
-  if (insErr) return bad(`Insert failed: ${insErr.message}`, 500);
+  if (insErr) {
+    // C2 audit fix: detect the partial unique index violation
+    // (one open group buy per product) and turn it into a clean
+    // 409 with the actionable message. Without this, an admin
+    // trying to launch a second open group buy on a product
+    // that's already in one would get a generic 500.
+    if (insErr.code === "23505" && insErr.message.includes("group_buys_one_open_per_product_idx")) {
+      // Look up the existing open group buy for this product so
+      // the admin knows which one to cancel first.
+      const { data: existing } = await sb
+        .from("group_buys")
+        .select("id, deadline_at")
+        .eq("product_id", productId)
+        .eq("status", "open")
+        .maybeSingle();
+      const existingId = existing?.id
+        ? String(existing.id).slice(0, 8)
+        : "an existing one";
+      return NextResponse.json(
+        {
+          error: `Product #${productId} already has an open group buy (${existingId}). Cancel or wait for it to expire before launching a new one.`,
+          existingGroupBuyId: existing?.id ?? null,
+          code: "OPEN_GROUP_BUY_EXISTS",
+        },
+        { status: 409 },
+      );
+    }
+    return bad(`Insert failed: ${insErr.message}`, 500);
+  }
 
   return NextResponse.json({ id: created.id });
 }

@@ -120,6 +120,47 @@ check("status 200", createRes.status === 200, `${createRes.status} ${JSON.string
 check("returns id", typeof createJson.id === "string" && createJson.id.length > 0, createJson.id);
 const newId = createJson.id;
 
+// --- 3b. C2 audit fix: overlap must be rejected WHILE the first is still open.
+// (This MUST run before the cancel test in [6] — the partial unique
+// index only applies to status='open' rows, so once we cancel in [6]
+// a second open row on the same product is allowed again.) ---
+console.log("\n[3b] C2: overlap rejection (while still open)");
+const overlapRes = await fetchAuth("/api/admin/group-buys", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(createBody),
+});
+const overlapJson = await overlapRes.json();
+check("overlap returns 409", overlapRes.status === 409, `${overlapRes.status} ${JSON.stringify(overlapJson).slice(0, 100)}`);
+check("error code is OPEN_GROUP_BUY_EXISTS", overlapJson.code === "OPEN_GROUP_BUY_EXISTS", overlapJson.code);
+check("error message mentions existing", /already has an open group buy/.test(overlapJson.error ?? ""), overlapJson.error);
+check("returns existingGroupBuyId", typeof overlapJson.existingGroupBuyId === "string" && overlapJson.existingGroupBuyId.length > 0, overlapJson.existingGroupBuyId);
+check("overlap id matches the first create", overlapJson.existingGroupBuyId === newId, `expected ${newId} got ${overlapJson.existingGroupBuyId}`);
+
+// --- 3c. Different product — should succeed (proves the index is partial).
+// Skip if there's only one product in the DB (no other product to test with). ---
+console.log("\n[3c] Different product — should succeed");
+const otherProduct = products[0].id === productId ? products[1]?.id : products[0].id;
+if (otherProduct && otherProduct !== productId) {
+  const otherRes = await fetchAuth("/api/admin/group-buys", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...createBody, productId: otherProduct }),
+  });
+  const otherJson = await otherRes.json();
+  check("different product creates successfully", otherRes.status === 200, `${otherRes.status} ${JSON.stringify(otherJson).slice(0, 100)}`);
+  if (otherJson.id) {
+    // Clean up the second one (cancel it)
+    await fetchAuth(`/api/admin/group-buys/${otherJson.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "cancel" }),
+    });
+  }
+} else {
+  console.log("  (skipped — only 1 product in DB)");
+}
+
 // --- 5. GET /api/admin/group-buys/[id] ---
 console.log("\n[4] GET /api/admin/group-buys/[id]");
 const getRes = await fetchAuth(`/api/admin/group-buys/${newId}`);
@@ -183,7 +224,7 @@ for (const t of badTests) {
   check(`rejects: ${t.name}`, r.status === 400, `got ${r.status}`);
 }
 
-// --- 10. Unauth tests ---
+
 console.log("\n[9] Unauth tests");
 const r1 = await fetch(`${ORIGIN}/api/admin/group-buys/${newId}`, { method: "GET" });
 check("GET without auth -> 401", r1.status === 401, String(r1.status));
