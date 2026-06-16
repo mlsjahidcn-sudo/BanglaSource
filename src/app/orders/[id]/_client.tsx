@@ -47,6 +47,10 @@ type OrderItemRow = {
   unit_cny_fen: number;
   fx_cny_to_bdt: number;
   markup_pct: number;
+  weight_kg: number;
+  volume_cbm: number;
+  category: string | null;
+  customs_duty_per_kg: number;
   unit_bdt: number;
   line_bdt: number;
   line_duty_bdt: number;

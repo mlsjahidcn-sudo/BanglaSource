@@ -39,25 +39,18 @@ export async function GET(req: NextRequest) {
   );
   const supabase = getServiceRoleClient();
 
-  // Determine the identity key: user id if signed in, else session id from cookie
-  let key: { type: "user_id" | "session_id"; value: string } | null = null;
-  try {
-    const userClient = await getServerClient();
-    const {
-      data: { user },
-    } = await userClient.auth.getUser();
-    if (user) {
-      key = { type: "user_id", value: user.id };
-    }
-  } catch {
-    /* ignore */
-  }
-  if (!key) {
-    // Fall back to session_id
-    const sid = req.cookies.get("bs_sid")?.value;
-    if (sid) key = { type: "session_id", value: sid };
-  }
-  if (!key) {
+  // Determine the session id (the only stable key in `page_views`).
+  // The `page_views` table does NOT have a `user_id` column — the
+  // middleware that records views looks up the active `bs_sid`
+  // cookie at request time, so even for signed-in users we read by
+  // session_id.
+  let sessionId: string | null = null;
+  // First, check the cookie (works for both anon and signed-in)
+  sessionId = req.cookies.get("bs_sid")?.value ?? null;
+  if (!sessionId) {
+    // No cookie → nothing to read. (Signed-in users get a session
+    // via Supabase auth but their page views are still keyed by
+    // `bs_sid` from the middleware.)
     return NextResponse.json({ ok: true, items: [] });
   }
 
@@ -65,7 +58,7 @@ export async function GET(req: NextRequest) {
   const { data: views, error } = await supabase
     .from("page_views")
     .select("path, recorded_at")
-    .eq(key.type, key.value)
+    .eq("session_id", sessionId)
     .like("path", "/products/%")
     .order("recorded_at", { ascending: false })
     .limit(200);

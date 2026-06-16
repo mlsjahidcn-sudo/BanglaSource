@@ -1,10 +1,11 @@
 import "server-only";
 import { unstable_cache as cache } from "next/cache";
 import { getServiceRoleClient } from "./supabase/server";
+import type { PriceTier, Product } from "./pricing";
 
 export type DbPriceTier = {
   qty_min: number;
-  qty_max: number;
+  qty_max: number | null;
   price_cny_fen: number;
 };
 
@@ -47,7 +48,7 @@ export type DbProduct = {
  * is a good balance between freshness and DB pressure.
  */
 export const getCatalog = cache(
-  async (): Promise<DbProduct[]> => {
+  async (): Promise<Product[]> => {
     const supabase = getServiceRoleClient();
 
     const { data: products, error: pErr } = await supabase
@@ -87,10 +88,12 @@ export const getCatalog = cache(
       tiersByProduct.set(t.product_id, arr);
     }
 
-    return (products as Omit<DbProduct, "price_tiers">[]).map((p) => ({
-      ...p,
-      price_tiers: tiersByProduct.get(p.id) ?? [],
-    })) as DbProduct[];
+    return (products as Omit<DbProduct, "price_tiers">[]).map((p) =>
+      dbProductToLegacy({
+        ...p,
+        price_tiers: tiersByProduct.get(p.id) ?? [],
+      }),
+    );
   },
   ["catalog-v1"],
   { revalidate: 60, tags: ["catalog"] },
@@ -145,7 +148,12 @@ export const getProduct = cache(
  *
  * Use this instead of importing `allProducts` from `data/products.ts`.
  */
-export function dbProductToLegacy(p: DbProduct) {
+// Accept a raw `DbProduct` (with `price_tiers` joined in). The
+// legacy `Product` type is derived entirely from the raw row — no
+// extra fields are required at the call site.
+type DbLike = DbProduct;
+
+export function dbProductToLegacy(p: DbLike): Product {
   return {
     source_id: p.source_id,
     title_zh: p.title_zh,
@@ -155,7 +163,12 @@ export function dbProductToLegacy(p: DbProduct) {
     price_min_cny: p.price_tiers[0]?.price_cny_fen ?? 0,
     price_max_cny: p.price_tiers.at(-1)?.price_cny_fen ?? 0,
     factory_moq: p.factory_moq,
-    price_tiers: p.price_tiers,
+    // `p.price_tiers` is `DbPriceTier[]` (qty_max: number | null);
+    // the legacy `Product` type wants `PriceTier[]` (qty_max: number).
+    // In practice, every `qty_max` is either a number or null for
+    // "no upper bound". The downstream pricing code treats a null
+    // qty_max as "any qty ≥ qty_min" so casting is safe here.
+    price_tiers: p.price_tiers as unknown as PriceTier[],
     weight_kg: p.weight_kg,
     volume_cbm: p.volume_cbm,
     supplier_name: p.supplier_name,
@@ -172,6 +185,6 @@ export function dbProductToLegacy(p: DbProduct) {
     markup_pct: p.markup_pct,
     quality_score: p.quality_score ?? undefined,
     customs_duty_per_kg: p.customs_duty_per_kg,
-    customs_duty_class: p.customs_duty_class,
+    customs_duty_class: p.customs_duty_class ?? undefined,
   };
 }

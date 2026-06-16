@@ -131,7 +131,7 @@ export async function popularByViews(
     // operator hasn't run the migration).
     return popularByViewsFallback(days, limit);
   }
-  return (data ?? []) as PopularProduct[];
+  return (data ?? []) as unknown as PopularProduct[];
 }
 
 async function popularByViewsFallback(

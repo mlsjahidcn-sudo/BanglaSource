@@ -47,7 +47,10 @@ export async function PATCH(
     );
   }
 
-  const admin = await requireAdminApi();
+  const admin = await requireAdminApi(req);
+  if (!admin.ok) {
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
+  }
   const { id } = await params;
   const rfqId = Number(id);
   if (!Number.isInteger(rfqId) || rfqId <= 0) {
@@ -128,7 +131,7 @@ export async function PATCH(
       quoted_min_qty: minQty,
       quoted_lead_days: leadDays,
       quoted_notes: notes || null,
-      admin_owner_id: admin.id,
+      admin_owner_id: admin.user.id,
     })
     .eq("id", rfqId)
     .select("*")

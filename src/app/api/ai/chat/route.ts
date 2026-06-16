@@ -155,7 +155,11 @@ export async function POST(req: NextRequest) {
       for (let turn = 0; turn < MAX_TURNS; turn += 1) {
         let resp;
         try {
-          resp = await deepseekChat(messages, {
+          // `ClientMessage` is the public-facing shape (content optional
+          // + tool role). Internally we ensure every `content` slot
+          // is a string by the time we get here (the route handler
+          // filters out empty messages). Cast at the boundary.
+          resp = await deepseekChat(messages as never, {
             model: "deepseek-v4-pro",
             maxTokens: 4096,
             temperature: 1.0,

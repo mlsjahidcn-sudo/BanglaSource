@@ -705,7 +705,7 @@ type DbLite = {
   markup_pct: number;
   weight_kg: number;
   volume_cbm: number;
-  price_tiers: { qty_min: number; qty_max: number; price_cny_fen: number }[];
+  price_tiers: { qty_min: number; qty_max: number | null; price_cny_fen: number }[];
   customs_duty_per_kg: number;
   supplier_name: string;
   rating_overall: number;
@@ -721,7 +721,14 @@ function dbProductToLegacy(p: DbLite) {
     price_min_cny: p.price_tiers[0]?.price_cny_fen ?? 0,
     price_max_cny: p.price_tiers.at(-1)?.price_cny_fen ?? 0,
     factory_moq: p.factory_moq,
-    price_tiers: p.price_tiers,
+    // `p.price_tiers` has nullable `qty_max` (the DB row); the
+    // legacy `Product` type requires `number`. Coalesce null → 0
+    // (the downstream pricing code treats 0 as "no upper bound").
+    price_tiers: p.price_tiers.map((t) => ({
+      qty_min: t.qty_min,
+      qty_max: t.qty_max ?? 0,
+      price_cny_fen: t.price_cny_fen,
+    })),
     weight_kg: p.weight_kg,
     volume_cbm: p.volume_cbm,
     supplier_name: p.supplier_name,

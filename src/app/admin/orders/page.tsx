@@ -235,7 +235,8 @@ export default async function AdminOrdersPage({
   let orders: OrderRow[] = ((ordersRaw ?? []) as any[]).map((o) => {
     const items = Array.isArray(o.order_items) ? o.order_items : [];
     const sorted = [...items].sort(
-      (a, b) => (a.position ?? 0) - (b.position ?? 0),
+      (a: { position?: number }, b: { position?: number }) =>
+        (a.position ?? 0) - (b.position ?? 0),
     );
     const first = sorted[0];
     const profile = profileById.get(o.user_id as string);
@@ -256,7 +257,10 @@ export default async function AdminOrdersPage({
       buyer_email: profile?.email ?? null,
       buyer_full_name: profile?.full_name ?? null,
       item_count: items.length,
-      total_qty: items.reduce((s, it) => s + (it.qty ?? 0), 0),
+      total_qty: items.reduce(
+        (s: number, it: { qty?: number }) => s + (it.qty ?? 0),
+        0,
+      ),
       first_image: first?.image_snapshot ?? null,
       first_source_id: first?.products?.source_id ?? null,
     };

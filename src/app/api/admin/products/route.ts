@@ -277,7 +277,7 @@ export async function POST(req: NextRequest) {
       source_id: sourceId,
       title_en: titleEn,
       title_bn: titleBn || titleEn,
-      title_zh: body.titleZh ?? null,
+      title_zh: body.titleZh ?? "",
       category: body.category,
       factory_moq: Math.max(1, Math.round(body.factoryMoq || 1)),
       weight_kg: body.weightKg || 0.5,
@@ -294,6 +294,8 @@ export async function POST(req: NextRequest) {
       // anything filtering on this field still finds the row.
       source_url: `https://manual.local/${sourceId}`,
       customs_duty_per_kg: body.customsDutyPerKg || 750,
+      quality_score: null,
+      customs_duty_class: null,
     })
     .select("id")
     .single();
@@ -389,7 +391,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  revalidateTag("catalog");
+  revalidateTag("catalog", "max");
   revalidatePath("/");
   revalidatePath("/categories");
   revalidatePath("/admin/products");

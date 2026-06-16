@@ -157,7 +157,9 @@ export async function PATCH(
 
   const { data, error } = await sb
     .from("addresses")
-    .update(patch)
+    // `patch` is `Record<string, any>` for incremental narrowing,
+    // but the keys match the addresses Update shape (validated above).
+    .update(patch as never)
     .eq("id", addressId)
     .eq("user_id", user.id) // belt-and-suspenders; RLS already enforces this
     .select("*")

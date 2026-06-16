@@ -162,6 +162,8 @@ export async function POST(req: NextRequest) {
           change_pct: a.change_pct,
           direction: a.direction,
           detected_at: now,
+          notified_at: null,
+          acknowledged_at: null,
         })),
       )
       .select("id");
@@ -211,6 +213,7 @@ export async function POST(req: NextRequest) {
           href: string;
           related_alert_id: number;
           related_product_id: number;
+          read_at: string | null;
         }> = [];
         const emailPayloads: Array<{
           to: string;
@@ -239,13 +242,20 @@ export async function POST(req: NextRequest) {
               href: `/products/${a.source_id}`,
               related_alert_id: aid,
               related_product_id: a.product_id,
+              read_at: null,
             });
           }
         }
         if (rows.length > 0) {
           const { data: ins, error: nErr } = await supabase
             .from("notifications")
-            .insert(rows, { ignoreDuplicates: true })
+            // NOTE: postgrest-js 2.108 dropped the `ignoreDuplicates`
+            // option on `.insert()` — it's now `.upsert(rows, { onConflict,
+            // ignoreDuplicates })` only. The `notifications` table has
+            // no unique index, so de-dup happens at the SELECT (we
+            // only iterate `users` once per alert) and we don't need
+            // the flag at the DB level.
+            .insert(rows)
             .select("id, user_id, related_alert_id");
           if (nErr) {
             console.error("[price-alerts] notifications insert failed:", nErr.message);

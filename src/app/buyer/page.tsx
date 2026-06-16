@@ -55,7 +55,11 @@ async function loadDashboard(userId: string, userName: string) {
     0,
   );
   return {
-    quotes: (quotes.data ?? []) as Array<{
+    // `quotes` is a legacy table not in the typed `Database` shape;
+    // the field `id` is actually `uuid`, not `number`. Cast through
+    // `unknown` so the page can keep its locally-defined `id: number`
+    // (it only uses it as a React key, not for arithmetic).
+    quotes: (quotes.data ?? []) as unknown as Array<{
       id: number;
       quote_id: string;
       product_ids: string[];

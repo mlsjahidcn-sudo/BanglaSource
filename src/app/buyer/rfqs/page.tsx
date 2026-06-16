@@ -54,7 +54,7 @@ export default async function BuyerRFQsPage({
       <RFQsClient
         rfqs={rfqs}
         mode={mode}
-        defaultName={user.fullName}
+        defaultName={user.fullName ?? ""}
         defaultEmail={user.email}
       />
     </div>

@@ -203,6 +203,7 @@ export async function GET(req: NextRequest) {
       const bySession = new Map<string, Set<string>>();
       for (const r of cv ?? []) {
         const sid = r.path.replace("/products/", "");
+        if (!r.session_id) continue; // skip anonymous page-views (no session_key)
         const arr = bySession.get(r.session_id) ?? new Set<string>();
         arr.add(sid);
         bySession.set(r.session_id, arr);

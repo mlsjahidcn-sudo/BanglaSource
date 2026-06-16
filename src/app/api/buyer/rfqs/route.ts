@@ -134,6 +134,14 @@ export async function POST(req: NextRequest) {
       image_urls: imageUrls,
       destination_country: destinationCountry,
       notes,
+      status: "open",
+      admin_owner_id: null,
+      quoted_price_cny_fen: null,
+      quoted_min_qty: null,
+      quoted_lead_days: null,
+      quoted_notes: null,
+      quoted_at: null,
+      closed_at: null,
     })
     .select("id")
     .single();

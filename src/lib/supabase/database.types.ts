@@ -332,6 +332,9 @@ export type Database = {
           new_price_cny_fen: number;
           change_pct: Numeric;
           direction: string;
+          detected_at: Timestamp;
+          notified_at: Timestamp | null;
+          acknowledged_at: Timestamp | null;
         };
         Insert: Omit<
           Database["public"]["Tables"]["price_alert_log"]["Row"],
@@ -554,7 +557,52 @@ export type Database = {
       };
     };
     Views: { [_ in never]: never };
-    Functions: { [_ in never]: never };
+    Functions: {
+      create_order_with_items: {
+        Args: {
+          p_user_id: string;
+          p_shipping_mode: string;
+          p_payment_method: string;
+          p_product_subtotal_bdt: number;
+          p_shipping_bdt: number;
+          p_duty_bdt: number;
+          p_vat_bdt: number;
+          p_ait_bdt: number;
+          p_total_bdt: number;
+          p_deposit_bdt: number;
+          p_balance_bdt: number;
+          p_address_id: number | null;
+          p_address_snapshot: unknown;
+          p_buyer_note: string | null;
+          p_items: Array<{
+            product_id: number;
+            qty: number;
+            title_snapshot: string;
+            image_snapshot: string | null;
+            unit_cny_fen: number;
+            fx_cny_to_bdt: number;
+            markup_pct: number;
+            weight_kg: number;
+            volume_cbm: number;
+            category: string | null;
+            customs_duty_per_kg: number;
+            unit_bdt: number;
+            line_bdt: number;
+            line_duty_bdt: number;
+            position: number;
+          }>;
+        };
+        Returns: number;
+      };
+      popular_by_views: {
+        Args: { p_since: string; p_limit: number };
+        Returns: Array<{
+          product_id: number;
+          source_id: string;
+          view_count: number;
+        }>;
+      };
+    };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };
   };

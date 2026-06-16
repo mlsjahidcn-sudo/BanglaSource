@@ -257,13 +257,6 @@ export const dict: Dict = {
     en: "Per-kg rates above are reference. The actual landed cost for your order is confirmed by our team via email or WhatsApp after you place the order.",
     bn: "উপরের প্রতি-কেজি হারগুলো রেফারেন্স। আপনার অর্ডারের প্রকৃত ল্যান্ডেড খরচ অর্ডার দেওয়ার পর ইমেইল বা হোয়াটসঅ্যাপে আমাদের টিম নিশ্চিত করবে।",
   },
-  "ship.mode.air": { en: "Air freight", bn: "এয়ার ফ্রেইট" },
-  "ship.mode.sea": { en: "Sea freight (LCL)", bn: "সি ফ্রেইট (LCL)" },
-  "ship.mode.express": { en: "Express (DHL/FedEx)", bn: "এক্সপ্রেস (DHL/FedEx)" },
-  "ship.transit": { en: "Transit time", bn: "ট্রানজিট সময়" },
-  "ship.min": { en: "Minimum", bn: "ন্যূনতম" },
-  "ship.perkg": { en: "Per kg", bn: "প্রতি কেজি" },
-  "ship.percbm": { en: "Per CBM", bn: "প্রতি CBM" },
   "ship.calc.title": { en: "Landed cost calculator", bn: "ল্যান্ডেড খরচ ক্যালকুলেটর" },
   "ship.calc.subtitle": {
     en: "Drop in your product weight and quantity. We'll show the full delivered cost in BDT.",

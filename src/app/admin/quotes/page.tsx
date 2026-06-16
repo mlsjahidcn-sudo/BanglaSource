@@ -4,27 +4,46 @@ import { AdminPage, AdminPageHeader } from "@/components/admin-page";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+// `quotes` table shape (per the live DB schema):
+//   id uuid, user_id uuid, quote_id text, product_ids text[],
+//   shipping_mode text, total_qty int, fob_cny_fen bigint,
+//   fx_cny_bdt numeric, cn_subtotal_bdt bigint, intl_bdt bigint,
+//   agent_bdt bigint, consol_bdt bigint, duty_bdt bigint,
+//   duty_pct numeric, vat_bdt bigint, ait_bdt bigint,
+//   markup_bdt bigint, transit_days text, quote_status text,
+//   expires_at timestamptz, created_at timestamptz.
+// This page predates the column rename + consolidation. We
+// keep the legacy field names in `QuoteRow` for downstream use
+// and resolve the column drift with a mapper below.
 type QuoteRow = {
-  id: number;
+  id: string;
   user_id: string;
-  source_id: string | null;
-  qty: number;
-  mode: string;
+  quote_id: string;
+  product_ids: string[];
+  mode: string; // mapped from shipping_mode
+  qty: number; // mapped from total_qty
+  total_bdt: number; // synthesized (cn_subtotal_bdt + intl + agent + consol + duty + vat + ait + markup)
+  // Legacy UI field — derived as fob_cny_fen / total_qty (per-piece)
   unit_cny_fen: number;
-  total_cny_fen: number;
-  total_bdt: number;
+  // Legacy UI field — single source_id (was the original column name)
+  source_id: string | null;
   transit_days: string;
-  status: string;
-  notes: string | null;
+  status: string; // mapped from quote_status
   created_at: string;
 };
 
 async function loadQuotes() {
   const supabase = getServiceRoleClient();
-  const { data } = await supabase
+  // `quotes` is not in the typed `Database` shape (it's a legacy
+  // table kept around for old quote references). Cast to `never`
+  // at the table-call boundary so we can read the actual columns
+  // we need.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sb = supabase as any;
+  const { data } = await sb
     .from("quotes")
     .select(
-      "id,user_id,source_id,qty,mode,unit_cny_fen,total_cny_fen,total_bdt,transit_days,status,notes,created_at",
+      "id,user_id,quote_id,product_ids,shipping_mode,total_qty,fob_cny_fen,cn_subtotal_bdt,intl_bdt,agent_bdt,consol_bdt,duty_bdt,vat_bdt,ait_bdt,markup_bdt,transit_days,quote_status,created_at",
     )
     .order("created_at", { ascending: false })
     .limit(200);
@@ -32,8 +51,32 @@ async function loadQuotes() {
     .from("profiles")
     .select("id,email,full_name,company,country");
   const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rows: QuoteRow[] = (data ?? []).map((q: any) => ({
+    id: q.id,
+    user_id: q.user_id,
+    quote_id: q.quote_id,
+    product_ids: q.product_ids ?? [],
+    mode: q.shipping_mode,
+    qty: q.total_qty,
+    total_bdt:
+      Number(q.cn_subtotal_bdt ?? 0) +
+      Number(q.intl_bdt ?? 0) +
+      Number(q.agent_bdt ?? 0) +
+      Number(q.consol_bdt ?? 0) +
+      Number(q.duty_bdt ?? 0) +
+      Number(q.vat_bdt ?? 0) +
+      Number(q.ait_bdt ?? 0) +
+      Number(q.markup_bdt ?? 0),
+    unit_cny_fen:
+      q.total_qty > 0 ? Math.round(Number(q.fob_cny_fen ?? 0) / q.total_qty) : 0,
+    source_id: q.product_ids?.[0] ?? null,
+    transit_days: q.transit_days,
+    status: q.quote_status,
+    created_at: q.created_at,
+  }));
   return {
-    quotes: (data ?? []) as QuoteRow[],
+    quotes: rows,
     profileMap,
   };
 }

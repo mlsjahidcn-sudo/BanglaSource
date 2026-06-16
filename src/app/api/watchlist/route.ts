@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabase
     .from("watchlist")
     .upsert(
-      { user_id: uid, product_id: productId },
+      { user_id: uid, product_id: productId, notify_on_drop: true },
       { onConflict: "user_id,product_id", ignoreDuplicates: false },
     )
     .select("id, product_id, saved_at")

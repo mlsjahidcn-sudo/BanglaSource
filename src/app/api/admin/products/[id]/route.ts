@@ -215,7 +215,12 @@ export async function PATCH(
   const supabase = getServiceRoleClient();
   const { data, error } = await supabase
     .from("products")
-    .update(patch)
+    // `patch` is built as `Record<string, unknown>` for incremental field
+    // accumulation, but at the call site we know it matches the
+    // `products` Update shape (every key was validated against the schema
+    // in the branches above). Cast at the boundary to keep the build-shape
+    // type-safe without dragging `Database` into this file.
+    .update(patch as never)
     .eq("id", productId)
     .select(
       "id,source_id,title_en,title_bn,title_zh,category,active,markup_pct,images,description_en,description_bn,weight_kg,volume_cbm,factory_moq,supplier_name,supplier_city,supplier_province,quality_score,badges,source_url,updated_at",
@@ -240,7 +245,7 @@ export async function PATCH(
   // revalidate=60; we tag it via revalidateTag so the next request
   // misses the cache.
   try {
-    revalidateTag("catalog");
+    revalidateTag("catalog", "max");
   } catch {
     // ignore — revalidateTag may not be wired on the catalog cache key
   }

@@ -39,7 +39,7 @@ async function loadProductHistory(sourceId: string) {
   const { data: product } = await supabase
     .from("products")
     .select(
-      "id,source_id,title_zh,title_en,title_bn,description_en,description_bn,category,active,markup_pct,weight_kg,volume_cbm,factory_moq,badges,supplier_name,supplier_city,supplier_province,source_url,images,price_tiers(qty_min,qty_max,price_cny_fen)",
+      "id,source_id,title_zh,title_en,title_bn,description_en,description_bn,category,active,markup_pct,weight_kg,volume_cbm,factory_moq,badges,supplier_name,supplier_city,supplier_province,source_url,images,customs_duty_per_kg,customs_duty_class,price_tiers(qty_min,qty_max,price_cny_fen)",
     )
     .eq("source_id", sourceId)
     .maybeSingle();
@@ -133,6 +133,8 @@ export default async function AdminProductPage({
     price_min_cny: pricesFen.length > 0 ? Math.min(...pricesFen) : 0,
     price_max_cny: pricesFen.length > 0 ? Math.max(...pricesFen) : 0,
     badges: (product.badges as string[]) ?? [],
+    customs_duty_per_kg: Number(product.customs_duty_per_kg ?? 0),
+    customs_duty_class: (product.customs_duty_class as string | null) ?? null,
   };
 
   const aiEnabled = Boolean(process.env.DEEPSEEK_API_KEY);

@@ -338,7 +338,7 @@ export async function POST(
       );
     }
     newImagesAdded = uploadedUrls.length;
-    revalidateTag("catalog");
+    revalidateTag("catalog", "max");
     revalidatePath(`/products/${product.source_id}`);
     revalidatePath("/admin/products");
   }

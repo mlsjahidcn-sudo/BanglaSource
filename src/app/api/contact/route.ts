@@ -118,6 +118,9 @@ export async function POST(req: NextRequest) {
       message,
       source,
       status: isSpam ? "spam" : "new",
+      user_id: null,
+      ip_hash: null,
+      admin_owner_id: null,
     })
     .select("id")
     .single();

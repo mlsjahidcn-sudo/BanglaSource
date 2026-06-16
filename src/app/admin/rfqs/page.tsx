@@ -99,7 +99,7 @@ export default async function AdminRFQsPage({
         <AdminPageHeader
           eyebrow="Inbound"
           title="RFQs"
-          accent="cyan"
+          dotColor="cyan"
           subtitle="Custom request-for-quote — buyer-submitted specs that need factory pickup."
         />
         <div className="card p-6 text-rose-600 text-[13px]">Error: {error.message}</div>
@@ -134,7 +134,7 @@ export default async function AdminRFQsPage({
       <AdminPageHeader
         eyebrow="Inbound"
         title="RFQs"
-        accent="cyan"
+        dotColor="cyan"
         subtitle="Custom request-for-quote — buyer-submitted specs that need factory pickup."
       />
 

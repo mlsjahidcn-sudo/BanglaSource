@@ -419,6 +419,7 @@ function CartCrossSell({
                   title_bn: s.title_bn,
                   image: s.image,
                   unitPriceCny: s.price_cny_fen,
+                  factory_moq: 1,
                   qty: 1,
                   // Phase 11: snapshot the per-product markup at
                   // add-time. effectiveMarkupPct falls back to

@@ -165,7 +165,9 @@ export async function PATCH(
 
   const { data: updated, error: uErr } = await sb
     .from("orders")
-    .update(patch)
+    // `patch` is `Record<string, unknown>` for incremental narrowing,
+    // but the keys match the orders Update shape (validated above).
+    .update(patch as never)
     .eq("id", orderId)
     .select("*")
     .maybeSingle();

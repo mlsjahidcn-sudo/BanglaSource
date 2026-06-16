@@ -207,8 +207,12 @@ export async function POST(req: NextRequest) {
   const admin = getServiceRoleClient();
   type Resolved = {
     wire: WireCartItem;
-    db: Awaited<ReturnType<typeof getProduct>>;
-    legacy: ReturnType<typeof dbProductToLegacy> | null;
+    // After the early-return in the for-loop below, db is guaranteed
+    // non-null. The unwrapping happens in the same scope, but TS
+    // can't always narrow through the await. We assert non-null
+    // here so the downstream `r.db` accesses are clean.
+    db: NonNullable<Awaited<ReturnType<typeof getProduct>>>;
+    legacy: ReturnType<typeof dbProductToLegacy>;
     unit_bdt: number;
     line_bdt: number;
     line_duty_bdt: number;
