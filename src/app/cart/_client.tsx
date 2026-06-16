@@ -133,7 +133,7 @@ export function CartClient() {
         </p>
         <Link
           href="/categories"
-          className="mt-6 inline-flex h-11 items-center px-5 text-[13.5px] font-medium rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
+          className="mt-6 inline-flex h-11 items-center px-5 text-[13.5px] font-medium rounded-md bg-cyan-600 text-white hover:bg-cyan-700"
         >
           {t("cart.empty.cta")}
         </Link>
@@ -268,7 +268,7 @@ export function CartClient() {
                 <span
                   className={
                     minWeightMet
-                      ? "text-emerald-700 font-mono tnum font-medium"
+                      ? "text-cyan-700 font-mono tnum font-medium"
                       : "text-fg font-mono tnum"
                   }
                 >
@@ -287,7 +287,7 @@ export function CartClient() {
               </div>
               <p
                 className={`mt-1.5 text-[11px] ${
-                  minWeightMet ? "text-emerald-700" : "text-fg-muted"
+                  minWeightMet ? "text-cyan-700" : "text-fg-muted"
                 }`}
               >
                 {minWeightMet
@@ -301,14 +301,14 @@ export function CartClient() {
             <button
               onClick={requestQuote}
               disabled={quoteLoading}
-              className="mt-5 w-full h-11 rounded-md bg-emerald-600 text-white text-[13.5px] font-medium hover:bg-emerald-700 disabled:opacity-60"
+              className="mt-5 w-full h-11 rounded-md bg-cyan-600 text-white text-[13.5px] font-medium hover:bg-cyan-700 disabled:opacity-60"
             >
               {quoteLoading ? "Calculating…" : t("cart.request_quote")}
             </button>
             {minWeightMet ? (
               <Link
                 href={signedInEmail ? "/checkout" : "/login?redirect=/checkout"}
-                className="mt-2 w-full h-11 rounded-md border border-emerald-600 text-emerald-700 text-[13.5px] font-medium hover:bg-emerald-50 flex items-center justify-center"
+                className="mt-2 w-full h-11 rounded-md bg-cyan-600 text-white text-[13.5px] font-medium hover:bg-cyan-700 flex items-center justify-center"
               >
                 {t("cart.place_order")} →
               </Link>
@@ -345,7 +345,7 @@ export function CartClient() {
           {quote && (
             <div className="card p-5 space-y-3">
               <div className="flex items-baseline justify-between">
-                <p className="text-[11px] text-emerald-700 uppercase tracking-wider font-semibold">
+                <p className="text-[11px] text-cyan-700 uppercase tracking-wider font-semibold">
                   Quote {quote.quoteId}
                 </p>
                 <p className="text-[10.5px] text-fg-subtle">

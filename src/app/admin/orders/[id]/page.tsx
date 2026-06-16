@@ -166,7 +166,7 @@ export default async function AdminOrderDetailPage({
         <div>
           <div className="flex items-end gap-3">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mb-3" />
-            <p className="text-[12px] font-medium tracking-wider uppercase text-emerald-700">
+            <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
               Inbound
             </p>
           </div>

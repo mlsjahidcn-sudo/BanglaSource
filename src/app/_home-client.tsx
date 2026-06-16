@@ -46,7 +46,7 @@ export function HomeClient({
         <Container className="py-2.5 flex items-center justify-between gap-4 text-[12px] text-fg-muted">
           <div className="flex items-center gap-4 min-w-0">
             <span className="flex items-center gap-1.5 shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
               {lang === "bn"
                 ? `${syncStats.activeCount.toLocaleString("bn-BD")}টি পণ্য স্টকে`
                 : `${syncStats.activeCount.toLocaleString("en-US")} products in stock`}
@@ -295,7 +295,7 @@ function SidebarRail({ products: allProducts }: { products: CatalogProduct[] }) 
             </div>
             <Link
               href={`/categories/${hoveredCat.slug}`}
-              className="block p-3 text-center text-[12.5px] font-medium text-fg hover:text-emerald-700 border-t border-border bg-bg-soft"
+              className="block p-3 text-center text-[12.5px] font-medium text-fg hover:text-cyan-700 border-t border-border bg-bg-soft"
             >
               {lang === "bn" ? "সব দেখুন" : "Browse all"} {lang === "bn" ? hoveredCat.name_bn : hoveredCat.name_en} →
             </Link>
@@ -326,23 +326,19 @@ function Hero({
   heroProduct: PopularProduct | null;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-xl border border-border h-[420px] bg-gradient-to-br from-slate-900 to-slate-800 text-white">
-      {/* Faint grid backdrop — same as before, lower opacity so the
-          product image on the right reads cleanly. */}
-      <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px)",
-          backgroundSize: "56px 56px",
-        }}
-      />
-      <div className="relative h-full grid md:grid-cols-2 gap-4 p-8 md:p-10">
-        <HeroCopy
-          activeCount={activeCount}
-          lastUpdateIso={lastUpdateIso}
-        />
-        <div className="hidden md:flex items-center justify-center relative">
+    <div className="relative overflow-hidden rounded-xl border border-border bg-bg h-[420px]">
+      {/* Subtle cyan accent stripe down the left edge — the brand mark
+          for the hero block. Reads as "this is a featured block" without
+          being a full bleed gradient. */}
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-600" aria-hidden />
+      <div className="relative h-full grid md:grid-cols-12 gap-6 p-8 md:p-10">
+        <div className="md:col-span-7 flex flex-col justify-center min-w-0">
+          <HeroCopy
+            activeCount={activeCount}
+            lastUpdateIso={lastUpdateIso}
+          />
+        </div>
+        <div className="md:col-span-5 hidden md:flex items-center justify-center relative">
           <HeroVisual product={heroProduct} />
         </div>
       </div>
@@ -360,42 +356,38 @@ function HeroCopy({
   const { t, lang } = useLang();
   const numFmt = lang === "bn" ? "bn-BD" : "en-US";
   const countStr = activeCount.toLocaleString(numFmt);
-  // The eyebrow shows the i18n string verbatim (en: "Hand-picked · N
-  // products · updated today"). We override the "updated today"
-  // portion to actually reflect the freshness of the last product
-  // write — so it reads "updated 3h ago" or "updated yesterday" when
-  // a few days pass between manual adds. Cheap on a single column.
   const freshLabel = useFreshnessLabel(lastUpdateIso, lang);
-  // The eyebrow string is fully translated in i18n-dict; for now we
-  // let the i18n key hold the en/bn copy with a fixed "updated
-  // today" suffix — if a more dynamic version is needed later we
-  // can split it into two keys. (The TopRibbon LiveBadge already
-  // renders the dynamic age in plain English below the hero.)
   void freshLabel;
 
   return (
-    <div className="flex flex-col justify-center min-w-0">
-      <span className="inline-flex w-fit items-center gap-2 px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase rounded-full bg-emerald-500 text-slate-900">
+    <div className="flex flex-col min-w-0">
+      <span className="inline-flex w-fit items-center gap-2 px-2.5 py-1 text-[10px] font-semibold tracking-[0.1em] uppercase rounded-full bg-cyan-600 text-white">
         <span className="relative flex h-1.5 w-1.5">
-          <span className="absolute inline-flex h-full w-full rounded-full bg-slate-900 opacity-60 animate-ping" />
-          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-slate-900" />
+          <span className="absolute inline-flex h-full w-full rounded-full bg-white opacity-60 animate-ping" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
         </span>
         {t("home.hero.eyebrow", { count: countStr })}
       </span>
 
-      <h2 className="mt-4 text-[28px] md:text-[36px] leading-[1.05] font-semibold tracking-[-0.025em] max-w-[24ch]">
+      <h2 className="mt-4 text-[32px] md:text-[40px] leading-[1.05] font-semibold tracking-[-0.02em] text-fg max-w-[20ch]">
         {t("home.hero.title")}
       </h2>
-      <p className="mt-3 text-[14px] text-slate-300 leading-relaxed max-w-[44ch]">
+      <p className="mt-4 text-[14px] text-fg-muted leading-relaxed max-w-[52ch]">
         {t("home.hero.subhead", { count: countStr })}
       </p>
 
-      <div className="mt-6">
+      <div className="mt-6 flex flex-wrap items-center gap-3">
         <Link
           href="/categories"
-          className="inline-flex items-center h-11 px-5 text-[14px] font-medium rounded-md bg-white text-slate-900 hover:bg-slate-100 transition-colors"
+          className="inline-flex items-center h-11 px-5 text-[14px] font-medium rounded-md bg-cyan-600 text-white hover:bg-cyan-700 transition-colors shadow-[inset_0_-1px_0_rgba(0,0,0,0.08)]"
         >
           {t("home.hero.cta.browse", { count: countStr })} →
+        </Link>
+        <Link
+          href="/buyer/rfqs?action=new"
+          className="inline-flex items-center h-11 px-5 text-[14px] font-medium rounded-md border border-border text-fg hover:border-cyan-600 hover:text-cyan-700 transition-colors"
+        >
+          {t("home.hero.cta.quote")} →
         </Link>
       </div>
     </div>
@@ -425,7 +417,7 @@ function HeroVisual({ product }: { product: PopularProduct | null }) {
     // has any view history).
     return (
       <div className="relative w-full h-full flex items-center justify-center">
-        <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-slate-700/50 flex items-center justify-center">
+        <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden border border-border bg-slate-100 flex items-center justify-center">
           <div className="text-center px-4">
             <p className="text-[10px] font-semibold tracking-wider uppercase text-slate-400">
               Popular this week
@@ -442,7 +434,7 @@ function HeroVisual({ product }: { product: PopularProduct | null }) {
     <div className="relative w-full h-full flex items-center justify-center">
       <Link
         href={`/products/${product.source_id}`}
-        className="relative w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-white block group"
+        className="relative w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden border border-border shadow-lg bg-white block group"
       >
         <Image
           src={product.image}
@@ -457,8 +449,8 @@ function HeroVisual({ product }: { product: PopularProduct | null }) {
           Real number from the DB (min_bdt is the BDT product price
           the buyer would pay for the starting MOQ). NOT a fabricated
           marketing number. */}
-      <div className="absolute left-1/2 -translate-x-1/2 -bottom-3 bg-white text-slate-900 px-4 py-2.5 rounded-lg shadow-2xl border border-slate-200 w-[300px]">
-        <p className="text-[10px] font-semibold tracking-wider uppercase text-emerald-600">
+      <div className="absolute left-1/2 -translate-x-1/2 -bottom-3 bg-white text-slate-900 px-4 py-2.5 rounded-lg shadow-2xl border border-border w-[300px]">
+        <p className="text-[10px] font-semibold tracking-wider uppercase text-cyan-700">
           Popular this week
         </p>
         <div className="flex items-baseline gap-2 mt-0.5">
@@ -490,22 +482,22 @@ function CategoryStrip({
     .slice(0, 4);
 
   return (
-    <div className="mb-12">
+    <div className="mb-14">
       <div className="flex items-end justify-between mb-6 pb-4 border-b border-border">
-        <div className="flex items-end gap-3">
+        <div className="flex items-end gap-3 min-w-0">
           <span
-            className={`w-1.5 h-1.5 rounded-full ${cat.accent} mb-2`}
+            className={`w-1.5 h-1.5 rounded-full ${cat.accent} mb-2.5`}
           />
-          <h2 className="text-[22px] md:text-[26px] font-semibold tracking-[-0.01em]">
+          <h2 className="section-title !text-[22px] md:!text-[26px]">
             {lang === "bn" ? cat.name_bn : cat.name_en}
           </h2>
-          <span className="text-[12px] text-fg-subtle font-mono tnum pb-1 hidden sm:inline">
+          <span className="text-[12px] text-fg-subtle font-mono tnum pb-1.5 hidden sm:inline">
             {items.length} {t("cat.products")}
           </span>
         </div>
         <Link
           href={`/categories/${cat.slug}`}
-          className="text-[13px] font-medium text-fg hover:text-emerald-700"
+          className="text-[13px] font-medium text-cyan-700 hover:text-cyan-800 shrink-0"
         >
           {t("home.strip.see_all")} →
         </Link>
@@ -546,7 +538,7 @@ function StripCard({ product }: { product: CatalogProduct }) {
   return (
     <Link
       href={`/products/${product.source_id}`}
-      className="group block rounded-lg border border-border bg-bg overflow-hidden hover:border-emerald-600/40 hover:shadow-[0_2px_4px_rgba(15,23,42,0.04),0_12px_28px_-12px_rgba(15,23,42,0.12)] transition-all duration-200"
+      className="group block rounded-lg border border-border bg-bg overflow-hidden hover:border-cyan-600/40 hover:shadow-[0_2px_4px_rgba(15,23,42,0.04),0_12px_28px_-12px_rgba(15,23,42,0.12)] transition-all duration-200"
     >
       <div className="relative aspect-square bg-slate-50">
         <Image
@@ -558,7 +550,7 @@ function StripCard({ product }: { product: CatalogProduct }) {
         />
         {saving >= 30 && (
           <div className="absolute top-3 left-3">
-            <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded-full bg-emerald-500 text-slate-900">
+            <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded-full bg-cyan-600 text-white">
               −{saving}%
             </span>
           </div>

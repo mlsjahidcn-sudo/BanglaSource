@@ -63,7 +63,7 @@ export const categories: Record<
     name_bn: "জুতা ও ফুটওয়্যার",
     blurb_en: "Sneakers, heels, sandals.",
     blurb_bn: "স্নিকার্স, হিল, স্যান্ডেল।",
-    accent: "bg-emerald-500",
+    accent: "bg-cyan-500",
     cover: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&h=200&fit=crop&q=80",
     subs: [
       { slug: "sneakers", name_en: "Sneakers", name_bn: "স্নিকার্স" },

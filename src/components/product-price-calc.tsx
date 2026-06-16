@@ -82,7 +82,7 @@ export function ProductPriceCalc() {
               <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium">
                 Pay now 70% (product only)
               </p>
-              <p className="mt-1.5 text-[20px] font-semibold price-tag text-emerald-700">
+              <p className="mt-1.5 text-[20px] font-semibold price-tag text-cyan-700">
                 {fmtBdt(Math.round(result.productBdt * 0.7))}
               </p>
               <p className="mt-1 text-[11.5px] text-fg-muted">
@@ -113,7 +113,7 @@ export function ProductPriceCalc() {
         }
         .input:focus {
           outline: none;
-          border-color: var(--emerald-600);
+          border-color: var(--cyan-600);
         }
       `}</style>
     </div>

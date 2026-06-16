@@ -194,7 +194,7 @@ export default async function BuyerSavedPage() {
           </p>
           <Link
             href="/categories"
-            className="mt-5 inline-flex h-10 items-center px-4 text-[13px] font-medium rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
+            className="mt-5 inline-flex h-10 items-center px-4 text-[13px] font-medium rounded-md bg-cyan-600 text-white hover:bg-cyan-700"
           >
             Browse catalog →
           </Link>

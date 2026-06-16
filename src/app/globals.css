@@ -1,14 +1,20 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   Design tokens — Slate + Emerald, B2B conservative
-   No dark mode (this is a B2B operator site; light-only keeps it trustworthy)
+   Design tokens — Slate + Cyan, B2B enterprise
+   - Single brand color: cyan-600 (the "BanglaSource" identity)
+   - Emerald is reserved for SUCCESS ONLY (verified / online / active)
+   - Amber / red / violet are status-only
+   - Neutrals are slate (cool grey)
+   Light-mode only — this is a B2B operator site; light keeps it
+   trustworthy and pairs well with the long table layouts.
    ========================================================================== */
 
 :root {
-  /* Neutrals — slate scale */
+  /* ── Neutrals (slate) ── */
   --slate-50:  #f8fafc;
   --slate-100: #f1f5f9;
+  --slate-150: #e9eef4;   /* mid-border, used in dense tables */
   --slate-200: #e2e8f0;
   --slate-300: #cbd5e1;
   --slate-400: #94a3b8;
@@ -17,69 +23,146 @@
   --slate-700: #334155;
   --slate-800: #1e293b;
   --slate-900: #0f172a;
+  --slate-950: #020617;
 
-  /* Accent — emerald */
+  /* ── Brand: cyan-600 ── */
+  --cyan-50:  #ecfeff;
+  --cyan-100: #cffafe;
+  --cyan-200: #a5f3fc;
+  --cyan-400: #22d3ee;
+  --cyan-500: #06b6d4;
+  --cyan-600: #0891b2;
+  --cyan-700: #0e7490;
+  --cyan-800: #155e75;
+
+  /* ── Semantic: success (emerald) ── */
   --emerald-50:  #ecfdf5;
   --emerald-100: #d1fae5;
   --emerald-500: #10b981;
   --emerald-600: #059669;
   --emerald-700: #047857;
 
-  /* Status */
+  /* ── Status: warning (amber) ── */
   --amber-50:  #fffbeb;
+  --amber-100: #fef3c7;
   --amber-500: #f59e0b;
   --amber-600: #d97706;
-  --red-50:    #fef2f2;
-  --red-600:   #dc2626;
+  --amber-700: #b45309;
 
-  /* Surface */
+  /* ── Status: danger (red) ── */
+  --red-50:    #fef2f2;
+  --red-100:   #fee2e2;
+  --red-500:   #ef4444;
+  --red-600:   #dc2626;
+  --red-700:   #b91c1c;
+
+  /* ── Status: info / secondary (violet) ── */
+  --violet-50:  #f5f3ff;
+  --violet-100: #ede9fe;
+  --violet-500: #8b5cf6;
+  --violet-600: #7c3aed;
+  --violet-700: #6d28d9;
+
+  /* ── Surface tokens (used by tailwind via @theme inline) ── */
   --bg:        #ffffff;
   --bg-soft:   var(--slate-50);
   --bg-muted:  var(--slate-100);
-  --border:    var(--slate-200);
+  --bg-table:  #fcfcfd;          /* zebra row on dense data tables */
+  --border:        var(--slate-200);
   --border-strong: var(--slate-300);
+  --border-fine:   var(--slate-150);
   --fg:        var(--slate-900);
   --fg-muted:  var(--slate-600);
   --fg-subtle: var(--slate-500);
-  --accent:    var(--emerald-600);
-  --accent-fg: #ffffff;
+  --fg-faint:  var(--slate-400);
+  --accent:        var(--cyan-600);
+  --accent-hover:  var(--cyan-700);
+  --accent-soft:   var(--cyan-50);
+  --accent-fg:     #ffffff;
+  --success:       var(--cyan-600);
+  --warning:       var(--amber-600);
+  --danger:        var(--red-600);
+  --info:          var(--violet-600);
+
+  /* Brand mark (cyan-700) — used for the logo glyph + brand text */
+  --brand:        var(--cyan-700);
+  --brand-mark:   var(--cyan-600);
 }
 
 @theme inline {
   --color-bg:         var(--bg);
   --color-bg-soft:    var(--bg-soft);
   --color-bg-muted:   var(--bg-muted);
-  --color-border:     var(--border);
-  --color-border-strong: var(--border-strong);
+  --color-bg-table:   var(--bg-table);
+  --color-border:         var(--border);
+  --color-border-strong:  var(--border-strong);
+  --color-border-fine:    var(--border-fine);
   --color-fg:         var(--fg);
   --color-fg-muted:   var(--fg-muted);
   --color-fg-subtle:  var(--fg-subtle);
-  --color-accent:     var(--accent);
-  --color-accent-fg:  var(--accent-fg);
+  --color-fg-faint:   var(--fg-faint);
+  --color-accent:         var(--accent);
+  --color-accent-hover:   var(--accent-hover);
+  --color-accent-soft:    var(--accent-soft);
+  --color-accent-fg:      var(--accent-fg);
+  --color-brand:      var(--brand);
+  --color-brand-mark: var(--brand-mark);
+  --color-success:    var(--success);
+  --color-warning:    var(--warning);
+  --color-danger:     var(--danger);
+  --color-info:       var(--info);
+
+  /* Slate scale (Tailwind picks these up as bg-slate-*, text-slate-*) */
+  --color-slate-50:  var(--slate-50);
+  --color-slate-100: var(--slate-100);
+  --color-slate-150: var(--slate-150);
+  --color-slate-200: var(--slate-200);
+  --color-slate-300: var(--slate-300);
+  --color-slate-400: var(--slate-400);
+  --color-slate-500: var(--slate-500);
+  --color-slate-600: var(--slate-600);
+  --color-slate-700: var(--slate-700);
+  --color-slate-800: var(--slate-800);
+  --color-slate-900: var(--slate-900);
+  --color-slate-950: var(--slate-950);
+
+  /* Cyan scale (the brand) */
+  --color-cyan-50:  var(--cyan-50);
+  --color-cyan-100: var(--cyan-100);
+  --color-cyan-200: var(--cyan-200);
+  --color-cyan-400: var(--cyan-400);
+  --color-cyan-500: var(--cyan-500);
+  --color-cyan-600: var(--cyan-600);
+  --color-cyan-700: var(--cyan-700);
+  --color-cyan-800: var(--cyan-800);
+
+  /* Semantic colours (Tailwind keeps these as `bg-emerald-*` etc. via
+     the @import "tailwindcss" CSS. We only add the semantic semantic
+     tokens so the rest of the palette stays intact. */
   --color-emerald-50:  var(--emerald-50);
   --color-emerald-100: var(--emerald-100);
   --color-emerald-500: var(--emerald-500);
   --color-emerald-600: var(--emerald-600);
   --color-emerald-700: var(--emerald-700);
-  --color-amber-50:    var(--amber-50);
-  --color-amber-500:   var(--amber-500);
-  --color-amber-600:   var(--amber-600);
-  --color-red-50:      var(--red-50);
-  --color-red-600:     var(--red-600);
-  --color-slate-50:    var(--slate-50);
-  --color-slate-100:   var(--slate-100);
-  --color-slate-200:   var(--slate-200);
-  --color-slate-300:   var(--slate-300);
-  --color-slate-400:   var(--slate-400);
-  --color-slate-500:   var(--slate-500);
-  --color-slate-600:   var(--slate-600);
-  --color-slate-700:   var(--slate-700);
-  --color-slate-800:   var(--slate-800);
-  --color-slate-900:   var(--slate-900);
+  --color-amber-50:  var(--amber-50);
+  --color-amber-100: var(--amber-100);
+  --color-amber-500: var(--amber-500);
+  --color-amber-600: var(--amber-600);
+  --color-amber-700: var(--amber-700);
+  --color-red-50:    var(--red-50);
+  --color-red-100:   var(--red-100);
+  --color-red-500:   var(--red-500);
+  --color-red-600:   var(--red-600);
+  --color-red-700:   var(--red-700);
+  --color-violet-50:  var(--violet-50);
+  --color-violet-100: var(--violet-100);
+  --color-violet-500: var(--violet-500);
+  --color-violet-600: var(--violet-600);
+  --color-violet-700: var(--violet-700);
 
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
-  --font-bn: var(--font-noto-bn), "Kalpurush", var(--font-inter), system-ui, sans-serif;
+  --font-bn:   var(--font-noto-bn), "Kalpurush", var(--font-inter), system-ui, sans-serif;
 }
 
 /* ==========================================================================
@@ -98,14 +181,22 @@ body {
   font-feature-settings: "ss01", "cv11", "kern";
 }
 
+/* Headings — enterprise hierarchy. Tighter tracking on h1/h2 so
+   the line ends cleanly even at the larger 36/40/48 sizes. */
+h1, h2, h3, h4 {
+  color: var(--fg);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
 *:focus-visible {
-  outline: 2px solid var(--emerald-600);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
 ::selection {
-  background: var(--emerald-100);
+  background: var(--cyan-100);
   color: var(--slate-900);
 }
 
@@ -131,7 +222,8 @@ body {
 }
 .nav-link:hover::after { transform: scaleX(1); }
 
-/* Tabular numbers for prices, quantities */
+/* Tabular numbers for prices, quantities, weights, dates. The
+   `.tnum` class is used everywhere we show numbers. */
 .tnum { font-variant-numeric: tabular-nums; }
 
 /* Hairline divider */
@@ -140,7 +232,19 @@ body {
   background: var(--border);
 }
 
-/* Subtle data table */
+/* ==========================================================================
+   Data display — the heart of a B2B operator site
+
+   `.table-pro` is the canonical dense data table used in
+     /admin/orders, /admin/products, /admin/rfqs, /admin/users, etc.
+   It pairs `.table-clean` (the public-side table style) but adds
+   sticky header + tighter row padding + zebra rows + a left border
+   highlight on hover. Reads like a Bloomberg or terminal.
+
+   `.data-row` is for the inline key/value rows used on the PDP
+   and admin detail pages. 2-column, 1-line each, dot-leader.
+   ========================================================================== */
+
 .table-clean {
   width: 100%;
   border-collapse: collapse;
@@ -160,6 +264,60 @@ body {
   background: var(--bg-soft);
 }
 .table-clean tr:last-child td { border-bottom: none; }
+
+.table-pro {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+.table-pro thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-soft);
+  text-align: left;
+  font-weight: 500;
+  color: var(--fg-muted);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.table-pro tbody td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-fine);
+  color: var(--fg);
+  vertical-align: middle;
+}
+.table-pro tbody tr:hover td {
+  background: var(--cyan-50);
+}
+.table-pro tbody tr:last-child td { border-bottom: none; }
+.table-pro .col-num { text-align: right; font-variant-numeric: tabular-nums; }
+.table-pro .col-actions { text-align: right; white-space: nowrap; }
+
+/* Inline key/value rows. Used on PDP specs panel + admin order detail. */
+.data-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 200px) 1fr;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border);
+  font-size: 13px;
+}
+.data-row:last-child { border-bottom: none; }
+.data-row dt {
+  color: var(--fg-muted);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+.data-row dd {
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
 
 /* Print price tag */
 .price-tag {
@@ -193,3 +351,70 @@ body {
 /* Container widths */
 .container-prose { max-width: 1200px; margin-inline: auto; padding-inline: 24px; }
 @media (min-width: 768px) { .container-prose { padding-inline: 40px; } }
+
+/* ==========================================================================
+   Section header — the standard pattern used between home sections
+
+   A bold uppercase eyebrow (12px, tracking 0.08em) + a 28/32 h2
+   (semibold, tracking -0.02em) + a one-line subtitle, optionally with
+   a right-aligned action. Always sits above a thin border. Used by
+   the home carousels, the value-props section, the testimonials, etc.
+   ========================================================================== */
+.section-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.section-eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 1.5px;
+  background: var(--accent);
+}
+.section-eyebrow.plain { color: var(--fg-muted); }
+.section-eyebrow.plain::before { background: var(--fg-faint); }
+
+.section-title {
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin-top: 8px;
+}
+@media (min-width: 768px) {
+  .section-title { font-size: 32px; }
+}
+
+/* Status pill — used in tables + cards for order/quote/RFQ status */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.status-pill::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.status-pill.is-cyan    { color: var(--cyan-700);    background: var(--cyan-50);    }
+.status-pill.is-success { color: var(--cyan-700); background: var(--cyan-50); }
+.status-pill.is-warning { color: var(--amber-700);   background: var(--amber-50);   }
+.status-pill.is-danger  { color: var(--red-700);     background: var(--red-50);     }
+.status-pill.is-info    { color: var(--violet-700);  background: var(--violet-50);  }
+.status-pill.is-neutral { color: var(--fg-muted);    background: var(--slate-100);  }

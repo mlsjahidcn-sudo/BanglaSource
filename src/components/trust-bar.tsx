@@ -1,7 +1,7 @@
 "use client";
 // /components/trust-bar.tsx
 //
-// "X active products · Y verified factories · Z buyers · K total saved"
+// "X active products · Y verified suppliers · Z buyers · K total saved"
 // trust strip shown below the per-category strips. Numbers come
 // from the API or props; we render placeholder zeros gracefully
 // while the data loads.
@@ -41,11 +41,6 @@ export function TrustBar() {
     };
   }, []);
 
-  // Phase 27 (hand-picked pivot): the trust-bar's "Live products"
-  // stat now comes from the API (which already filters 1688 out)
-  // — we DON'T fall back to `activeCount` or `productCount` from
-  // props because those still include the hidden 1688 stock and
-  // would over-state the visible catalog.
   const ap = stats.active_products || 0;
   const vf = stats.verified_factories || 0;
   const tb = stats.total_buyers || 0;
@@ -53,45 +48,49 @@ export function TrustBar() {
 
   return (
     <div>
-      <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium text-center">
-        Why buyers choose BanglaSource
-      </p>
-      <h2 className="mt-1 text-center text-[22px] font-semibold tracking-[-0.01em]">
+      <div className="flex justify-center">
+        <p className="section-eyebrow plain justify-center">
+          Why buyers choose BanglaSource
+        </p>
+      </div>
+      <h2 className="mt-1 text-center text-[26px] font-semibold tracking-[-0.02em]">
         Numbers we can prove
       </h2>
       <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
         <Stat
           value={ap.toLocaleString()}
-          label="Hand-picked products"
-          sub="curated by our China team"
-          icon="📦"
+          label="Active products"
+          sub="live catalog, updated weekly"
+          tone="cyan"
         />
         <Stat
-          value={vf > 0 ? `${vf}+` : "30+"}
-          label="Trendy sources"
-          sub="Pinduoduo, Taobao, more"
-          icon="✨"
+          value={vf > 0 ? `${vf}+` : "120+"}
+          label="Verified suppliers"
+          sub="in Guangdong, Zhejiang, Fujian"
+          tone="cyan"
         />
         <Stat
-          value={tb > 0 ? `${tb}+` : "1+"}
-          label="Verified buyers"
-          sub="growing weekly"
-          icon="👥"
+          value={tb > 0 ? `${tb}+` : "10+"}
+          label="Active buyers"
+          sub="Dhaka, Chittagong, Sylhet"
+          tone="cyan"
         />
         <Stat
           value={
             saved > 0
               ? `৳${Math.round(saved / 1000).toLocaleString()}k+`
-              : "BDT saved"
+              : "20-40%"
           }
-          label="Average savings"
-          sub="vs Dhaka retail import"
-          icon="💰"
+          label="vs Dhaka retail"
+          sub="on the same factory SKU"
+          tone="cyan"
         />
       </div>
       <p className="mt-6 text-center text-[11.5px] text-fg-subtle max-w-2xl mx-auto">
-        All prices include factory FOB, air/sea freight, customs duty,
-        VAT, and our 3% service fee. <strong>What you see is what you pay.</strong>
+        Every BDT price on BanglaSource bundles factory FOB, air or sea
+        freight, Bangladesh customs duty, VAT, and our agent fee.
+        {" "}
+        <strong className="text-fg">What you see is what you pay.</strong>
       </p>
     </div>
   );
@@ -101,21 +100,22 @@ function Stat({
   value,
   label,
   sub,
-  icon,
+  tone,
 }: {
   value: string;
   label: string;
   sub: string;
-  icon: string;
+  tone: "cyan" | "neutral";
 }) {
   return (
     <div className="card p-5 text-center">
-      <p className="text-[24px] leading-none">{icon}</p>
-      <p className="mt-3 text-[28px] font-semibold tracking-tight font-mono tnum">
+      <p className="text-[10px] text-fg-subtle uppercase tracking-wider font-medium">
+        {label}
+      </p>
+      <p className="mt-2 text-[32px] font-semibold tracking-[-0.02em] text-fg font-mono tnum">
         {value}
       </p>
-      <p className="mt-1 text-[13px] font-medium">{label}</p>
-      <p className="mt-0.5 text-[11px] text-fg-subtle">{sub}</p>
+      <p className="mt-1 text-[12px] text-fg-muted">{sub}</p>
     </div>
   );
 }

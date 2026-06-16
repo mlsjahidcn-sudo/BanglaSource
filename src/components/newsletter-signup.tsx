@@ -53,10 +53,8 @@ export function NewsletterSignup() {
   return (
     <div className="grid md:grid-cols-2 gap-8 items-center">
       <div>
-        <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium">
-          Weekly digest
-        </p>
-        <h2 className="mt-1 text-[26px] font-semibold tracking-[-0.01em]">
+        <p className="section-eyebrow">Weekly digest</p>
+        <h2 className="mt-1 text-[28px] font-semibold tracking-[-0.02em]">
           The 5 best wholesale deals, every Sunday
         </h2>
         <p className="mt-2 text-[14px] text-fg-muted max-w-md">
@@ -83,7 +81,7 @@ export function NewsletterSignup() {
       <div>
         {status === "ok" ? (
           <div className="card p-6 bg-emerald-50/40 border-emerald-200">
-            <p className="text-[14px] font-medium text-emerald-700">
+            <p className="text-[14px] font-medium text-cyan-700">
               Check your inbox to confirm.
             </p>
             <p className="mt-1 text-[12.5px] text-fg-muted">

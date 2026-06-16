@@ -189,7 +189,7 @@ export default async function AdminDashboard() {
                     <td className="px-4 py-2.5 text-right">
                       <Link
                         href={`/admin/products/${r.source_id}`}
-                        className="text-emerald-700 hover:underline text-[12px]"
+                        className="text-cyan-700 hover:underline text-[12px]"
                       >
                         Edit →
                       </Link>

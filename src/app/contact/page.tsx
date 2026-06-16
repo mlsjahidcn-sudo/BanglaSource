@@ -76,7 +76,7 @@ export default function ContactPage() {
     <Container className="pt-16 md:pt-20 pb-24">
       <div className="grid lg:grid-cols-12 gap-12">
         <div className="lg:col-span-5">
-          <p className="text-[12px] font-medium tracking-wider uppercase text-emerald-700">
+          <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
             Contact
           </p>
           <h1 className="mt-3 text-[40px] md:text-[48px] leading-[1.05] font-semibold tracking-[-0.02em]">
@@ -100,7 +100,7 @@ export default function ContactPage() {
                 )}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-1.5 inline-block text-[15px] font-medium hover:text-emerald-700 font-mono tnum"
+                className="mt-1.5 inline-block text-[15px] font-medium hover:text-cyan-700 font-mono tnum"
               >
                 {BRAND.whatsappDisplay}
               </a>
@@ -111,7 +111,7 @@ export default function ContactPage() {
               </p>
               <a
                 href={`mailto:${BRAND.email}`}
-                className="mt-1.5 inline-block text-[15px] font-medium hover:text-emerald-700"
+                className="mt-1.5 inline-block text-[15px] font-medium hover:text-cyan-700"
               >
                 {BRAND.email}
               </a>
@@ -122,7 +122,7 @@ export default function ContactPage() {
               </p>
               <a
                 href={`tel:${BRAND.phoneBdE164}`}
-                className="mt-1.5 inline-block text-[15px] font-medium hover:text-emerald-700 font-mono tnum"
+                className="mt-1.5 inline-block text-[15px] font-medium hover:text-cyan-700 font-mono tnum"
               >
                 {BRAND.phoneBdDisplay}
               </a>
@@ -157,7 +157,7 @@ export default function ContactPage() {
           <div className="card p-7 md:p-10">
             {sent ? (
               <div className="py-12 text-center" role="status" aria-live="polite">
-                <div className="inline-flex w-12 h-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                <div className="inline-flex w-12 h-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
                   <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
                     <path
                       d="M5 11.5L9 15.5L17 7.5"
@@ -181,7 +181,7 @@ export default function ContactPage() {
                   href={whatsappLink()}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-5 inline-flex h-9 px-4 items-center text-[13px] font-medium rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
+                  className="mt-5 inline-flex h-9 px-4 items-center text-[13px] font-medium rounded-md bg-cyan-600 text-white hover:bg-cyan-700"
                 >
                   Open WhatsApp
                 </a>
@@ -217,7 +217,7 @@ export default function ContactPage() {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full h-11 px-3.5 border border-border rounded-md focus:border-emerald-600 focus:outline-none"
+                      className="w-full h-11 px-3.5 border border-border rounded-md focus:border-cyan-600 focus:outline-none"
                     />
                   </Field>
                   <Field label="Phone (BD mobile)" required error={errors.phone}>
@@ -227,7 +227,7 @@ export default function ContactPage() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="01XXX-XXXXXX"
-                      className="w-full h-11 px-3.5 border border-border rounded-md focus:border-emerald-600 focus:outline-none font-mono tnum"
+                      className="w-full h-11 px-3.5 border border-border rounded-md focus:border-cyan-600 focus:outline-none font-mono tnum"
                     />
                   </Field>
                 </div>
@@ -236,7 +236,7 @@ export default function ContactPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-11 px-3.5 border border-border rounded-md focus:border-emerald-600 focus:outline-none"
+                    className="w-full h-11 px-3.5 border border-border rounded-md focus:border-cyan-600 focus:outline-none"
                   />
                 </Field>
                 <Field label="Shop / company name">
@@ -244,7 +244,7 @@ export default function ContactPage() {
                     type="text"
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
-                    className="w-full h-11 px-3.5 border border-border rounded-md focus:border-emerald-600 focus:outline-none"
+                    className="w-full h-11 px-3.5 border border-border rounded-md focus:border-cyan-600 focus:outline-none"
                   />
                 </Field>
                 <Field label="What are you sourcing?" required error={errors.message}>
@@ -254,7 +254,7 @@ export default function ContactPage() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="e.g. TWS earbuds, 200 pcs, 4 colors, want to ship by mid-July"
-                    className="w-full p-3.5 border border-border rounded-md focus:border-emerald-600 focus:outline-none resize-none"
+                    className="w-full p-3.5 border border-border rounded-md focus:border-cyan-600 focus:outline-none resize-none"
                   />
                 </Field>
                 <div className="pt-2">
@@ -295,7 +295,7 @@ function Field({
     <label className="block">
       <span className="text-[12px] text-fg-subtle uppercase tracking-wider font-medium">
         {label}
-        {required && <span className="text-emerald-600 ml-1">*</span>}
+        {required && <span className="text-cyan-700 ml-1">*</span>}
       </span>
       <div className="mt-2">{children}</div>
       {error && (

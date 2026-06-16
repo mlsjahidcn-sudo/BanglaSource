@@ -450,7 +450,7 @@ https://example.com/photo-3.webp"
             type="button"
             onClick={handleSave}
             disabled={!canSave}
-            className="h-10 px-5 rounded-md bg-emerald-600 text-white text-[13px] font-medium hover:bg-emerald-700 disabled:opacity-60"
+            className="h-10 px-5 rounded-md bg-cyan-600 text-white text-[13px] font-medium hover:bg-cyan-700 disabled:opacity-60"
           >
             {saving ? "Saving…" : "Create product"}
           </button>
@@ -476,7 +476,7 @@ https://example.com/photo-3.webp"
         }
         .input:focus {
           outline: none;
-          border-color: var(--emerald-600);
+          border-color: var(--cyan-600);
         }
         textarea.input {
           height: auto;

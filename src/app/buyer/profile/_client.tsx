@@ -158,7 +158,7 @@ export function ProfileEditor({ initial }: { initial: ProfileShape }) {
           role="alert"
           className={`mb-4 rounded-md px-3 py-2 text-[13px] border ${
             toast.kind === "ok"
-              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+              ? "bg-cyan-50 border-cyan-200 text-cyan-800"
               : "bg-rose-50 border-rose-200 text-rose-800"
           }`}
         >
@@ -184,7 +184,7 @@ export function ProfileEditor({ initial }: { initial: ProfileShape }) {
             <button
               type="button"
               onClick={startEdit}
-              className="px-4 py-2 text-[13px] rounded-md bg-emerald-600 text-white hover:bg-emerald-700 font-medium"
+              className="px-4 py-2 text-[13px] rounded-md bg-cyan-600 text-white hover:bg-cyan-700 font-medium"
             >
               Edit profile
             </button>
@@ -257,7 +257,7 @@ export function ProfileEditor({ initial }: { initial: ProfileShape }) {
               type="button"
               onClick={saveProfile}
               disabled={pending}
-              className="px-4 py-2 text-[13px] rounded-md bg-emerald-600 text-white hover:bg-emerald-700 font-medium disabled:opacity-50"
+              className="px-4 py-2 text-[13px] rounded-md bg-cyan-600 text-white hover:bg-cyan-700 font-medium disabled:opacity-50"
             >
               {pending ? "Saving…" : "Save changes"}
             </button>
@@ -319,7 +319,7 @@ export function ProfileEditor({ initial }: { initial: ProfileShape }) {
               type="button"
               onClick={changePassword}
               disabled={pending}
-              className="px-4 py-2 text-[13px] rounded-md bg-emerald-600 text-white hover:bg-emerald-700 font-medium disabled:opacity-50"
+              className="px-4 py-2 text-[13px] rounded-md bg-cyan-600 text-white hover:bg-cyan-700 font-medium disabled:opacity-50"
             >
               {pending ? "Saving…" : "Change password"}
             </button>
@@ -361,7 +361,7 @@ function Row({
           <span
             className={`text-[10px] font-medium tracking-wider uppercase px-1.5 py-0.5 border rounded ${
               badge === "emerald"
-                ? "border-emerald-200 bg-emerald-100 text-emerald-800"
+                ? "border-cyan-200 bg-cyan-50 text-cyan-800"
                 : "border-border bg-bg-soft text-fg-muted"
             }`}
           >

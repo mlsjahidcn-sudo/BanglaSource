@@ -265,7 +265,7 @@ export default async function AdminProductsIndex({
         <div className="flex items-center gap-2">
           <button
             type="submit"
-            className="h-9 px-4 text-[13px] rounded-md bg-emerald-600 text-white hover:bg-emerald-700 font-medium"
+            className="h-9 px-4 text-[13px] rounded-md bg-cyan-600 text-white hover:bg-cyan-700 font-medium"
           >
             Apply
           </button>
@@ -296,7 +296,7 @@ export default async function AdminProductsIndex({
               {" "}
               <Link
                 href="/admin/products"
-                className="text-emerald-700 hover:underline"
+                className="text-cyan-700 hover:underline"
               >
                 Clear filters
               </Link>
@@ -395,7 +395,7 @@ export default async function AdminProductsIndex({
                               markup === 0
                                 ? "text-fg-subtle"
                                 : markup === DEFAULT_BUYER_MARKUP_PCT
-                                  ? "text-emerald-700"
+                                  ? "text-cyan-700"
                                   : "text-cyan-700"
                             }
                           >
@@ -415,13 +415,13 @@ export default async function AdminProductsIndex({
                           <span className="text-fg font-semibold">
                             ৳{markedUp.toLocaleString("en-IN")}
                           </span>
-                          <span className="block text-[10.5px] text-emerald-700">
+                          <span className="block text-[10.5px] text-cyan-700">
                             +৳{marginBdt.toLocaleString("en-IN")} margin
                           </span>
                         </td>
                         <td className="px-4 py-2.5 text-right text-[12px] whitespace-nowrap">
                           {p.active ? (
-                            <span className="inline-flex items-center gap-1.5 text-emerald-700">
+                            <span className="inline-flex items-center gap-1.5 text-cyan-700">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                               active
                             </span>

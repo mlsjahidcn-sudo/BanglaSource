@@ -23,18 +23,19 @@ export const dict: Dict = {
   // ── Home: single-slide hero (Phase 26, hand-picked since 2026-06-15) ──
   // Eyebrow no longer references 1688 or live sync — we hand-pick.
   "home.hero.eyebrow": {
-    en: "Hand-picked · {count} products · updated today",
-    bn: "হাতে বাছাই · {count}টি পণ্য · আজ আপডেট",
+    en: "Verified supplier · {count} products in stock",
+    bn: "যাচাইকৃত সরবরাহকারী · {count}টি পণ্য স্টকে",
   },
   "home.hero.title": {
-    en: "Hand-picked China, in your currency.",
-    bn: "হাতে বাছাই চীনা পণ্য, আপনার মুদ্রায়।",
+    en: "Bulk wholesale, all-in BDT pricing.",
+    bn: "পাইকারি আমদানি, সম্পূর্ণ বিডিটি মূল্যে।",
   },
   "home.hero.subhead": {
-    en: "{count} trending products from Pinduoduo, Taobao, and other China sources, hand-curated by our team. One all-in BDT price — factory, freight, customs, and our 3% service fee. Nothing hidden.",
-    bn: "{count}টি ট্রেন্ডি পণ্য পিন্ডুডুও, তাওবাও এবং অন্যান্য চীনা উৎস থেকে, আমাদের টিম সাবধানে বাছাই করেছে। একটি সব-অন্তর্ভুক্ত বিডিটি মূল্যে — কারখানা, ফ্রেইট, কাস্টমস এবং আমাদের ৩% সার্ভিস ফি। কিছুই লুকানো নেই।",
+    en: "Hand-picked by our China team. Factory price, air or sea freight, Bangladesh customs duty, VAT, and agent fee — combined into one transparent BDT unit price. No hidden markups, no FX surprises.",
+    bn: "আমাদের চীনা টিম সাবধানে বাছাই করেছে। কারখানা মূল্য, এয়ার বা সি ফ্রেইট, বাংলাদেশ কাস্টমস ডিউটি, ভ্যাট এবং এজেন্ট ফি — সব একটি স্বচ্ছ বিডিটি ইউনিট মূল্যে। কোনো লুকানো মার্কআপ নেই, কোনো এফএক্স চমক নেই।",
   },
   "home.hero.cta.browse": { en: "Browse {count} products", bn: "{count}টি পণ্য দেখুন" },
+  "home.hero.cta.quote": { en: "Request a quote", bn: "কোটেশন চান" },
 
   // ── Home: left rail + strip layout ───────────────────────────────
   "home.rail.title": { en: "Shop by category", bn: "ক্যাটাগরি" },

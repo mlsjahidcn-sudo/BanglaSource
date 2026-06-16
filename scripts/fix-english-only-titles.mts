@@ -93,7 +93,10 @@ for (const row of needFix) {
   };
   const { error: upErr } = await supabase
     .from("products")
-    .update(updates)
+    // `updates` is built incrementally with `Record<string, unknown>`
+    // for type-safe narrowing, but the keys match the products
+    // Update shape. Cast at the boundary to keep the call site clean.
+    .update(updates as never)
     .eq("id", row.id);
   if (upErr) {
     console.log(`  ✗ id=${row.id}: ${upErr.message}`);

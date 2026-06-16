@@ -61,18 +61,14 @@ export function RecentlyViewed({ limit = 8 }: { limit?: number }) {
 
   return (
     <section>
-      <div className="mb-5 flex items-end justify-between gap-4">
-        <div>
-          <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium">
-            Pick up where you left off
-          </p>
-          <h2 className="mt-1 text-[22px] font-semibold tracking-[-0.01em]">
-            Recently viewed
-          </h2>
+      <div className="mb-6 flex items-end justify-between gap-4 pb-4 border-b border-border">
+        <div className="min-w-0">
+          <p className="section-eyebrow">Pick up where you left off</p>
+          <h2 className="section-title">Recently viewed</h2>
         </div>
         <Link
           href="/categories"
-          className="text-[12.5px] text-cyan-600 hover:underline shrink-0"
+          className="text-[13px] font-medium text-cyan-700 hover:text-cyan-800 shrink-0"
         >
           See all →
         </Link>

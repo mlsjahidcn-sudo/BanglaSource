@@ -92,7 +92,7 @@ export default async function AdminUsersPage() {
                   </td>
                   <td className="px-4 py-2.5">
                     {u.is_admin ? (
-                      <span className="text-[10px] font-medium tracking-wider uppercase px-1.5 py-0.5 border border-emerald-200 bg-emerald-100 text-emerald-800 rounded">
+                      <span className="text-[10px] font-medium tracking-wider uppercase px-1.5 py-0.5 border border-cyan-200 bg-cyan-50 text-cyan-800 rounded">
                         admin
                       </span>
                     ) : (

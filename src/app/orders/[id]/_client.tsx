@@ -120,7 +120,7 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
         <h1 className="text-2xl font-semibold">Order not found</h1>
         <Link
           href="/buyer/orders"
-          className="mt-4 inline-block text-emerald-600 hover:text-emerald-700 text-sm font-medium"
+          className="mt-4 inline-block text-cyan-700 hover:text-cyan-700 text-sm font-medium"
         >
           ← View all orders
         </Link>
@@ -153,7 +153,7 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
       {order.status === "pending_payment" ? (
         <section className="card p-6 mb-6 border-emerald-200 bg-emerald-50/40">
           <h2 className="text-[15px] font-semibold flex items-center gap-2">
-            <span className="w-6 h-6 rounded-full bg-emerald-600 text-white text-[12px] font-semibold flex items-center justify-center">
+            <span className="w-6 h-6 rounded-full bg-cyan-600 text-white text-[12px] font-semibold flex items-center justify-center">
               !
             </span>
             {t("order.payment_instructions")}
@@ -172,7 +172,7 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
             <button
               onClick={markOrderPaid}
               disabled={markingPaid || marked}
-              className="px-4 h-10 rounded-md bg-emerald-600 text-white text-[13px] font-medium hover:bg-emerald-700 disabled:opacity-60"
+              className="px-4 h-10 rounded-md bg-cyan-600 text-white text-[13px] font-medium hover:bg-cyan-700 disabled:opacity-60"
             >
               {marked
                 ? "✓ Marked paid"
@@ -184,7 +184,7 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
               href="https://wa.me/8617325764171"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[12.5px] text-emerald-700 hover:text-emerald-800 font-medium"
+              className="text-[12.5px] text-cyan-700 hover:text-cyan-800 font-medium"
             >
               Need help? WhatsApp →
             </a>

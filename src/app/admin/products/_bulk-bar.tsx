@@ -109,7 +109,7 @@ export function BulkActionsBar(props: Props) {
           className={
             "basis-full mt-1 text-[12px] px-2 py-1 rounded border " +
             (toast.kind === "ok"
-              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+              ? "bg-cyan-50 border-cyan-200 text-cyan-800"
               : "bg-rose-50 border-rose-200 text-rose-800")
           }
         >

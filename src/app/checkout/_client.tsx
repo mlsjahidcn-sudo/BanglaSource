@@ -148,7 +148,7 @@ export function CheckoutClient() {
         <h1 className="text-2xl font-semibold">{t("checkout.empty")}</h1>
         <Link
           href="/categories"
-          className="mt-6 inline-block px-5 py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700"
+          className="mt-6 inline-block px-5 py-2.5 rounded-md bg-cyan-600 text-white text-sm font-medium hover:bg-cyan-700"
         >
           {t("checkout.empty.cta")}
         </Link>
@@ -163,7 +163,7 @@ export function CheckoutClient() {
         <h1 className="text-2xl font-semibold">{t("checkout.sign_in")}</h1>
         <Link
           href="/login?redirect=/checkout"
-          className="mt-6 inline-block px-5 py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700"
+          className="mt-6 inline-block px-5 py-2.5 rounded-md bg-cyan-600 text-white text-sm font-medium hover:bg-cyan-700"
         >
           {t("nav.signin")}
         </Link>
@@ -295,7 +295,7 @@ export function CheckoutClient() {
           {/* Address */}
           <section className="card p-6">
             <h2 className="text-[15px] font-semibold flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 text-[12px] font-semibold flex items-center justify-center">
+              <span className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-700 text-[12px] font-semibold flex items-center justify-center">
                 1
               </span>
               {t("checkout.address")}
@@ -397,7 +397,7 @@ export function CheckoutClient() {
                 value={buyerNote}
                 onChange={(e) => setBuyerNote(e.target.value)}
                 placeholder={t("checkout.buyer_note_ph")}
-                className="mt-1.5 w-full px-3 py-2 rounded-md border border-border bg-bg text-[13px] focus:outline-none focus:border-emerald-500 resize-none"
+                className="mt-1.5 w-full px-3 py-2 rounded-md border border-border bg-bg text-[13px] focus:outline-none focus:border-cyan-500 resize-none"
               />
             </div>
           </section>
@@ -405,7 +405,7 @@ export function CheckoutClient() {
           {/* Shipping mode */}
           <section className="card p-6">
             <h2 className="text-[15px] font-semibold flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 text-[12px] font-semibold flex items-center justify-center">
+              <span className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-700 text-[12px] font-semibold flex items-center justify-center">
                 2
               </span>
               {t("checkout.shipping")}
@@ -432,7 +432,7 @@ export function CheckoutClient() {
           {/* Payment method */}
           <section className="card p-6">
             <h2 className="text-[15px] font-semibold flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 text-[12px] font-semibold flex items-center justify-center">
+              <span className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-700 text-[12px] font-semibold flex items-center justify-center">
                 3
               </span>
               {t("checkout.payment")}
@@ -540,7 +540,7 @@ export function CheckoutClient() {
             <button
               onClick={placeOrder}
               disabled={submitting}
-              className="mt-4 w-full h-11 rounded-md bg-emerald-600 text-white text-[14px] font-medium hover:bg-emerald-700 disabled:opacity-60"
+              className="mt-4 w-full h-11 rounded-md bg-cyan-600 text-white text-[14px] font-medium hover:bg-cyan-700 disabled:opacity-60"
             >
               {submitting ? t("checkout.placing") : t("checkout.place")}
             </button>
@@ -587,7 +587,7 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="mt-1.5 w-full h-10 px-3 rounded-md border border-border bg-bg text-[13px] placeholder:text-fg-subtle focus:outline-none focus:border-emerald-500"
+        className="mt-1.5 w-full h-10 px-3 rounded-md border border-border bg-bg text-[13px] placeholder:text-fg-subtle focus:outline-none focus:border-cyan-500"
       />
     </div>
   );
@@ -611,7 +611,7 @@ function ModeButton({
       className={`p-3 rounded-md border text-left transition-colors ${
         active
           ? "bg-emerald-50 border-emerald-300"
-          : "bg-bg border-border hover:border-emerald-200"
+          : "bg-bg border-border hover:border-cyan-200"
       }`}
     >
       <p
@@ -642,13 +642,13 @@ function PaymentRadio({
       className={`w-full p-3 rounded-md border text-left transition-colors ${
         active
           ? "bg-emerald-50 border-emerald-300"
-          : "bg-bg border-border hover:border-emerald-200"
+          : "bg-bg border-border hover:border-cyan-200"
       }`}
     >
       <div className="flex items-center gap-2">
         <span
           className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-            active ? "border-emerald-600" : "border-border"
+            active ? "border-cyan-600" : "border-border"
           }`}
         >
           {active ? (

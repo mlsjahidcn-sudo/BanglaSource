@@ -317,7 +317,7 @@ function MessageBubble({ m }: { m: Message }) {
                       t.ok === false
                         ? "text-rose-600"
                         : t.ok
-                          ? "text-emerald-700"
+                          ? "text-cyan-700"
                           : "text-amber-700"
                     }
                   >

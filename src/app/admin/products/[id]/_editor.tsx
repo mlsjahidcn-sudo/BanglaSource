@@ -665,7 +665,7 @@ export function AdminProductEditor({
             </p>
           )}
           {save === "ok" && (
-            <p className="text-[12px] text-emerald-700 font-mono">
+            <p className="text-[12px] text-cyan-700 font-mono">
               ✓ Saved
             </p>
           )}

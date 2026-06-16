@@ -28,8 +28,8 @@ const BASE = "http://localhost:3000";
 const EMAIL = "test+phase3@banglasource.bd";
 const PASSWORD = "TestPass123!";
 
-function ok(msg) { console.log(`✓ ${msg}`); }
-function fail(msg) { console.error(`✗ ${msg}`); process.exit(1); }
+function ok(msg: string) { console.log(`✓ ${msg}`); }
+function fail(msg: string) { console.error(`✗ ${msg}`); process.exit(1); }
 
 // Sign in
 const r1 = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
@@ -53,7 +53,7 @@ const { data: prods, error: pErr } = await admin
   .eq("active", true)
   .limit(1);
 if (pErr || !prods?.length) fail("no products");
-const prod = prods[0];
+const prod = prods![0]!;
 ok(`sample product: ${prod.source_id} (${prod.title_en})`);
 
 // Sign in to the website so we get a session cookie for /api/orders.
@@ -109,7 +109,7 @@ function cookieAdapter() {
         value,
       }));
     },
-    setAll(toSet) {
+    setAll(toSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
       for (const { name, value, options } of toSet) {
         cookieJar.set(name, value);
       }
@@ -127,7 +127,7 @@ const { data: signinData, error: signinErr } = await sb.auth.signInWithPassword(
 if (signinErr || !signinData.user) {
   fail(`signin err: ${signinErr?.message}`);
 }
-ok(`supabase-ssr signed in, ${signinData.user.id}`);
+ok(`supabase-ssr signed in, ${signinData.user!.id}`);
 
 // Get the session cookies
 const sessionCookies = Array.from(cookieJar.entries());

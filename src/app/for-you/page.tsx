@@ -59,7 +59,7 @@ export default async function ForYouPage() {
       <div className="mb-8">
         <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium flex items-center gap-1.5">
           Personalized
-          <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[9.5px] font-mono tnum">
+          <span className="px-1.5 py-0.5 rounded bg-cyan-50 text-cyan-800 text-[9.5px] font-mono tnum">
             AI
           </span>
         </p>

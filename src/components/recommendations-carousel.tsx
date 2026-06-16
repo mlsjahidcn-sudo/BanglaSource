@@ -243,7 +243,7 @@ export function RecommendationsCarousel({
                     </span>
                   )}
                   {r.reasons.includes("popular_in_category") && (
-                    <span className="px-1.5 py-0.5 text-[9px] font-medium tracking-wider uppercase bg-emerald-600 text-white rounded">
+                    <span className="px-1.5 py-0.5 text-[9px] font-medium tracking-wider uppercase bg-cyan-600 text-white rounded">
                       Popular
                     </span>
                   )}

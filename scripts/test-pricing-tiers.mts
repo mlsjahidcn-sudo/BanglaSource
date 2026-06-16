@@ -7,7 +7,7 @@
 // Run with:
 //   NODE_OPTIONS="--conditions=react-server" pnpm tsx scripts/test-pricing-tiers.mts
 
-import { airShippingBdt, seaShippingBdt, airRateTier, chargeableWeightKg, FX_CNY_BDT, landedCost, airShippingBreakdown, unitProductBdt } from "../src/lib/pricing.ts";
+import { airShippingBdt, seaShippingBdt, airRateTier, chargeableWeightKg, FX_CNY_BDT, landedCost, airShippingBreakdown, unitProductBdt } from "../src/lib/pricing";
 
 let pass = 0;
 let fail = 0;
@@ -154,10 +154,21 @@ interface QuoteResponse {
     chargeableKg: number;
     volumetricKg: number;
     rateTier?: { tierMaxKg: number; rateBdtPerKg: number; minBdt: number } | null;
+    shippingBreakdown?: { perKgAmount: number; floorApplied: boolean } | null;
     totalBdt: number;
     unitBdt: number;
     shippingDominantPct: number;
     tooSmallForAir: boolean;
+    dutyBdt: number;
+    dutyPerKg: number;
+    dutyClass: string;
+    cifBdt: number;
+    vatBdt: number;
+    aitBdt: number;
+    markupBdt: number;
+    markupPct: number;
+    productBdt: number;
+    deliveryBdt: number;
   };
 }
 
@@ -307,7 +318,7 @@ const handTest = landedCost(
     price_min_cny: 13,
     price_max_cny: 13,
     factory_moq: 1,
-    price_tiers: [{ qty_min: 1, qty_max: null, price_cny_fen: 1300 }],
+    price_tiers: [{ qty_min: 1, qty_max: 999999, price_cny_fen: 1300 }],
     weight_kg: 0.05,
     volume_cbm: 0.0005,
     supplier_name: "test",

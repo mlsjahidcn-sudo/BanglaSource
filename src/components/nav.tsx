@@ -40,7 +40,7 @@ export function Nav() {
               height="22"
               viewBox="0 0 22 22"
               fill="none"
-              className="text-emerald-600"
+              className="text-cyan-700"
             >
               <path
                 d="M11 1.5L20.5 6.5V15.5L11 20.5L1.5 15.5V6.5L11 1.5Z"
@@ -148,7 +148,7 @@ export function Nav() {
                 <circle cx="18" cy="20" r="1.4" fill="currentColor" />
               </svg>
               {count > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-emerald-600 text-white text-[10px] font-semibold flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-cyan-600 text-white text-[10px] font-semibold flex items-center justify-center">
                   {count > 99 ? "99+" : count}
                 </span>
               )}

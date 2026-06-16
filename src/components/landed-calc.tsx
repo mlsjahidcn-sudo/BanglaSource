@@ -312,7 +312,7 @@ export function LandedCalc() {
         }
         .input:focus {
           outline: none;
-          border-color: var(--emerald-600);
+          border-color: var(--cyan-600);
         }
       `}</style>
     </div>

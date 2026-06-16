@@ -71,10 +71,10 @@ export function CartDrawer({ open, onClose }: Props) {
       >
         <div className="flex items-center justify-between p-5 border-b border-border">
           <div>
-            <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium">
+            <p className="section-eyebrow plain !text-[10.5px] !tracking-[0.1em]">
               {t("cart.title")}
             </p>
-            <h2 className="mt-0.5 text-[18px] font-semibold tracking-tight">
+            <h2 className="mt-1 text-[20px] font-semibold tracking-[-0.01em]">
               {count} {t("cart.items")}
             </h2>
           </div>
@@ -195,7 +195,7 @@ export function CartDrawer({ open, onClose }: Props) {
                     <span
                       className={
                         minWeightMet
-                          ? "text-emerald-700 font-mono tnum font-medium"
+                          ? "text-cyan-700 font-mono tnum font-medium"
                           : "text-fg font-mono tnum"
                       }
                     >
@@ -214,7 +214,7 @@ export function CartDrawer({ open, onClose }: Props) {
                   </div>
                   <p
                     className={`mt-1.5 text-[11px] ${
-                      minWeightMet ? "text-emerald-700" : "text-fg-muted"
+                      minWeightMet ? "text-cyan-700" : "text-fg-muted"
                     }`}
                   >
                     {minWeightMet
@@ -242,7 +242,7 @@ export function CartDrawer({ open, onClose }: Props) {
                 <Link
                   href="/checkout"
                   onClick={onClose}
-                  className="h-10 inline-flex items-center justify-center text-[13px] font-medium rounded-md bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                  className="h-10 inline-flex items-center justify-center text-[13px] font-medium rounded-md bg-cyan-600 text-white hover:bg-cyan-700 transition-colors"
                 >
                   {t("cart.place_order")}
                 </Link>
@@ -287,7 +287,7 @@ function Empty() {
       </p>
       <Link
         href="/categories"
-        className="mt-5 inline-flex h-10 items-center px-4 text-[13px] font-medium rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
+        className="mt-5 inline-flex h-10 items-center px-4 text-[13px] font-medium rounded-md bg-cyan-600 text-white hover:bg-cyan-700"
       >
         {t("cart.empty.cta")}
       </Link>

@@ -173,7 +173,7 @@ function SearchPageInner() {
             <span className="font-mono tnum">{results.length}</span>{" "}
             {results.length === 1 ? "result" : "results"}
             {usedAi && parsed && (
-              <span className="ml-2 text-emerald-700">
+              <span className="ml-2 text-cyan-700">
                 · smart search
               </span>
             )}
@@ -196,12 +196,12 @@ function SearchPageInner() {
             </span>
           )}
           {parsed.price_min_bdt != null && (
-            <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-medium">
+            <span className="px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-800 font-medium">
               ৳{parsed.price_min_bdt.toLocaleString()}+
             </span>
           )}
           {parsed.price_max_bdt != null && (
-            <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-medium">
+            <span className="px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-800 font-medium">
               under ৳{parsed.price_max_bdt.toLocaleString()}
             </span>
           )}
@@ -254,7 +254,7 @@ function SearchPageInner() {
           <Link
             key={h.id}
             href={`/products/${h.id}`}
-            className="group block rounded-lg border border-border bg-bg overflow-hidden hover:border-emerald-600/40 hover:shadow-[0_2px_4px_rgba(15,23,42,0.04),0_12px_28px_-12px_rgba(15,23,42,0.12)] transition-all"
+            className="group block rounded-lg border border-border bg-bg overflow-hidden hover:border-cyan-600/40 hover:shadow-[0_2px_4px_rgba(15,23,42,0.04),0_12px_28px_-12px_rgba(15,23,42,0.12)] transition-all"
           >
             <div className="relative aspect-square bg-slate-50">
               {h.image && (

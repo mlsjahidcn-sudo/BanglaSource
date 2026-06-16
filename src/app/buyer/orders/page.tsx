@@ -77,7 +77,7 @@ export default async function BuyerOrdersPage() {
         </div>
         <Link
           href="/cart"
-          className="hidden sm:inline-block text-[12.5px] text-emerald-600 hover:text-emerald-700 font-medium"
+          className="hidden sm:inline-block text-[12.5px] text-cyan-700 hover:text-cyan-700 font-medium"
         >
           Build a new order →
         </Link>
@@ -92,7 +92,7 @@ export default async function BuyerOrdersPage() {
           </p>
           <Link
             href="/categories"
-            className="mt-5 inline-block px-4 py-2 text-[13px] rounded-md bg-emerald-600 text-white hover:bg-emerald-700 font-medium"
+            className="mt-5 inline-block px-4 py-2 text-[13px] rounded-md bg-cyan-600 text-white hover:bg-cyan-700 font-medium"
           >
             Browse the catalog
           </Link>

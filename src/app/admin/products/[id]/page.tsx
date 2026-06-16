@@ -159,7 +159,7 @@ export default async function AdminProductPage({
             product.active ? "bg-emerald-500" : "bg-rose-500"
           }`}
         />
-        <p className="text-[12px] font-medium tracking-wider uppercase text-emerald-700">
+        <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
           Product · {product.active ? "active" : "inactive"}
         </p>
       </div>
@@ -279,7 +279,7 @@ export default async function AdminProductPage({
                           cumChange > 0
                             ? "text-rose-600"
                             : cumChange < 0
-                              ? "text-emerald-700"
+                              ? "text-cyan-700"
                               : "text-fg-muted"
                         }`}
                       >
@@ -333,7 +333,7 @@ export default async function AdminProductPage({
                                       : r.change_pct > 0
                                         ? "text-rose-600"
                                         : r.change_pct < 0
-                                          ? "text-emerald-700"
+                                          ? "text-cyan-700"
                                           : "text-fg-muted"
                                   }`}
                                 >
@@ -386,7 +386,7 @@ export default async function AdminProductPage({
                         className={`inline-flex items-center gap-1.5 ${
                           a.direction === "rise"
                             ? "text-rose-600"
-                            : "text-emerald-700"
+                            : "text-cyan-700"
                         }`}
                       >
                         <span
@@ -403,7 +403,7 @@ export default async function AdminProductPage({
                       className={`px-4 py-2.5 text-right font-mono tnum ${
                         a.direction === "rise"
                           ? "text-rose-600"
-                          : "text-emerald-700"
+                          : "text-cyan-700"
                       }`}
                     >
                       {fmtChange(a.change_pct)}
@@ -490,7 +490,7 @@ function LivePriceCard({
                 markupPct === 0
                   ? "text-fg-subtle"
                   : isDefault
-                    ? "text-emerald-700"
+                    ? "text-cyan-700"
                     : "text-cyan-700"
               }
             >
@@ -568,7 +568,7 @@ function LivePriceCard({
                   <td className="px-4 py-2.5 text-right font-mono tnum text-[12px] font-semibold">
                     {fmtBdt(bdtFinal)}
                   </td>
-                  <td className="px-4 py-2.5 text-right font-mono tnum text-[12px] text-emerald-700">
+                  <td className="px-4 py-2.5 text-right font-mono tnum text-[12px] text-cyan-700">
                     +{fmtBdt(marginBdt)}
                   </td>
                 </tr>

@@ -142,14 +142,15 @@ async function translateOne(row: TransRow): Promise<{
 
 async function main() {
   // Use the SQL helper for fast fetch
-  const { data: rows, error } = await supabase.rpc("get_untranslated_products", {
-    limit_n: LIMIT,
-  });
+  const { data: rows, error } = await supabase.rpc(
+    "get_untranslated_products" as never,
+    { limit_n: LIMIT } as never,
+  );
   if (error) {
     console.error("rpc get_untranslated_products failed:", error.message);
     process.exit(1);
   }
-  const list = (rows ?? []) as TransRow[];
+  const list = (rows ?? []) as unknown as TransRow[];
   console.log(
     `\n[translate] ${list.length} products to translate (concurrency=${CONCURRENCY})\n`,
   );
@@ -212,7 +213,10 @@ async function main() {
 
       const { error: updErr } = await supabase
         .from("products")
-        .update(updates)
+        // `updates` is `Record<string, unknown>` for incremental
+        // narrowing, but the keys match the products Update shape
+        // (validated above). Cast at the boundary.
+        .update(updates as never)
         .eq("id", row.id);
       if (updErr) {
         failed += 1;

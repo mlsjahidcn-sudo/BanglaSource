@@ -178,7 +178,7 @@ export function WatchlistGrid({ items: initial }: { items: SavedItem[] }) {
           type="checkbox"
           checked={allSelected}
           onChange={toggleAll}
-          className="w-3.5 h-3.5 rounded border-border text-emerald-600"
+          className="w-3.5 h-3.5 rounded border-border text-cyan-700"
           aria-label="Select all"
         />
         <span>{selected.size} of {items.length} selected</span>
@@ -233,7 +233,7 @@ export function WatchlistGrid({ items: initial }: { items: SavedItem[] }) {
                     <span
                       className={`px-1.5 py-0.5 rounded text-[9.5px] font-semibold ${
                         changePct < 0
-                          ? "bg-emerald-600 text-white"
+                          ? "bg-cyan-600 text-white"
                           : "bg-rose-600 text-white"
                       }`}
                     >
@@ -276,7 +276,7 @@ export function WatchlistGrid({ items: initial }: { items: SavedItem[] }) {
                 <div className="mt-2.5 flex items-center gap-2">
                   <Link
                     href={`/products/${i.source_id}`}
-                    className="flex-1 h-8 inline-flex items-center justify-center text-[11.5px] font-medium rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
+                    className="flex-1 h-8 inline-flex items-center justify-center text-[11.5px] font-medium rounded-md bg-cyan-600 text-white hover:bg-cyan-700"
                   >
                     View
                   </Link>
@@ -298,7 +298,7 @@ export function WatchlistGrid({ items: initial }: { items: SavedItem[] }) {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-lg bg-emerald-600 text-white text-[13px] font-medium shadow-lg">
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-lg bg-cyan-600 text-white text-[13px] font-medium shadow-lg">
           {toast}
         </div>
       )}

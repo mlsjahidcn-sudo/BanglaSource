@@ -53,47 +53,58 @@ export function AdminPageHeader({
   title,
   subtitle,
   actions,
-  dotColor = "emerald",
+  dotColor = "cyan",
 }: {
   eyebrow: string;
   title: string;
   subtitle?: ReactNode;
   actions?: ReactNode;
-  dotColor?: "emerald" | "violet" | "rose" | "amber" | "cyan";
+  dotColor?: "cyan" | "emerald" | "violet" | "amber" | "rose";
 }) {
+  // Brand-aligned defaults: cyan is the new accent (per the single-
+  // brand-color polish). The other tones map to the semantic palette
+  // (emerald = success, amber = warning, red/rose = danger, violet =
+  // info) so admin pages can still group by intent.
   const dotClass = {
+    cyan: "bg-cyan-600",
     emerald: "bg-emerald-500",
     violet: "bg-violet-500",
-    rose: "bg-rose-500",
     amber: "bg-amber-500",
-    cyan: "bg-cyan-500",
+    rose: "bg-rose-500",
   }[dotColor];
   const eyebrowClass = {
+    cyan: "text-cyan-700",
     emerald: "text-emerald-700",
     violet: "text-violet-700",
-    rose: "text-rose-700",
     amber: "text-amber-700",
-    cyan: "text-cyan-700",
+    rose: "text-rose-700",
   }[dotColor];
   return (
-    <div className="mb-8 flex items-end justify-between gap-4">
-      <div>
-        <div className="flex items-end gap-3">
-          <div className={`w-1.5 h-1.5 rounded-full ${dotClass} mb-3`} />
-          <p
-            className={`text-[12px] font-medium tracking-wider uppercase ${eyebrowClass}`}
-          >
-            {eyebrow}
-          </p>
+    <div className="mb-8 pb-6 border-b border-border">
+      <div className="flex items-end justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2.5">
+            <span
+              className={`inline-block w-2 h-2 rounded-full ${dotClass}`}
+              aria-hidden
+            />
+            <p
+              className={`text-[11.5px] font-semibold tracking-[0.1em] uppercase ${eyebrowClass}`}
+            >
+              {eyebrow}
+            </p>
+          </div>
+          <h1 className="mt-3 text-[32px] md:text-[40px] leading-[1.05] font-semibold tracking-[-0.02em]">
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="mt-3 text-[14px] text-fg-muted max-w-2xl leading-relaxed">
+              {subtitle}
+            </p>
+          )}
         </div>
-        <h1 className="mt-3 text-[32px] md:text-[40px] leading-[1.05] font-semibold tracking-[-0.02em]">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="mt-3 text-[14px] text-fg-muted max-w-2xl">{subtitle}</p>
-        )}
+        {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
       </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
   );
 }

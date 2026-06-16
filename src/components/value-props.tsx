@@ -71,10 +71,10 @@ export function ValueProps() {
   return (
     <div>
       <div className="text-center max-w-2xl mx-auto">
-        <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium">
+        <p className="section-eyebrow plain justify-center inline-flex">
           How we compare
         </p>
-        <h2 className="mt-1 text-[26px] font-semibold tracking-[-0.01em]">
+        <h2 className="mt-1 text-[28px] font-semibold tracking-[-0.02em]">
           BanglaSource vs the alternatives
         </h2>
         <p className="mt-2 text-[14px] text-fg-muted">

@@ -122,7 +122,7 @@ export function ProductDetail({ product }: { product: Product }) {
               onClick={() => setActiveImage(i)}
               className={`relative aspect-square bg-slate-50 rounded-md overflow-hidden border transition-colors ${
                 activeImage === i
-                  ? "border-emerald-600"
+                  ? "border-cyan-600"
                   : "border-border hover:border-border-strong"
               }`}
               aria-label={`View image ${i + 1}`}
@@ -140,12 +140,96 @@ export function ProductDetail({ product }: { product: Product }) {
 
         {/* Description */}
         <div className="mt-10">
-          <h2 className="text-[18px] font-semibold tracking-tight">
+          <p className="section-eyebrow">About this product</p>
+          <h2 className="section-title !text-[22px] md:!text-[26px]">
             Description
           </h2>
           <p className="mt-3 text-[15px] text-fg-muted leading-relaxed">
             {product.description_en}
           </p>
+        </div>
+
+        {/* Specifications — the B2B operator's panel.
+            Dense data-row layout, two columns, dot-leader rows.
+            Mirrors what an Alibaba / Grainger spec sheet looks like. */}
+        <div className="mt-10">
+          <p className="section-eyebrow">Specs</p>
+          <h2 className="section-title !text-[22px] md:!text-[26px]">
+            Product specifications
+          </h2>
+          <dl className="mt-5 border-t border-border">
+            <div className="data-row">
+              <dt>Supplier</dt>
+              <dd>
+                {product.supplier_name}
+                {product.supplier_city && (
+                  <span className="text-fg-muted">
+                    , {product.supplier_city}
+                    {product.supplier_province
+                      ? `, ${product.supplier_province}`
+                      : ""}
+                  </span>
+                )}
+              </dd>
+            </div>
+            <div className="data-row">
+              <dt>Category</dt>
+              <dd className="capitalize">{product.category}</dd>
+            </div>
+            <div className="data-row">
+              <dt>Factory MOQ</dt>
+              <dd>
+                {product.factory_moq}{" "}
+                {product.factory_moq === 1 ? "piece" : "pieces"}
+              </dd>
+            </div>
+            <div className="data-row">
+              <dt>Unit weight</dt>
+              <dd>{product.weight_kg.toFixed(2)} kg</dd>
+            </div>
+            <div className="data-row">
+              <dt>Volume</dt>
+              <dd>{(product.volume_cbm * 1_000_000).toFixed(0)} cm³</dd>
+            </div>
+            {(product.customs_duty_per_kg ?? 0) > 0 && (
+              <div className="data-row">
+                <dt>BD customs duty (per kg)</dt>
+                <dd>
+                  ৳{(product.customs_duty_per_kg ?? 0).toLocaleString()} / kg
+                  {product.customs_duty_class && (
+                    <span className="text-fg-muted">
+                      {" · "}
+                      {product.customs_duty_class}
+                    </span>
+                  )}
+                </dd>
+              </div>
+            )}
+            {product.source_url && !product.source_url.includes("manual.local") && (
+              <div className="data-row">
+                <dt>Source listing</dt>
+                <dd>
+                  <a
+                    href={product.source_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-cyan-700 hover:text-cyan-800 underline underline-offset-2"
+                  >
+                    {(() => {
+                      try {
+                        return new URL(product.source_url).hostname.replace(
+                          /^www\./,
+                          "",
+                        );
+                      } catch {
+                        return "View original listing";
+                      }
+                    })()}
+                  </a>
+                </dd>
+              </div>
+            )}
+          </dl>
         </div>
 
         {/* Why buy from us — trust strip */}
@@ -180,13 +264,18 @@ export function ProductDetail({ product }: { product: Product }) {
           ))}
         </div>
 
-        {/* Bulk tier table */}
-        <div className="mt-10">
-          <div className="flex items-baseline justify-between flex-wrap gap-2">
-            <h2 className="text-[18px] font-semibold tracking-tight">
-              Bulk pricing
-            </h2>
-            <div className="flex items-center gap-3 text-[11.5px] text-fg-muted">
+        {/* Bulk tier table — the B2B price-break table. Uses the
+            .table-pro class for dense data display: tight rows,
+            tabular numbers, right-aligned numerics, sticky-friendly. */}
+        <div className="mt-12">
+          <div className="flex items-end justify-between flex-wrap gap-2 pb-4 border-b border-border">
+            <div>
+              <p className="section-eyebrow">Volume discount</p>
+              <h2 className="section-title !text-[22px] md:!text-[26px]">
+                Bulk pricing
+              </h2>
+            </div>
+            <div className="flex items-center gap-3 text-[11.5px] text-fg-muted pb-1.5">
               {product.order_count_30d > 0 && (
                 <span className="inline-flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -204,7 +293,7 @@ export function ProductDetail({ product }: { product: Product }) {
               </span>
             </div>
           </div>
-          <table className="table-clean mt-4">
+          <table className="table-pro mt-4">
             <thead>
               <tr>
                 <th>Quantity</th>
@@ -232,7 +321,7 @@ export function ProductDetail({ product }: { product: Product }) {
                 return (
                   <tr
                     key={i}
-                    className={isCurrent ? "bg-emerald-50/50" : ""}
+                    className={isCurrent ? "bg-cyan-50/60" : ""}
                   >
                     <td>
                       <span className="font-mono tnum">
@@ -240,18 +329,18 @@ export function ProductDetail({ product }: { product: Product }) {
                         {tier.qty_max === 9999 ? "+" : `–${tier.qty_max}`}
                       </span>
                       {isCurrent && (
-                        <span className="ml-2 text-[10px] uppercase tracking-wider text-emerald-700 font-medium">
+                        <span className="ml-2 text-[10px] uppercase tracking-wider text-cyan-700 font-medium">
                           current
                         </span>
                       )}
                     </td>
-                    <td className="text-right price-tag font-medium text-fg-muted">
+                    <td className="text-right price-tag font-medium text-fg-muted col-num">
                       {fmtCny(fen)}
                     </td>
-                    <td className="text-right price-tag font-semibold text-fg">
+                    <td className="text-right price-tag font-semibold text-fg col-num">
                       {fmtBdt(landedBdtPerPc)}
                     </td>
-                    <td className="text-right text-fg-muted">
+                    <td className="text-right text-fg-muted col-num">
                       {saving > 0 ? `−${saving}%` : "—"}
                     </td>
                   </tr>
@@ -300,10 +389,10 @@ export function ProductDetail({ product }: { product: Product }) {
       <div className="lg:col-span-5">
         <div className="lg:sticky lg:top-24 space-y-6">
           <div>
-            <div className="text-[12px] text-fg-subtle font-mono tnum uppercase tracking-wider">
+            <div className="text-[11.5px] text-fg-muted font-mono tnum tracking-[0.06em]">
               ID · {product.source_id}
             </div>
-            <h1 className="mt-2 text-[24px] md:text-[28px] leading-[1.2] font-semibold tracking-[-0.015em]">
+            <h1 className="mt-2 text-[24px] md:text-[28px] leading-[1.2] font-semibold tracking-[-0.02em]">
               {product.title_en}
             </h1>
             <p className="mt-2 text-[14px] text-fg-muted">
@@ -315,13 +404,13 @@ export function ProductDetail({ product }: { product: Product }) {
           <div className="card p-5">
             <div className="flex items-end justify-between">
               <div>
-                <p className="text-[11px] text-fg-subtle uppercase tracking-wider">
+                <p className="section-eyebrow plain !text-[10.5px] !tracking-[0.1em]">
                   Factory price
                 </p>
-                <p className="price-tag text-[24px] font-semibold mt-0.5">
+                <p className="price-tag text-[26px] font-semibold mt-1">
                   {fmtBdt(Math.ceil((unitCny / 100) * 16.85))}
                 </p>
-                <p className="text-[12px] text-fg-subtle mt-0.5">
+                <p className="text-[12px] text-fg-muted mt-0.5">
                   per piece · ≈ {fmtCny(unitCny)} · MOQ {product.factory_moq}
                 </p>
               </div>
@@ -353,7 +442,7 @@ export function ProductDetail({ product }: { product: Product }) {
                       ),
                     )
                   }
-                  className="flex-1 h-10 border border-border rounded-md text-center price-tag font-medium focus:border-emerald-600 focus:outline-none"
+                  className="flex-1 h-10 border border-border rounded-md text-center price-tag font-medium focus:border-cyan-600 focus:outline-none"
                 />
                 <button
                   onClick={() => setQty(qty + 1)}

@@ -79,13 +79,11 @@ export function ForYou({ limit = 12, title = "For you", eyebrow, className = "" 
   if (loading) {
     return (
       <section className={className}>
-        <div className="mb-5">
-          <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium">
+        <div className="mb-6 pb-4 border-b border-border">
+          <p className="section-eyebrow">
             {eyebrow ?? (personalized ? "Personalized" : "Popular this week")}
           </p>
-          <h2 className="mt-1 text-[22px] font-semibold tracking-[-0.01em]">
-            {title}
-          </h2>
+          <h2 className="section-title">{title}</h2>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -106,19 +104,17 @@ export function ForYou({ limit = 12, title = "For you", eyebrow, className = "" 
 
   return (
     <section className={className}>
-      <div className="mb-5 flex items-end justify-between gap-4">
-        <div>
-          <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium flex items-center gap-1.5">
+      <div className="mb-6 pb-4 border-b border-border flex items-end justify-between gap-4">
+        <div className="min-w-0">
+          <p className="section-eyebrow flex items-center gap-1.5">
             {eyebrow ?? (personalized ? "Personalized" : "Popular this week")}
             {personalized && (
-              <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[9.5px] font-mono tnum">
+              <span className="px-1.5 py-0.5 rounded bg-cyan-50 text-cyan-800 text-[9.5px] font-mono tnum">
                 AI
               </span>
             )}
           </p>
-          <h2 className="mt-1 text-[22px] font-semibold tracking-[-0.01em]">
-            {title}
-          </h2>
+          <h2 className="section-title">{title}</h2>
         </div>
         <Link
           href="/categories"
@@ -151,7 +147,7 @@ export function ForYou({ limit = 12, title = "For you", eyebrow, className = "" 
                 {/* Reason chip overlay (top-left) */}
                 {h.reasons && h.reasons.length > 0 && (
                   <div className="absolute top-2 left-2 max-w-[80%]">
-                    <span className="inline-block px-2 py-0.5 rounded bg-emerald-600 text-white text-[9.5px] font-medium uppercase tracking-wider">
+                    <span className="inline-block px-2 py-0.5 rounded bg-cyan-600 text-white text-[9.5px] font-medium uppercase tracking-wider">
                       {h.reasons[0]}
                     </span>
                   </div>

@@ -27,7 +27,7 @@ export function ShippingClient() {
     <>
       {/* Hero */}
       <Container className="pt-16 md:pt-20 pb-10">
-        <p className="text-[12px] font-medium tracking-wider uppercase text-emerald-700">
+        <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
           Logistics
         </p>
         <h1 className="mt-3 text-[40px] md:text-[56px] leading-[1.05] font-semibold tracking-[-0.02em] max-w-3xl">
@@ -85,7 +85,7 @@ export function ShippingClient() {
 
           {/* Sea */}
           <div className="rounded-lg border border-border bg-bg p-6 flex flex-col">
-            <p className="text-[11px] uppercase tracking-wider font-medium text-emerald-700">
+            <p className="text-[11px] uppercase tracking-wider font-medium text-cyan-700">
               {t("ship.mode.sea")}
             </p>
             <p className="mt-2 text-[20px] font-semibold tracking-tight">
@@ -150,7 +150,7 @@ export function ShippingClient() {
       {/* Product price estimator */}
       <Container className="pb-12">
         <div className="max-w-5xl">
-          <p className="text-[12px] font-medium tracking-wider uppercase text-emerald-700">
+          <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
             Estimator
           </p>
           <h2 className="mt-3 text-[28px] md:text-[36px] leading-tight font-semibold tracking-[-0.02em]">
@@ -175,19 +175,19 @@ export function ShippingClient() {
           </h2>
           <ul className="mt-5 space-y-4 text-[14px] text-fg-muted leading-relaxed max-w-3xl">
             <li className="flex gap-3">
-              <span className="text-emerald-600 shrink-0">→</span>
+              <span className="text-cyan-700 shrink-0">→</span>
               {t("ship.disclaimer.1")}
             </li>
             <li className="flex gap-3">
-              <span className="text-emerald-600 shrink-0">→</span>
+              <span className="text-cyan-700 shrink-0">→</span>
               {t("ship.disclaimer.2")}
             </li>
             <li className="flex gap-3">
-              <span className="text-emerald-600 shrink-0">→</span>
+              <span className="text-cyan-700 shrink-0">→</span>
               {t("ship.disclaimer.3")}
             </li>
             <li className="flex gap-3">
-              <span className="text-emerald-600 shrink-0">→</span>
+              <span className="text-cyan-700 shrink-0">→</span>
               {t("ship.disclaimer.4")}
             </li>
           </ul>

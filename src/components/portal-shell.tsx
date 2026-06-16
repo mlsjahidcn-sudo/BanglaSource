@@ -94,7 +94,7 @@ export function PortalShell({
             >
               <div
                 className={cn(
-                  "w-8 h-8 rounded-md bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-700 font-semibold text-[14px] shrink-0",
+                  "w-8 h-8 rounded-md bg-cyan-600 text-white font-semibold text-[14px] shrink-0 flex items-center justify-center",
                 )}
               >
                 BS
@@ -152,7 +152,7 @@ export function PortalShell({
                             "flex items-center gap-2.5 rounded-md h-9 px-2.5 text-[13px] transition-colors group",
                             expanded ? "" : "justify-center",
                             active
-                              ? "bg-emerald-500/10 text-emerald-800 font-medium"
+                              ? "bg-cyan-50 text-cyan-800 font-medium"
                               : "text-fg-muted hover:bg-bg hover:text-fg",
                           )}
                           title={!expanded ? item.label : undefined}
@@ -161,7 +161,7 @@ export function PortalShell({
                             className={cn(
                               "shrink-0 w-5 h-5 flex items-center justify-center",
                               active
-                                ? "text-emerald-700"
+                                ? "text-cyan-700"
                                 : "text-fg-subtle group-hover:text-fg-muted",
                             )}
                           >
@@ -177,7 +177,7 @@ export function PortalShell({
                                   className={cn(
                                     "text-[10px] font-mono px-1.5 py-0.5 rounded",
                                     active
-                                      ? "bg-emerald-500/20 text-emerald-800"
+                                      ? "bg-cyan-100 text-cyan-800"
                                       : "bg-bg-soft text-fg-muted",
                                   )}
                                 >
@@ -276,7 +276,7 @@ function UserPanel({ user }: { user: User }) {
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center gap-2.5 rounded-md h-10 px-2 text-[12px] hover:bg-bg transition-colors"
       >
-        <div className="w-6 h-6 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-700 text-[10px] font-semibold">
+        <div className="w-6 h-6 rounded-full bg-cyan-600 text-white flex items-center justify-center text-[10px] font-semibold">
           {(user?.fullName ?? user?.email ?? "?")
             .split(/\s+/)
             .map((s) => s[0])

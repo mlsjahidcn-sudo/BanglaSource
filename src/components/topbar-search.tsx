@@ -37,7 +37,7 @@ type OrderHit = {
 type Hit = ProductHit | UserHit | OrderHit;
 
 const KIND_TONE: Record<Hit["kind"], string> = {
-  product: "text-emerald-700 bg-emerald-50 border-emerald-200",
+  product: "text-cyan-700 bg-cyan-50 border-cyan-200",
   user: "text-cyan-700 bg-cyan-50 border-cyan-200",
   order: "text-violet-700 bg-violet-50 border-violet-200",
 };
@@ -186,7 +186,7 @@ export function TopbarSearch() {
             <Link
               href={`/admin/products?q=${encodeURIComponent(q)}`}
               onClick={() => setOpen(false)}
-              className="text-emerald-700 hover:underline"
+              className="text-cyan-700 hover:underline"
             >
               See all in catalog →
             </Link>

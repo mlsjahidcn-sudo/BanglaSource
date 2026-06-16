@@ -558,7 +558,7 @@ export function ImageAgentClient({
                     type="button"
                     onClick={() => handleGenerate(true)}
                     disabled={genRunning}
-                    className="h-9 px-4 rounded-md bg-emerald-600 text-white text-[12.5px] font-medium hover:bg-emerald-700 disabled:opacity-60"
+                    className="h-9 px-4 rounded-md bg-cyan-600 text-white text-[12.5px] font-medium hover:bg-cyan-700 disabled:opacity-60"
                   >
                     {genRunning ? "Adding…" : "Add to product"}
                   </button>
@@ -597,7 +597,7 @@ export function ImageAgentClient({
         }
         .input:focus {
           outline: none;
-          border-color: var(--emerald-600);
+          border-color: var(--cyan-600);
         }
         textarea.input {
           height: auto;

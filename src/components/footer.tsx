@@ -15,7 +15,7 @@ export function Footer() {
               <svg
                 viewBox="0 0 22 22"
                 fill="none"
-                className="w-5 h-5 text-emerald-600"
+                className="w-5 h-5 text-cyan-700"
                 aria-hidden="true"
               >
                 <path

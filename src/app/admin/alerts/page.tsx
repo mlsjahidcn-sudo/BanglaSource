@@ -113,7 +113,7 @@ export default async function OpsAlertsPage() {
                         className={`inline-flex items-center gap-1.5 ${
                           a.direction === "rise"
                             ? "text-rose-600"
-                            : "text-emerald-700"
+                            : "text-cyan-700"
                         }`}
                       >
                         <span
@@ -130,7 +130,7 @@ export default async function OpsAlertsPage() {
                       className={`px-4 py-2.5 text-right font-mono tnum ${
                         a.direction === "rise"
                           ? "text-rose-600"
-                          : "text-emerald-700"
+                          : "text-cyan-700"
                       }`}
                     >
                       {(a.change_pct > 0 ? "+" : "") + a.change_pct.toFixed(1)}%

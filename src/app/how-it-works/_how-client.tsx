@@ -59,7 +59,7 @@ export function HowClient() {
   return (
     <>
       <Container className="pt-16 md:pt-20 pb-12">
-        <p className="text-[12px] font-medium tracking-wider uppercase text-emerald-700">
+        <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
           Process
         </p>
         <h1 className="mt-3 text-[40px] md:text-[56px] leading-[1.05] font-semibold tracking-[-0.02em] max-w-3xl">
