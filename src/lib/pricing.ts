@@ -794,3 +794,166 @@ export function fmtCbm(cbm: number): string {
 export function fmtPct(p: number): string {
   return `${Math.round(p * 100)}%`;
 }
+
+/* ===========================================================================
+   Group buy pricing (Phase 36)
+
+   A "group buy" lets multiple buyers aggregate qty to unlock tiered
+   pricing. Admin sets 1-5 price tiers (e.g. "500 pcs = ৳480, 1000
+   pcs = ৳450, 2000 pcs = ৳420"). When SUM(member.qty) crosses a
+   tier's qty_threshold, the per-piece price drops to that tier's
+   unit_bdt.
+
+   The pricing is computed in two distinct moments:
+   1. **At commit time** (every time a buyer joins or the group
+      progresses): the *current* price they're committing at.
+      This goes into `group_buy_members.unit_bdt_at_commit` and
+      lets the UI show "price dropped since you joined" later.
+   2. **At formation time** (once, when SUM >= target_qty): the
+      *final* price everyone gets charged. This goes into
+      `group_buys.final_unit_bdt`.
+
+   The two functions below are identical in math; we keep them
+   separate so callers can make the intent explicit. The pricing
+   is per-piece (BDT), in the same unit the rest of the catalog
+   uses (the buyer PDP "Product price" is also per-piece BDT).
+   =========================================================================== */
+
+/** A single price tier (mirrors the `price_tiers` jsonb column). */
+export type GroupBuyPriceTier = {
+  qty_threshold: number; // The total committed qty at which
+                         // `unit_bdt` kicks in.
+  unit_bdt: number;      // Per-piece BDT at this tier.
+};
+
+/** Validate the price_tiers shape (sorted ASC, no dupes, positive). */
+export function validateGroupBuyTiers(
+  tiers: GroupBuyPriceTier[],
+): { ok: true } | { ok: false; error: string } {
+  if (!Array.isArray(tiers) || tiers.length === 0) {
+    return { ok: false, error: "price_tiers must be a non-empty array" };
+  }
+  if (tiers.length > 5) {
+    return { ok: false, error: "price_tiers max 5 entries" };
+  }
+  let lastThreshold = -Infinity;
+  for (let i = 0; i < tiers.length; i += 1) {
+    const t = tiers[i];
+    if (!t || typeof t.qty_threshold !== "number" || typeof t.unit_bdt !== "number") {
+      return { ok: false, error: `tier ${i}: qty_threshold + unit_bdt must be numbers` };
+    }
+    if (!Number.isInteger(t.qty_threshold) || t.qty_threshold <= 0) {
+      return { ok: false, error: `tier ${i}: qty_threshold must be a positive integer` };
+    }
+    if (!Number.isInteger(t.unit_bdt) || t.unit_bdt <= 0) {
+      return { ok: false, error: `tier ${i}: unit_bdt must be a positive integer` };
+    }
+    if (t.qty_threshold <= lastThreshold) {
+      return {
+        ok: false,
+        error: `tier ${i}: qty_threshold must be strictly greater than the previous tier`,
+      };
+    }
+    lastThreshold = t.qty_threshold;
+  }
+  return { ok: true };
+}
+
+/**
+ * Compute the per-piece price for a given committed qty — the
+ * BEST tier the group is currently in.
+ *
+ * Walks the tiers from the highest threshold DOWN, returning the
+ * unit_bdt of the HIGHEST tier whose qty_threshold has been
+ * crossed. This is the "current price" the buyer sees on the
+ * group-buy detail page (the best they've unlocked so far).
+ *
+ * If the committed qty is below the lowest tier's threshold, the
+ * buyer is "not yet in any tier" — we return the LOWEST tier's
+ * price (the most expensive) as a soft commitment indicator.
+ * (The buyer sees: "If no one else joins, the price is ৳480;
+ * if we hit 1000, it drops to ৳450." The lowest tier is the
+ * worst-case floor, which is fair to show as the "current price"
+ * even at 0 qty.)
+ *
+ * Tiers MUST be sorted ASC by qty_threshold. Use
+ * `validateGroupBuyTiers` to enforce this.
+ *
+ * Example: tiers = [{500,480}, {1000,450}, {2000,420}]
+ *   committed=0    → 480 (below all; lowest tier = worst case)
+ *   committed=500  → 480
+ *   committed=999  → 480
+ *   committed=1000 → 450  (the 1000 tier is the best unlocked)
+ *   committed=2000 → 420  (the 2000 tier is the best unlocked)
+ *
+ * Used by:
+ *   - The buyer detail page to render "Current price: ৳X/pc".
+ *   - `groupBuyFinalUnitBdt` at formation time (the price
+ *     everyone gets charged).
+ *   - `unit_bdt_at_commit` when a member joins (the price they
+ *     SAW when they committed, for the "price dropped" message).
+ */
+export function groupBuyPriceAtQty(
+  tiers: GroupBuyPriceTier[],
+  committedQty: number,
+): number {
+  if (tiers.length === 0) {
+    throw new Error("groupBuyPriceAtQty: tiers must be non-empty");
+  }
+  for (let i = tiers.length - 1; i >= 0; i -= 1) {
+    const t = tiers[i];
+    if (committedQty >= t.qty_threshold) {
+      return t.unit_bdt;
+    }
+  }
+  // Below the lowest threshold — fall back to the lowest tier
+  // (the most expensive — the worst-case floor).
+  return tiers[0].unit_bdt;
+}
+
+/**
+ * Compute the per-piece price for the NEXT tier above the current
+ * committed qty. Returns `null` when we're already at the top
+ * (highest) tier. Used to render the "+350 more unlocks ৳420"
+ * callout on the buyer detail page.
+ */
+export function groupBuyNextTier(
+  tiers: GroupBuyPriceTier[],
+  committedQty: number,
+): GroupBuyPriceTier | null {
+  for (const t of tiers) {
+    if (committedQty < t.qty_threshold) {
+      return t;
+    }
+  }
+  return null; // already at the top tier
+}
+
+/**
+ * Compute the final per-piece price at the moment of formation.
+ * Called ONCE (by the cron job, with the final SUM of all member
+ * qty). The result is written to `group_buys.final_unit_bdt`
+ * and is the price EVERY member gets charged.
+ *
+ * Thin wrapper around `groupBuyPriceAtQty` — kept as a separate
+ * function so the call site is self-documenting.
+ */
+export function groupBuyFinalUnitBdt(
+  tiers: GroupBuyPriceTier[],
+  finalCommittedQty: number,
+): number {
+  return groupBuyPriceAtQty(tiers, finalCommittedQty);
+}
+
+/**
+ * Compute the per-member line total at the given price + qty.
+ * (No shipping / duty / VAT — the order row carries those when
+ * the formation cron creates the order. The group-buy line total
+ * is purely product: qty × unit_bdt.)
+ */
+export function groupBuyLineTotalBdt(
+  unitBdt: number,
+  qty: number,
+): number {
+  return unitBdt * qty;
+}

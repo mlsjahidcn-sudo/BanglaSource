@@ -555,6 +555,63 @@ export type Database = {
           { foreignKeyName: "products_implicit_product_id", columns: ["product_id"], referencedRelation: "products", referencedColumns: ["id"] },
         ],
       };
+      group_buys: {
+        Row: {
+          id: Uuid;
+          product_id: number;
+          target_qty: number;
+          min_qty_per_buyer: number;
+          // jsonb Array<{qty_threshold:number, unit_bdt:number}>.
+          // Validated shape is enforced in pricing.ts
+          // (validateGroupBuyTiers) and at the DB CHECK constraint.
+          price_tiers: unknown;
+          deadline_at: Timestamp;
+          status: string;
+          final_unit_bdt: number | null;
+          created_by: Uuid;
+          created_at: Timestamp;
+          formed_at: Timestamp | null;
+          cancelled_at: Timestamp | null;
+          updated_at: Timestamp;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["group_buys"]["Row"],
+          "id" | "created_at" | "updated_at"
+        > & {
+          id?: Uuid;
+          created_at?: Timestamp;
+          updated_at?: Timestamp;
+        };
+        Update: Partial<Database["public"]["Tables"]["group_buys"]["Insert"]>;
+        Relationships: [
+          { foreignKeyName: "group_buys_product_id_fkey", columns: ["product_id"], referencedRelation: "products", referencedColumns: ["id"] },
+        ];
+      };
+      group_buy_members: {
+        Row: {
+          id: Uuid;
+          group_buy_id: Uuid;
+          user_id: Uuid;
+          qty: number;
+          unit_bdt_at_commit: number;
+          payment_state: string;
+          order_id: number | null;
+          created_at: Timestamp;
+          charged_at: Timestamp | null;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["group_buy_members"]["Row"],
+          "id" | "created_at"
+        > & {
+          id?: Uuid;
+          created_at?: Timestamp;
+        };
+        Update: Partial<Database["public"]["Tables"]["group_buy_members"]["Insert"]>;
+        Relationships: [
+          { foreignKeyName: "group_buy_members_group_buy_id_fkey", columns: ["group_buy_id"], referencedRelation: "group_buys", referencedColumns: ["id"] },
+          { foreignKeyName: "group_buy_members_order_id_fkey", columns: ["order_id"], referencedRelation: "orders", referencedColumns: ["id"] },
+        ];
+      };
     };
     Views: { [_ in never]: never };
     Functions: {
