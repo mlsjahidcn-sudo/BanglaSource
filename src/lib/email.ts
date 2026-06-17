@@ -777,3 +777,200 @@ export async function notifyRFQQuoted(rfqId: number): Promise<EmailResult> {
     ],
   });
 }
+/* ============================================================================
+   Phase 38 — Group buy fan-outs
+
+   Two helpers used by /api/group-buys/[id]/join (notifyGroupBuyJoined)
+   and /api/group-buys/[id]/cancel-membership (notifyGroupBuyMembershipCancelled).
+
+   These are the buyer-side notifications for the group-buy flow. The
+   formation / expiry / cancellation fan-outs (Phase 40) will add 3 more
+   helpers at that time. Bodies are deliberately minimal for now; the
+   richer content (target progress bar, "you saved ৳X" copy, etc.) lands
+   in Phase 42 polish once we have real production data on what works.
+
+   The call sites use `void import("@/lib/email").then(...)` so a slow or
+   failed email never blocks the API response.
+   =========================================================================== */
+
+/**
+ * notifyGroupBuyJoined — fires after a buyer commits a qty to an
+ * open group_buy. Tells them:
+ *   - what they committed (qty)
+ *   - the price they SAW (unit_bdt_at_commit)
+ *   - the deadline
+ *   - where the group currently stands (current_qty / target_qty)
+ *
+ * Future enhancement (Phase 42): include a progress bar image +
+ * share button ("tell a friend to join and unlock a lower price").
+ */
+export async function notifyGroupBuyJoined(
+  memberId: string,
+): Promise<EmailResult> {
+  const sb = getServiceRoleClient();
+  const { data: member } = await sb
+    .from("group_buy_members")
+    .select(
+      "id, group_buy_id, user_id, qty, unit_bdt_at_commit, created_at, group_buys(target_qty, deadline_at, status, products(title_en))",
+    )
+    .eq("id", memberId)
+    .maybeSingle();
+  if (!member) {
+    return { ok: false, error: "member_not_found", to: [], provider: "resend" };
+  }
+  const gb = (member as unknown as {
+    group_buys: {
+      target_qty: number;
+      deadline_at: string;
+      status: string;
+      products: { title_en: string | null } | null;
+    } | null;
+  }).group_buys;
+  if (!gb) {
+    return { ok: false, error: "group_buy_not_found", to: [], provider: "resend" };
+  }
+
+  const { data: profile } = await sb
+    .from("profiles")
+    .select("email, full_name")
+    .eq("id", member.user_id)
+    .maybeSingle();
+  if (!profile?.email) {
+    return { ok: false, error: "buyer_no_email", to: [], provider: "resend" };
+  }
+
+  // Compute current SUM so the buyer sees their contribution in context.
+  const { data: sumRows } = await sb
+    .from("group_buy_members")
+    .select("qty")
+    .eq("group_buy_id", member.group_buy_id);
+  const currentQty = (sumRows ?? []).reduce((s, m) => s + (m.qty ?? 0), 0);
+  const remaining = Math.max(0, gb.target_qty - currentQty);
+
+  const greet = profile.full_name ? `Hi ${profile.full_name},` : "Hi,";
+  const productTitle = gb.products?.title_en ?? "your selected product";
+  const deadlineStr = new Date(gb.deadline_at).toLocaleString("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+
+  const subject = `You're in: ${member.qty} pcs committed at ৳${member.unit_bdt_at_commit}/pc`;
+  const html = `
+    <div style="font-family: -apple-system, system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #0f172a;">
+      <h1 style="font-size: 22px; margin-bottom: 4px;">${greet}</h1>
+      <p>You've committed <strong>${member.qty} pcs</strong> of <strong>${productTitle}</strong> to the group buy.</p>
+
+      <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 20px 0;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 8px 0; color: #64748b;">Your committed qty</td>
+            <td style="padding: 8px 0; text-align: right; font-family: ui-monospace, monospace; font-weight: 600;">${member.qty} pcs</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 8px 0; color: #64748b;">Price you're committed at</td>
+            <td style="padding: 8px 0; text-align: right; font-family: ui-monospace, monospace; font-weight: 600;">৳${member.unit_bdt_at_commit}/pc</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 8px 0; color: #64748b;">Group progress</td>
+            <td style="padding: 8px 0; text-align: right; font-family: ui-monospace, monospace; font-weight: 600;">${currentQty.toLocaleString()} / ${gb.target_qty.toLocaleString()} pcs</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #64748b;">Deadline</td>
+            <td style="padding: 8px 0; text-align: right; font-family: ui-monospace, monospace; font-weight: 600;">${deadlineStr}</td>
+          </tr>
+        </table>
+      </div>
+
+      <p>${
+        remaining > 0
+          ? `The group needs <strong>${remaining.toLocaleString()} more pcs</strong> by the deadline to form. If more buyers join, your per-piece price may drop further (you'll be charged the final tiered price when the group forms — not the price shown above).`
+          : `The group has hit its target. We're charging members now — you'll get a separate email when your order is ready to pay.`
+      }</p>
+
+      <p style="margin: 24px 0;">
+        <a href="${SITE_URL}/group-buys/${member.group_buy_id}" style="display: inline-block; background: #0891b2; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+          View group progress
+        </a>
+      </p>
+
+      <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">BanglaSource · Group buys</p>
+    </div>`;
+  return sendEmail({
+    to: profile.email,
+    subject,
+    html,
+    tags: [
+      { name: "type", value: "group_buy_joined" },
+      { name: "group_buy", value: String(member.group_buy_id).slice(0, 8) },
+    ],
+  });
+}
+
+/**
+ * notifyGroupBuyMembershipCancelled — fires after a buyer cancels
+ * their own commitment to a group_buy. Confirms the cancellation
+ * and reminds them of the group's deadline (in case they want to
+ * re-join).
+ */
+export async function notifyGroupBuyMembershipCancelled(
+  groupBuyId: string,
+  userId: string,
+): Promise<EmailResult> {
+  const sb = getServiceRoleClient();
+  const [{ data: profile }, { data: gb }] = await Promise.all([
+    sb
+      .from("profiles")
+      .select("email, full_name")
+      .eq("id", userId)
+      .maybeSingle(),
+    sb
+      .from("group_buys")
+      .select("id, deadline_at, status, products(title_en)")
+      .eq("id", groupBuyId)
+      .maybeSingle(),
+  ]);
+  if (!profile?.email) {
+    return { ok: false, error: "buyer_no_email", to: [], provider: "resend" };
+  }
+  if (!gb) {
+    return { ok: false, error: "group_buy_not_found", to: [], provider: "resend" };
+  }
+
+  const greet = profile.full_name ? `Hi ${profile.full_name},` : "Hi,";
+  const productTitle =
+    (gb as unknown as { products: { title_en: string | null } | null })
+      .products?.title_en ?? "your selected product";
+  const deadlineStr = new Date(gb.deadline_at).toLocaleString("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+
+  const subject = `Group buy cancellation confirmed`;
+  const html = `
+    <div style="font-family: -apple-system, system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #0f172a;">
+      <h1 style="font-size: 22px; margin-bottom: 4px;">${greet}</h1>
+      <p>Your commitment to the <strong>${productTitle}</strong> group buy has been cancelled. No charge has been made.</p>
+
+      ${
+        gb.status === "open"
+          ? `<p>The group is still open until <strong>${deadlineStr}</strong>. You can re-join any time before then — just head back to the group page.</p>
+             <p style="margin: 24px 0;">
+               <a href="${SITE_URL}/group-buys/${groupBuyId}" style="display: inline-block; background: #0891b2; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+                 View group
+               </a>
+             </p>`
+          : `<p>The group is no longer accepting new members (status: ${gb.status}).</p>`
+      }
+
+      <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">BanglaSource · Group buys</p>
+    </div>`;
+  return sendEmail({
+    to: profile.email,
+    subject,
+    html,
+    tags: [
+      { name: "type", value: "group_buy_membership_cancelled" },
+      { name: "group_buy", value: String(groupBuyId).slice(0, 8) },
+    ],
+  });
+}
