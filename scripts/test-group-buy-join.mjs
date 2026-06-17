@@ -310,21 +310,50 @@ check(
 //   earlier, but service-role bypasses the route-level check.
 console.log("\n[12] DB trigger: rejects insert on status='cancelled' even via service-role");
 const sbService = createClient(URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-// First check whether the trigger exists. The supabase-js client
-// doesn't expose arbitrary SQL via REST; instead we try a
-// service-role select on pg_trigger (RLS allows service-role).
-// Skip the check entirely if the from() throws — the migration
-// hasn't been applied.
+// First check whether the trigger exists. We can't query
+// pg_trigger via PostgREST (catalog tables aren't exposed). So
+// instead we probe the trigger indirectly: try a service-role
+// insert on a status='cancelled' group and see if it fails
+// with the trigger's P0001 code. If the trigger exists, we get
+// that error; if not, the insert succeeds (and we skip the
+// trigger-specific assertions below).
 let triggerApplied = false;
-try {
-  const { data: triggerRows } = await sbService
-    .from("pg_trigger")
-    .select("tgname")
-    .eq("tgname", "group_buy_members_guard")
-    .limit(1);
-  triggerApplied = Array.isArray(triggerRows) && triggerRows.length > 0;
-} catch {
-  triggerApplied = false;
+{
+  // Create a quick 'cancelled' group to probe the trigger
+  const probeRes = await fetchAs("/api/admin/group-buys", {
+    method: "POST",
+    body: JSON.stringify({
+      productId: 23,
+      targetQty: 200,
+      minQtyPerBuyer: 50,
+      priceTiers: [{ qty_threshold: 100, unit_bdt: 500 }],
+      deadlineAt: new Date(Date.now() + 7 * 86400_000).toISOString(),
+    }),
+  });
+  const probeJson = await probeRes.json();
+  if (probeRes.status === 200) {
+    // Flip to cancelled
+    await fetchAs(`/api/admin/group-buys/${probeJson.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ action: "cancel" }),
+    });
+    // Try a service-role INSERT on the cancelled group
+    const { error: probeErr } = await sbService
+      .from("group_buy_members")
+      .insert({
+        group_buy_id: probeJson.id,
+        user_id: auth.user.id,
+        qty: 50,
+        unit_bdt_at_commit: 500,
+        payment_state: "pending",
+      })
+      .select("id")
+      .maybeSingle();
+    triggerApplied =
+      probeErr?.code === "P0001" && /group_buy_not_open/.test(probeErr?.message ?? "");
+    // Cleanup the probe group
+    await sbService.from("group_buys").delete().eq("id", probeJson.id);
+  }
 }
 
 if (!triggerApplied) {
