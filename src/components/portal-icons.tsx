@@ -212,6 +212,31 @@ export const IconPlus = ({ size = 16, className }: IconProps) =>
     className,
   );
 
+// Chain-link — used by /admin/import (Phase 43 Taobao/Tmall import).
+// Two interlocked ovals, classic "link" metaphor.
+export const IconLink = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <>
+      <path d="M6.5 9.5l3-3" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M5.5 7.5l-1 1a2.5 2.5 0 0 0 3.5 3.5l1-1"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M10.5 8.5l1-1a2.5 2.5 0 0 0-3.5-3.5l-1 1"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </>,
+    className,
+  );
+
 // Clipboard with checkmark — used by /admin/orders.
 // Distinct from IconPackage (which is a 3D box) because orders
 // are a workflow, not inventory.

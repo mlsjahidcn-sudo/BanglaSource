@@ -23,6 +23,7 @@ import {
   IconAI,
   IconImage,
   IconPlus,
+  IconLink,
   IconOrders,
   IconGroupBuy,
 } from "@/components/portal-icons";
@@ -69,6 +70,11 @@ export const adminNav = (counts: {
         label: "Add product",
         href: "/admin/products/new",
         icon: <IconPlus />,
+      },
+      {
+        label: "Import URL",
+        href: "/admin/import",
+        icon: <IconLink />,
       },
       {
         label: "Image agent",
