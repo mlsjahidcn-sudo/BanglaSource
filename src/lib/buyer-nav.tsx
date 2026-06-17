@@ -11,6 +11,7 @@ import {
   IconRFQ,
   IconCart,
   IconAI,
+  IconGroupBuy,
 } from "@/components/portal-icons";
 import type { NavGroup } from "@/components/portal-shell";
 
@@ -19,6 +20,7 @@ export const buyerNav = (counts: {
   rfqs: number;
   addresses: number;
   watchlist: number;
+  activeGroupBuys: number;
 }): NavGroup[] => [
   {
     label: "Overview",
@@ -46,6 +48,12 @@ export const buyerNav = (counts: {
         href: "/buyer/rfqs",
         icon: <IconRFQ />,
         badge: counts.rfqs,
+      },
+      {
+        label: "Group buys",
+        href: "/buyer/group-buys",
+        icon: <IconGroupBuy />,
+        badge: counts.activeGroupBuys,
       },
       {
         label: "Saved items",

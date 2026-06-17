@@ -83,6 +83,37 @@ export function Nav() {
             <Link href="/how-it-works" className="nav-link hover:text-fg">
               {t("nav.how")}
             </Link>
+            <Link
+              href="/group-buys"
+              className="nav-link hover:text-fg flex items-center gap-1"
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 16 16"
+                fill="none"
+                className="text-cyan-600"
+              >
+                <circle cx="5" cy="6" r="1.7" fill="currentColor" />
+                <circle cx="11" cy="6" r="1.7" fill="currentColor" />
+                <circle cx="8" cy="4" r="1.5" fill="currentColor" />
+                <path
+                  d="M2 12.5c.5-1.7 1.7-2.5 3-2.5s2.5.8 3 2.5"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  fill="none"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M8 11.5c.5-1.4 1.5-2 2.5-2s2 .6 2.5 2"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  fill="none"
+                  strokeLinecap="round"
+                />
+              </svg>
+              {t("nav.group_buys")}
+            </Link>
             <Link href="/shipping-rates" className="nav-link hover:text-fg">
               {t("nav.shipping")}
             </Link>

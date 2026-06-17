@@ -12,6 +12,7 @@ export const dict: Dict = {
   "nav.shipping": { en: "Shipping rates", bn: "শিপিং চার্জ" },
   "nav.about": { en: "About", bn: "সম্পর্কে" },
   "nav.contact": { en: "Contact", bn: "যোগাযোগ" },
+  "nav.group_buys": { en: "Group buys", bn: "গ্রুপ বায়" },
   "nav.signin": { en: "Sign in", bn: "সাইন ইন" },
   "nav.start_order": { en: "Start an order", bn: "অর্ডার শুরু করুন" },
   "nav.all_categories": { en: "All categories", bn: "সব ক্যাটাগরি" },
@@ -638,6 +639,197 @@ export const dict: Dict = {
   "group_buy.admin.pricing_ladder": {
     en: "Pricing ladder",
     bn: "মূল্য সিঁড়ি",
+  },
+
+  // ── Group buy (Phase 39) — public buyer-facing ─────────────────
+  // The listing page + the public detail page + the buyer-side
+  // "my groups" list all consume these keys.
+
+  // Listing page (/group-buys)
+  "group_buy.public.title": {
+    en: "Group buys",
+    bn: "গ্রুপ বায়",
+  },
+  "group_buy.public.subtitle": {
+    en: "Pay-on-success bulk deals. Commit a quantity; when the group's target is met by the deadline, every member is charged at the final tiered price.",
+    bn: "পে-অন-সাকসেস বাল্ক ডিল। পরিমাণ কমিট করুন; ডেডলাইনের মধ্যে টার্গেট পূরণ হলে প্রতিটি সদস্যকে চূড়ান্ত টায়ার্ড মূল্যে চার্জ করা হয়।",
+  },
+  "group_buy.public.filter.all": { en: "All", bn: "সব" },
+  "group_buy.public.filter.sort.deadline": {
+    en: "Ending soonest",
+    bn: "শীঘ্রই শেষ হবে",
+  },
+  "group_buy.public.filter.sort.progress": {
+    en: "Most progress",
+    bn: "সর্বাধিক অগ্রগতি",
+  },
+  "group_buy.public.card.committed": {
+    en: "committed",
+    bn: "কমিটেড",
+  },
+  "group_buy.public.card.buyers": { en: "buyers", bn: "জন ক্রেতা" },
+  "group_buy.public.card.ends_in": { en: "Ends in", bn: "শেষ হবে" },
+  "group_buy.public.card.ends_passed": { en: "Ended", bn: "শেষ হয়েছে" },
+  "group_buy.public.card.unlocks_at": {
+    en: "{qty} more for",
+    bn: "{qty} আরও হলে",
+  },
+  "group_buy.public.empty": {
+    en: "No active group buys right now. Check back soon.",
+    bn: "এখন কোনো সক্রিয় গ্রুপ বায় নেই। শীঘ্রই আবার দেখুন।",
+  },
+
+  // Detail page (/group-buys/[id])
+  "group_buy.public.detail.eyebrow": {
+    en: "Group buy",
+    bn: "গ্রুপ বায়",
+  },
+  "group_buy.public.detail.progress_label": {
+    en: "Progress",
+    bn: "অগ্রগতি",
+  },
+  "group_buy.public.detail.buyers_label": {
+    en: "Buyers committed",
+    bn: "কমিটেড ক্রেতা",
+  },
+  "group_buy.public.detail.target_label": {
+    en: "Target quantity",
+    bn: "টার্গেট পরিমাণ",
+  },
+  "group_buy.public.detail.deadline_label": {
+    en: "Deadline",
+    bn: "ডেডলাইন",
+  },
+  "group_buy.public.detail.current_price": {
+    en: "Current price (everyone pays this when the group forms)",
+    bn: "বর্তমান মূল্য (গ্রুপ গঠন হলে সবাই এই মূল্যে পাবে)",
+  },
+  "group_buy.public.detail.next_tier_hint": {
+    en: "{qty} more pcs to unlock {price}/pc",
+    bn: "{price}/pc আনলক করতে আরও {qty} পিস",
+  },
+  "group_buy.public.detail.tiers_title": {
+    en: "Price tiers — everyone pays the lowest tier reached when the group forms",
+    bn: "মূল্য স্তর — গ্রুপ গঠন হলে সবাই সবচেয়ে কম পৌঁছানো স্তরে পাবে",
+  },
+  "group_buy.public.detail.tier_unlocked": { en: "Unlocked", bn: "আনলকড" },
+  "group_buy.public.detail.tier_next": { en: "Next", bn: "পরবর্তী" },
+  "group_buy.public.detail.min_per_buyer": {
+    en: "Minimum per buyer: {qty} pcs",
+    bn: "প্রতি ক্রেতা সর্বনিম্ন: {qty} পিস",
+  },
+  "group_buy.public.detail.qty_label": {
+    en: "Quantity to commit",
+    bn: "কমিট করার পরিমাণ",
+  },
+  "group_buy.public.detail.you_pay": {
+    en: "You'll commit {qty} pcs at {price}/pc = {total}",
+    bn: "আপনি {qty} পিস কমিট করবেন {price}/pc = {total}",
+  },
+  "group_buy.public.detail.join_cta": { en: "Join now", bn: "এখনই যোগ দিন" },
+  "group_buy.public.detail.signin_cta": {
+    en: "Sign in to join",
+    bn: "যোগ দিতে সাইন ইন করুন",
+  },
+  "group_buy.public.detail.cancel_cta": {
+    en: "Cancel my commitment",
+    bn: "আমার কমিটমেন্ট বাতিল",
+  },
+  "group_buy.public.detail.already_in": {
+    en: "You're in — {qty} pcs committed at {price}/pc",
+    bn: "আপনি আছেন — {qty} পিস {price}/pc এ কমিটেড",
+  },
+  "group_buy.public.detail.already_in_explainer": {
+    en: "You'll be charged when the group forms. You can cancel before the deadline.",
+    bn: "গ্রুপ গঠন হলে আপনাকে চার্জ করা হবে। ডেডলাইনের আগে বাতিল করতে পারবেন।",
+  },
+  "group_buy.public.detail.formed": {
+    en: "Group formed at {price}/pc — orders created.",
+    bn: "গ্রুপ গঠিত {price}/pc এ — অর্ডার তৈরি হয়েছে।",
+  },
+  "group_buy.public.detail.expired": {
+    en: "This group buy didn't reach its target. No charge happened.",
+    bn: "এই গ্রুপ বায় টার্গেট পূরণ করতে পারেনি। কোনো চার্জ হয়নি।",
+  },
+  "group_buy.public.detail.cancelled": {
+    en: "This group buy was cancelled. No charge happened.",
+    bn: "এই গ্রুপ বায় বাতিল করা হয়েছে। কোনো চার্জ হয়নি।",
+  },
+  "group_buy.public.detail.forming": {
+    en: "Group is forming — your order is being created.",
+    bn: "গ্রুপ গঠন হচ্ছে — আপনার অর্ডার তৈরি হচ্ছে।",
+  },
+  "group_buy.public.detail.view_product": {
+    en: "View product details",
+    bn: "পণ্যের বিস্তারিত",
+  },
+  "group_buy.public.detail.how_it_works": {
+    en: "How group buys work",
+    bn: "গ্রুপ বায় কীভাবে কাজ করে",
+  },
+  "group_buy.public.detail.how_it_works_body": {
+    en: "1) Commit a quantity at the current tier price. 2) If the group's target is reached by the deadline, every member is charged the same (lowest-tier-reached) price. 3) If the target isn't reached, no charge happens and your commitment is released.",
+    bn: "১) বর্তমান স্তরের মূল্যে পরিমাণ কমিট করুন। ২) ডেডলাইনের মধ্যে টার্গেট পূরণ হলে সবাই একই (সবচেয়ে কম-পৌঁছানো-স্তর) মূল্যে পাবে। ৩) টার্গেট পূরণ না হলে কোনো চার্জ হবে না এবং আপনার কমিটমেন্ট মুক্ত হবে।",
+  },
+  "group_buy.public.detail.min_not_met": {
+    en: "Minimum per buyer is {qty} pcs",
+    bn: "প্রতি ক্রেতা সর্বনিম্ন {qty} পিস",
+  },
+  "group_buy.public.detail.qty_step_hint": {
+    en: "Step: {step} pcs",
+    bn: "ধাপ: {step} পিস",
+  },
+
+  // Buyer-side "my groups" page (/buyer/group-buys)
+  "group_buy.my.title": {
+    en: "My group buys",
+    bn: "আমার গ্রুপ বায়",
+  },
+  "group_buy.my.subtitle": {
+    en: "Every group buy you've committed to, current status, and your locked-in price.",
+    bn: "আপনি যে সব গ্রুপ বায়-তে কমিট করেছেন, বর্তমান অবস্থা এবং আপনার লক করা মূল্য।",
+  },
+  "group_buy.my.empty": {
+    en: "You haven't joined any group buys yet.",
+    bn: "আপনি এখনও কোনো গ্রুপ বায়-তে যোগ দেননি।",
+  },
+  "group_buy.my.empty_cta": {
+    en: "Browse active group buys",
+    bn: "সক্রিয় গ্রুপ বায় দেখুন",
+  },
+  "group_buy.my.status_label": { en: "Status", bn: "অবস্থা" },
+  "group_buy.my.your_qty": {
+    en: "Your qty: {qty} pcs",
+    bn: "আপনার পরিমাণ: {qty} পিস",
+  },
+  "group_buy.my.your_price_locked": {
+    en: "Locked at: {price}/pc",
+    bn: "লক করা মূল্য: {price}/pc",
+  },
+  "group_buy.my.will_pay": {
+    en: "You'll pay at formation: {price}/pc",
+    bn: "গঠনের সময় আপনি দেবেন: {price}/pc",
+  },
+  "group_buy.my.price_dropped": {
+    en: "Price has dropped since you joined — you're locked at {price}/pc.",
+    bn: "আপনার যোগদানের পর থেকে মূল্য কমেছে — আপনি {price}/pc এ লক আছেন।",
+  },
+  "group_buy.my.action.view": { en: "View group", bn: "গ্রুপ দেখুন" },
+  "group_buy.my.action.pay_now": {
+    en: "Pay now — order #{orderId}",
+    bn: "এখনই পেমেন্ট — অর্ডার #{orderId}",
+  },
+  "group_buy.my.action.cancel": {
+    en: "Cancel my commitment",
+    bn: "আমার কমিটমেন্ট বাতিল",
+  },
+  "group_buy.my.action.failed_retry": {
+    en: "Order failed — contact support",
+    bn: "অর্ডার ব্যর্থ — সাপোর্টে যোগাযোগ",
+  },
+  "group_buy.my.progress_label": {
+    en: "Group progress",
+    bn: "গ্রুপের অগ্রগতি",
   },
 };
 

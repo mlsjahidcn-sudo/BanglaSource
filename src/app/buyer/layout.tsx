@@ -37,14 +37,44 @@ async function loadCounts(userId: string) {
         .eq("user_id", userId)
         .in("status", ["open", "quoted"]),
     ]);
+
+    // Phase 39: count this buyer's memberships whose parent
+    // group_buy is still open or forming (the two states
+    // where the buyer needs to track them). Two-step to
+    // avoid PostgREST embed-filter edge cases — the member
+    // count per user is bounded.
+    const { data: memberRows } = await supabase
+      .from("group_buy_members")
+      .select("group_buy_id")
+      .eq("user_id", userId);
+    let activeGroupBuys = 0;
+    if (memberRows && memberRows.length > 0) {
+      const groupIds = Array.from(
+        new Set(memberRows.map((m) => m.group_buy_id)),
+      );
+      const { count } = await supabase
+        .from("group_buys")
+        .select("id", { count: "exact", head: true })
+        .in("id", groupIds)
+        .in("status", ["open", "forming"]);
+      activeGroupBuys = count ?? 0;
+    }
+
     return {
       openQuotes: openQuotes.count ?? 0,
       rfqs: openRFQs.count ?? 0,
       addresses: (addresses as { count: number }).count ?? 0,
       watchlist: watchlist.count ?? 0,
+      activeGroupBuys,
     };
   } catch {
-    return { openQuotes: 0, rfqs: 0, addresses: 0, watchlist: 0 };
+    return {
+      openQuotes: 0,
+      rfqs: 0,
+      addresses: 0,
+      watchlist: 0,
+      activeGroupBuys: 0,
+    };
   }
 }
 
