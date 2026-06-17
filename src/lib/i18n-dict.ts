@@ -593,6 +593,116 @@ export const dict: Dict = {
   },
   "login.out": { en: "Sign out", bn: "সাইন আউট" },
 
+  // ── Login UX (Phase 46, 2026-06-18) ──────────────────────────────
+  // Split-pane marketing pane + tabbed signin/signup + password
+  // strength meter + forgot-password flow. All previous hardcoded
+  // English strings in _client.tsx are now properly localized.
+  "login.headline": {
+    en: "Wholesale direct from China, priced in BDT.",
+    bn: "সরাসরি চীন থেকে পাইকারি, বিডিটি মূল্যে।",
+  },
+  "login.subhead": {
+    en: "Hand-picked products, factory-direct pricing, all-in-one BDT unit price.",
+    bn: "বাছাই করা পণ্য, কারখানা-সরাসরি মূল্য, সব-একটি বিডিটি ইউনিট মূল্য।",
+  },
+  "login.bullet1": {
+    en: "Factory-direct pricing, no middlemen",
+    bn: "কারখানা-সরাসরি মূল্য, কোনো মধ্যস্থতাকারী নেই",
+  },
+  "login.bullet2": {
+    en: "All-in BDT — shipping + customs duty included",
+    bn: "সব বিডিটিতে — শিপিং + কাস্টমস শুল্ক অন্তর্ভুক্ত",
+  },
+  "login.bullet3": {
+    en: "Photo QC on every order, before ship",
+    bn: "প্রতিটি অর্ডারে ছবি QC, শিপের আগে",
+  },
+  "login.trust_footer": {
+    en: "🔒 Auth secured by Supabase",
+    bn: "🔒 Supabase দ্বারা সুরক্ষিত",
+  },
+  "login.signin_tab": { en: "Sign in", bn: "সাইন ইন" },
+  "login.signup_tab": { en: "Create account", bn: "অ্যাকাউন্ট তৈরি করুন" },
+  "login.signin_lede": {
+    en: "Welcome back. Sign in to view your orders, quotes, and watchlist.",
+    bn: "স্বাগতম। আপনার অর্ডার, কোট এবং ওয়াচলিস্ট দেখতে সাইন ইন করুন।",
+  },
+  "login.signup_lede": {
+    en: "Free account. No credit card. 30-second setup.",
+    bn: "বিনামূল্যে অ্যাকাউন্ট। কোনো ক্রেডিট কার্ড নেই। ৩০ সেকেন্ডে সেটআপ।",
+  },
+  "login.signin_cta": { en: "Sign in", bn: "সাইন ইন" },
+  "login.signin_cta_admin": { en: "Open admin →", bn: "অ্যাডমিন খুলুন →" },
+  "login.signin_cta_buyer": {
+    en: "Open buyer dashboard →",
+    bn: "ক্রেতা ড্যাশবোর্ড খুলুন →",
+  },
+  "login.signup_cta": { en: "Create account", bn: "অ্যাকাউন্ট তৈরি করুন" },
+  "login.password_label": { en: "Password", bn: "পাসওয়ার্ড" },
+  "login.password_ph": {
+    en: "At least 8 characters",
+    bn: "কমপক্ষে ৮টি অক্ষর",
+  },
+  "login.show_password": { en: "Show", bn: "দেখান" },
+  "login.hide_password": { en: "Hide", bn: "লুকান" },
+  "login.forgot_link": { en: "Forgot password?", bn: "পাসওয়ার্ড ভুলে গেছেন?" },
+  "login.forgot_heading": {
+    en: "Reset your password",
+    bn: "আপনার পাসওয়ার্ড রিসেট করুন",
+  },
+  "login.forgot_body": {
+    en: "Enter your email and we'll send a reset link.",
+    bn: "আপনার ইমেইল দিন এবং আমরা একটি রিসেট লিঙ্ক পাঠাব।",
+  },
+  "login.forgot_cta": { en: "Send reset link", bn: "রিসেট লিঙ্ক পাঠান" },
+  "login.forgot_sent": {
+    en: "If an account exists for {email}, you'll receive a reset link shortly.",
+    bn: "{email} এর জন্য একটি অ্যাকাউন্ট থাকলে, আপনি শীঘ্রই একটি রিসেট লিঙ্ক পাবেন।",
+  },
+  "login.forgot_back": { en: "← Back to sign in", bn: "← সাইন ইনে ফিরে যান" },
+  "login.signing_in": { en: "Signing in…", bn: "সাইন ইন হচ্ছে…" },
+  "login.creating_account": { en: "Creating account…", bn: "অ্যাকাউন্ট তৈরি হচ্ছে…" },
+  "login.sending": { en: "Sending…", bn: "পাঠানো হচ্ছে…" },
+  "login.check_email_heading": {
+    en: "Check your email",
+    bn: "আপনার ইমেইল চেক করুন",
+  },
+  "login.check_email_body": {
+    en: "We've sent a confirmation link to {email}. Click it to activate your account.",
+    bn: "আমরা {email} এ একটি নিশ্চিতকরণ লিঙ্ক পাঠিয়েছি। আপনার অ্যাকাউন্ট সক্রিয় করতে এটিতে ক্লিক করুন।",
+  },
+  "login.check_email_help": {
+    en: "Didn't get it? Check your spam folder, or wait a minute and try again.",
+    bn: "পাননি? স্প্যাম ফোল্ডার চেক করুন, অথবা এক মিনিট অপেক্ষা করে আবার চেষ্টা করুন।",
+  },
+  "login.password_strength_label": {
+    en: "Strength:",
+    bn: "শক্তি:",
+  },
+  "login.password_strength_weak": { en: "Weak", bn: "দুর্বল" },
+  "login.password_strength_ok": { en: "OK", bn: "ঠিক আছে" },
+  "login.password_strength_strong": { en: "Strong", bn: "শক্তিশালী" },
+  "login.password_tip_length": {
+    en: "8+ characters",
+    bn: "৮+ অক্ষর",
+  },
+  "login.password_tip_mix": {
+    en: "Letters + numbers",
+    bn: "অক্ষর + সংখ্যা",
+  },
+  "login.password_tip_symbol": {
+    en: "Add a symbol (!@#$)",
+    bn: "একটি চিহ্ন যোগ করুন (!@#$)",
+  },
+  "login.have_account": {
+    en: "Already have an account? Sign in",
+    bn: "ইতিমধ্যে অ্যাকাউন্ট আছে? সাইন ইন করুন",
+  },
+  "login.need_account": {
+    en: "Need an account? Create one",
+    bn: "অ্যাকাউন্ট দরকার? একটি তৈরি করুন",
+  },
+
   // ── Group buy (Phase 37) ──────────────────────────────────────────
   // The admin + public surfaces use a mix of these. Status labels
   // (open/forming/formed/expired/cancelled) are intentionally kept

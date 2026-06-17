@@ -450,3 +450,52 @@ h1, h2, h3, h4 {
   }
 }
 .status-pill.is-neutral { color: var(--fg-muted);    background: var(--slate-100);  }
+
+/* ==========================================================================
+   Login UX (Phase 46, 2026-06-18)
+   - Tab-pill active indicator animation
+   - Email field checkmark pop-in
+   - Password strength bar transition
+   - Focus ring consistent with brand cyan
+   ========================================================================== */
+
+/* Tab indicator (we use a shadow on the active button instead of a
+   separate ::after pseudo so it works with the slate-100 wrapper) */
+.auth-tab-active {
+  background: white;
+  color: var(--fg);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 0 0 1px rgba(15, 23, 42, 0.04);
+}
+
+/* Subtle scale-in for the email valid checkmark */
+@keyframes auth-check-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.auth-check-icon {
+  animation: auth-check-pop 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Strength bar fill animation — width transitions on state change */
+.auth-strength-bar {
+  transition: width 250ms cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 250ms ease;
+}
+
+/* Form focus ring — cyan-100 is the soft halo, cyan-600 is the border.
+   We redefine here because the default focus-visible ring is too thin
+   on the form inputs (h-11 + thin border). */
+.auth-input:focus-visible {
+  outline: none;
+  border-color: var(--cyan-600);
+  box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.15);
+}
+
+/* Tab button focus ring — visible on keyboard nav */
+.auth-tab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--cyan-100), 0 0 0 3px var(--cyan-600);
+}
