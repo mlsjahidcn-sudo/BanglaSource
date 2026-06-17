@@ -7,6 +7,91 @@ import { Button } from "@/components/ui/button";
 import { useLang } from "@/lib/i18n";
 import { getBrowserClient } from "@/lib/supabase/browser";
 
+/**
+ * Decide where to send a freshly-authenticated user. Rules:
+ *   1. If a `?redirect=` param was passed AND it points to a
+ *      non-portal route, respect it (preserves the existing
+ *      "you tried to view /buyer/orders → sent back to login
+ *      → after login, return to /buyer/orders" flow).
+ *   2. If the param points at /admin/* and the user isn't an
+ *      admin, fall through to the role-based default.
+ *   3. Otherwise: admins → /admin, buyers → /buyer.
+ *
+ * Reads `is_admin` from the profiles table via the anon client
+ * (RLS allows users to read their own profile row).
+ */
+async function resolvePostLoginRedirect(fallback: string): Promise<string> {
+  const isAdminPath = fallback.startsWith("/admin");
+  if (fallback && fallback !== "/account" && !isAdminPath) {
+    return fallback;
+  }
+  try {
+    const supabase = getBrowserClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return "/buyer";
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", user.id)
+      .maybeSingle();
+    return profile?.is_admin ? "/admin" : "/buyer";
+  } catch {
+    return "/buyer";
+  }
+}
+
+/**
+ * The "Go to account →" button on the already-signed-in screen.
+ * Looks up `is_admin` and routes the user to the right portal.
+ * Same logic as `resolvePostLoginRedirect` but rendered as JSX
+ * after the session is established.
+ */
+function SignedInRedirectButton({ email }: { email: string | null }) {
+  const router = useRouter();
+  const [label, setLabel] = useState("Go to account →");
+  const [href, setHref] = useState("/account");
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const supabase = getBrowserClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user || cancelled) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      if (profile?.is_admin) {
+        setLabel("Open admin →");
+        setHref("/admin");
+      } else {
+        setLabel("Open buyer dashboard →");
+        setHref("/buyer");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return (
+    <Link
+      href={href}
+      onClick={(e) => {
+        e.preventDefault();
+        router.push(href);
+      }}
+      className="h-10 inline-flex items-center justify-center text-[13px] font-medium rounded-md bg-cyan-600 text-white hover:bg-cyan-700"
+    >
+      {label}
+    </Link>
+  );
+}
+
 export function LoginClient() {
   const { t } = useLang();
   const router = useRouter();
@@ -49,7 +134,7 @@ export function LoginClient() {
         if (error) throw error;
         // If email confirmation is required, the session will be null.
         if (data.session) {
-          router.push(redirectTo);
+          router.push(await resolvePostLoginRedirect(redirectTo));
         } else {
           setInfo(
             "Check your email to confirm. We've sent a link to " +
@@ -63,7 +148,7 @@ export function LoginClient() {
           password,
         });
         if (error) throw error;
-        router.push(redirectTo);
+        router.push(await resolvePostLoginRedirect(redirectTo));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -94,12 +179,7 @@ export function LoginClient() {
             {t("login.guest_body")}
           </p>
           <div className="mt-6 grid grid-cols-1 gap-2">
-            <Link
-              href="/account"
-              className="h-10 inline-flex items-center justify-center text-[13px] font-medium rounded-md bg-cyan-600 text-white hover:bg-cyan-700"
-            >
-              Go to account →
-            </Link>
+            <SignedInRedirectButton email={signedInEmail} />
             <button
               onClick={signOut}
               className="h-10 inline-flex items-center justify-center text-[13px] font-medium rounded-md border border-border hover:bg-slate-50"
