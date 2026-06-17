@@ -88,23 +88,18 @@ export default async function HomePage() {
       <HomeClient
         syncStats={syncStats}
         heroProduct={carousels.popular[0] ?? null}
+        aiPicks={carousels.popular}
       />
-      {/* Phase 23: the two new home carousels. Both are
-          server-rendered (data fetched above) and rendered
-          with the same client component the PDP uses. The
-          carousels fall back silently to nothing when
-          the queries return empty (early days of the
+      {/* Phase 45: the bottom carousel is now JUST the
+          "Recently restocked" strip — the "Trending" carousel
+          moved up into HomeClient right after the hero (where
+          it gets more engagement). The "Just moved" strip
+          surfaces freshly-synced items that don't have view
+          velocity yet, so they sit below the fold as a
+          discovery channel. Falls back silently to nothing
+          when the query returns empty (early days of the
           site) — that's by design, not an error. */}
       <Container className="pb-20">
-        {carousels.popular.length > 0 && (
-          <ProductCarousel
-            eyebrow="Trending"
-            title="Popular this week"
-            items={carousels.popular}
-            hrefAll="/search?sort=popularity"
-            hrefAllLabel="See all popular →"
-          />
-        )}
         {carousels.recent.length > 0 && (
           <ProductCarousel
             eyebrow="Just moved"

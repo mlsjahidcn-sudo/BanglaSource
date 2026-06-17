@@ -41,6 +41,20 @@ export const dict: Dict = {
   // ── Home: left rail + strip layout ───────────────────────────────
   "home.rail.title": { en: "Shop by category", bn: "ক্যাটাগরি" },
   "home.rail.all": { en: "All categories", bn: "সব ক্যাটাগরি" },
+
+  // ── Home: AI Picks (Phase 45, 2026-06-18) ─────────────────────────
+  // Section sits RIGHT after the hero. Pulled from `popularByViews`
+  // (real 7-day page-view signal), server-rendered. The "✦ AI" sparkle
+  // is a deliberate UX choice — the underlying ranker is a deterministic
+  // SQL scoring function (popularity × recency × rating), but framing it
+  // as "AI" matches user mental models and lifts CTR. Don't swap this
+  // for a real LLM ranker without checking budget + latency budget.
+  "home.ai_picks.eyebrow": { en: "✦ AI picks", bn: "✦ এআই পিক" },
+  "home.ai_picks.title": {
+    en: "Recommended for you",
+    bn: "আপনার জন্য সুপারিশ",
+  },
+  "home.ai_picks.see_all": { en: "See all popular →", bn: "সব জনপ্রিয় দেখুন →" },
   "home.strip.see_all": { en: "See all", bn: "সব দেখুন" },
   "home.strip.bulk_deal": {
     en: "Bulk deal",

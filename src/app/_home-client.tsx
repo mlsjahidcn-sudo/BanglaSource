@@ -9,7 +9,11 @@ import { useCatalog, type CatalogProduct } from "@/lib/use-catalog";
 import { fmtCny, fmtBdt, FX_CNY_BDT, landedCost } from "@/lib/pricing";
 import { categoryList, categories, type CategoryKey } from "@/lib/categories";
 import { ForYou } from "@/components/for-you";
-import { RecentlyViewed } from "@/components/recently-viewed";
+import { ProductCarousel } from "@/components/product-carousel";
+// NOTE (Phase 45, 2026-06-18): the RecentlyViewed component is still
+// used on /for-you/page.tsx but is no longer rendered on the home page.
+// The empty RecentlyViewed strip was replaced by an AI Picks carousel
+// (server-rendered, server-data fed from popularByViews(7, 12)).
 import { NewsletterSignup } from "@/components/newsletter-signup";
 import { TrustBar } from "@/components/trust-bar";
 import { ValueProps } from "@/components/value-props";
@@ -19,11 +23,23 @@ import type { PopularProduct } from "@/lib/popular";
 export function HomeClient({
   syncStats,
   heroProduct,
+  aiPicks,
 }: {
   syncStats: {
     activeCount: number;
     lastUpdateIso: string | null;
   };
+  /**
+   * Server-rendered trending picks (popularByViews(7, 12)).
+   * Phase 45 (2026-06-18): the section right after the hero
+   * is now an "AI Picks · Recommended for you" carousel using
+   * this data. Previously this slot was the empty `RecentlyViewed`
+   * strip (which silently hid for anon users + buyers without
+   * page_views history, so it almost always appeared empty on
+   * first load). Trending-by-views always has data so it always
+   * shows.
+   */
+  aiPicks: PopularProduct[];
   heroProduct: PopularProduct | null;
 }) {
   const { t, lang } = useLang();
@@ -91,11 +107,25 @@ export function HomeClient({
         </Container>
       </section>
 
-      {/* ────────────────────  RECENTLY VIEWED  ──────────────────── */}
-      {loaded && (
+      {/* ────────────────────  AI PICKS (after hero)  ──────────────────── */}
+      {/* Phase 45 (2026-06-18): replaced the empty RecentlyViewed
+          strip with this server-rendered trending carousel. The
+          data comes from `popularByViews(7, 12)` (passed in as
+          `aiPicks` from page.tsx). Always renders — no `loaded`
+          gate, no anon-empty fallthrough. The "✦ AI" eyebrow is a
+          deliberate UX choice: the ranker is deterministic SQL
+          (popularity × recency × rating), but the AI framing
+          matches user mental models and lifts CTR. */}
+      {aiPicks.length > 0 && (
         <section className="bg-bg">
-          <Container className="py-8">
-            <RecentlyViewed limit={8} />
+          <Container className="py-10">
+            <ProductCarousel
+              eyebrow={t("home.ai_picks.eyebrow")}
+              title={t("home.ai_picks.title")}
+              items={aiPicks}
+              hrefAll="/search?sort=popularity"
+              hrefAllLabel={t("home.ai_picks.see_all")}
+            />
           </Container>
         </section>
       )}
