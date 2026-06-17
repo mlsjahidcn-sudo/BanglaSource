@@ -112,39 +112,41 @@ route automatically per `vercel.json`:
 | `/api/cron/group-buys/expire` | every 5 min    | 40 | Expire past-deadline open groups |
 
 **Railway / self-hosted**: Vercel cron jobs don't run on Railway
-(or any other host). You need an external scheduler — the
-cheapest reliable option is a free cron on
-[GitHub Actions](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onschedule),
-[cron-job.org](https://cron-job.org), or
-[EasyCron](https://www.easycron.com). Each fires a `curl -X POST`
-to the route with the `-H "x-cron-secret: $CRON_SECRET"` header.
+(or any other host). You need an external scheduler. The
+cheapest reliable option is **GitHub Actions scheduled workflows**
+on this same repo (no extra account needed) — three workflow
+files are pre-shipped in `.github/workflows/`:
 
-Example GitHub Actions workflow (`.github/workflows/cron.yml`):
+| File | Schedule | Endpoint |
+|------|----------|----------|
+| `cron-1min.yml`   | every minute     | `/api/cron/group-buys/form` |
+| `cron-5min.yml`   | every 5 minutes  | `/api/cron/group-buys/expire` |
+| `cron-daily.yml`  | 03:00, 04:30, 05:00 UTC | `/api/cron/sync-1688`, `/api/cron/price-alerts`, `/api/cron/discover-1688` |
 
-```yaml
-name: Cron
-on:
-  schedule:
-    - cron: "* * * * *"     # every minute (group_buys/form)
-    - cron: "*/5 * * * *"   # every 5 minutes (group_buys/expire)
-jobs:
-  ping:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Group buy form
-        if: "!contains(github.event.schedule, '*/5')"
-        run: |
-          curl -fsS -X POST \
-            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
-            https://banglasource.com/api/cron/group-buys/form
-      - name: Group buy expire
-        if: "contains(github.event.schedule, '*/5')"
-        run: |
-          curl -fsS -X POST \
-            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
-            https://banglasource.com/api/cron/group-buys/expire
-```
+Activate them:
+
+1. Set **two repository secrets** under
+   GitHub → Settings → Secrets and variables → Actions:
+   - `CRON_SECRET` — must match `CRON_SECRET` on the BanglaSource
+     deployment (default `bnG_x9Kp7vR3wQzL2mY8sN4jH6tD5fE1aC0bVg`)
+   - `NEXT_PUBLIC_SITE_URL` — production URL, e.g.
+     `https://banglasource.up.railway.app`
+2. Ensure Actions are enabled on the repo
+   (Settings → Actions → General → Allow all actions +
+   all required permissions — read-only is fine)
+3. Verify: GitHub → Actions tab → click `Cron (1-min)` →
+   Run workflow (manual trigger). Watch the run log for
+   `Ping /api/cron/group-buys/form` exit code 0.
 
 Each route is idempotent and rate-limited at 30/min/IP, so
-duplicate pings (e.g. from a misbehaving scheduler + Vercel
-cron overlap during a deploy) won't cause double-orders.
+duplicate pings from a misbehaving scheduler (or a brief
+Vercel+GitHub overlap if you ever dual-host) won't cause
+double-orders. The 1688 routes no-op cleanly if `APIFY_TOKEN`
+is unset (they log + return 200), so leaving them wired is
+safe even before you set up Apify.
+
+Alternatives to GitHub Actions:
+[cron-job.org](https://cron-job.org) (free, no GitHub dep) and
+[EasyCron](https://www.easycron.com) work identically —
+both fire `curl -fsS -X POST -H "x-cron-secret: $CRON_SECRET"
+"$NEXT_PUBLIC_SITE_URL/api/cron/<route>"`.

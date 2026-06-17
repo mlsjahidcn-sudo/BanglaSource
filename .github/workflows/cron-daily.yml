@@ -1,0 +1,42 @@
+# Daily cron — 1688 sync, price alerts, 1688 discovery.
+# Public repos can run scheduled workflows at any minute.
+#
+# Setup: see .github/workflows/cron-1min.yml.
+#
+# Note: github.event.schedule exposes the matched cron string,
+# so each job's `if:` picks exactly one route per schedule fire.
+# 1688 routes are no-ops if APIFY_TOKEN is unset on the server
+# (they log and return 200), so leaving them wired is safe.
+name: Cron (daily)
+on:
+  schedule:
+    - cron: "0 3 * * *"   # 03:00 UTC — sync 1688 prices + stock
+    - cron: "30 4 * * *"  # 04:30 UTC — detect ≥15% price moves
+    - cron: "0 5 * * *"   # 05:00 UTC — discover new 1688 products
+  workflow_dispatch: # manual trigger for testing
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping /api/cron/sync-1688 (03:00 UTC)
+        if: github.event.schedule == '0 3 * * *'
+        run: |
+          curl -fsS --retry 3 --retry-delay 5 \
+            -X POST \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.NEXT_PUBLIC_SITE_URL }}/api/cron/sync-1688"
+      - name: Ping /api/cron/price-alerts (04:30 UTC)
+        if: github.event.schedule == '30 4 * * *'
+        run: |
+          curl -fsS --retry 3 --retry-delay 5 \
+            -X POST \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.NEXT_PUBLIC_SITE_URL }}/api/cron/price-alerts"
+      - name: Ping /api/cron/discover-1688 (05:00 UTC)
+        if: github.event.schedule == '0 5 * * *'
+        run: |
+          curl -fsS --retry 3 --retry-delay 5 \
+            -X POST \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.NEXT_PUBLIC_SITE_URL }}/api/cron/discover-1688"

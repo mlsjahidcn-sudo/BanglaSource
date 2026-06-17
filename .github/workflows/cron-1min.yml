@@ -1,0 +1,33 @@
+# Every-minute cron — group_buys/form.
+# Public repos can run scheduled workflows every minute on GitHub.
+# Idempotent + rate-limited at the API route (30/min/IP),
+# so duplicate pings from a misbehaving scheduler don't cause
+# double-orders.
+#
+# Setup:
+#   1. Add these repository secrets:
+#        CRON_SECRET          — must match $CRON_SECRET on the
+#                                BanglaSource deployment
+#        NEXT_PUBLIC_SITE_URL — production URL, e.g.
+#                                https://banglasource.up.railway.app
+#   2. Enable GitHub Actions on this repo (Settings → Actions
+#      → Allow all actions). Default branch: main.
+#   3. Disable the equivalent vercel.json entries if you ever
+#      dual-host (Vercel + Railway) — both schedulers would
+#      double-fire.
+name: Cron (1-min)
+on:
+  schedule:
+    - cron: "* * * * *"
+  workflow_dispatch: # manual trigger for testing
+jobs:
+  group-buys-form:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping /api/cron/group-buys/form
+        run: |
+          curl -fsS --retry 3 --retry-delay 5 \
+            -X POST \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.NEXT_PUBLIC_SITE_URL }}/api/cron/group-buys/form"
