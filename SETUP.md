@@ -91,3 +91,60 @@ The webhook fires the moment a new user signs up.
 All 6 are in `src/lib/email.ts`. All 6 return a non-throwing
 `EmailResult` envelope. All 6 log to stdout if `RESEND_API_KEY`
 is unset or `NODE_ENV !== "production"`.
+
+Phase 38/40 added 4 more helpers — see `group_buy.*` keys in
+`src/lib/i18n-dict.ts` for the buyer-facing copy that drives
+each template (`group_buy_joined`, `group_buy_membership_cancelled`,
+`group_buy_formed`, `group_buy_failed`, `group_buy_expired`).
+
+## Cron jobs (Phases 8, 9, 27, 40)
+
+All cron routes gate on the `x-cron-secret` header matching
+`process.env.CRON_SECRET`. On Vercel, the scheduler hits each
+route automatically per `vercel.json`:
+
+| Path | Schedule | Phase | Purpose |
+|------|----------|-------|---------|
+| `/api/cron/sync-1688`     | daily 03:00 UTC | 9  | Apify 1688 price + stock refresh |
+| `/api/cron/discover-1688` | daily 05:00 UTC | 9  | New 1688 product discovery |
+| `/api/cron/price-alerts`  | daily 04:30 UTC | 8  | Detect ≥15% price moves, fan out |
+| `/api/cron/group-buys/form`   | every minute   | 40 | Form group_buys at target qty |
+| `/api/cron/group-buys/expire` | every 5 min    | 40 | Expire past-deadline open groups |
+
+**Railway / self-hosted**: Vercel cron jobs don't run on Railway
+(or any other host). You need an external scheduler — the
+cheapest reliable option is a free cron on
+[GitHub Actions](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onschedule),
+[cron-job.org](https://cron-job.org), or
+[EasyCron](https://www.easycron.com). Each fires a `curl -X POST`
+to the route with the `-H "x-cron-secret: $CRON_SECRET"` header.
+
+Example GitHub Actions workflow (`.github/workflows/cron.yml`):
+
+```yaml
+name: Cron
+on:
+  schedule:
+    - cron: "* * * * *"     # every minute (group_buys/form)
+    - cron: "*/5 * * * *"   # every 5 minutes (group_buys/expire)
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Group buy form
+        if: "!contains(github.event.schedule, '*/5')"
+        run: |
+          curl -fsS -X POST \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            https://banglasource.com/api/cron/group-buys/form
+      - name: Group buy expire
+        if: "contains(github.event.schedule, '*/5')"
+        run: |
+          curl -fsS -X POST \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            https://banglasource.com/api/cron/group-buys/expire
+```
+
+Each route is idempotent and rate-limited at 30/min/IP, so
+duplicate pings (e.g. from a misbehaving scheduler + Vercel
+cron overlap during a deploy) won't cause double-orders.

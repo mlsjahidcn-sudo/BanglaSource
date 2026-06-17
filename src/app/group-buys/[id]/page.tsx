@@ -270,14 +270,27 @@ export default async function GroupBuyDetailPage({
                   {progressPct}%
                 </span>
               </div>
-              <div className="h-2 w-full bg-slate-100 rounded overflow-hidden mt-1.5">
+              <div
+                className={`h-2 w-full bg-slate-100 rounded overflow-hidden mt-1.5 ${
+                  detail.status === "forming" ? "gb-forming-bar" : ""
+                }`}
+              >
                 <div
                   className={`h-full transition-all ${
-                    progressPct >= 100 ? "bg-emerald-500" : "bg-cyan-500"
+                    progressPct >= 100
+                      ? "bg-emerald-500"
+                      : detail.status === "forming"
+                        ? "bg-violet-500"
+                        : "bg-cyan-500"
                   }`}
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
+              {detail.status === "forming" && (
+                <p className="text-[11px] text-violet-700 mt-1">
+                  {dict["group_buy.public.detail.forming"].en}
+                </p>
+              )}
               <p className="text-[12px] text-fg-subtle mt-1.5">
                 {detail.buyers_count}{" "}
                 {dict["group_buy.public.card.buyers"].en}

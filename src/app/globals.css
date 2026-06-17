@@ -417,4 +417,36 @@ h1, h2, h3, h4 {
 .status-pill.is-warning { color: var(--amber-700);   background: var(--amber-50);   }
 .status-pill.is-danger  { color: var(--red-700);     background: var(--red-50);     }
 .status-pill.is-info    { color: var(--violet-700);  background: var(--violet-50);  }
+
+/* Phase 42 — animated progress bar.
+   Used on the public Group Buy detail page while status='forming'.
+   Subtle right-to-left slide conveys "still moving" without
+   being distracting. Respects prefers-reduced-motion. */
+@keyframes gb-forming-slide {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+.gb-forming-bar {
+  position: relative;
+  overflow: hidden;
+}
+.gb-forming-bar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 30%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  animation: gb-forming-slide 1.6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gb-forming-bar::after {
+    animation: none;
+  }
+}
 .status-pill.is-neutral { color: var(--fg-muted);    background: var(--slate-100);  }

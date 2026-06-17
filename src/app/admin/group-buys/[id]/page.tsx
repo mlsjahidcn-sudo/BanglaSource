@@ -233,9 +233,13 @@ export default async function GroupBuyDetailPage({
                 }
                 mono
               />
-              <div className="h-1.5 w-full bg-slate-100 rounded overflow-hidden -mt-0.5 mb-1">
+              <div
+                className={`h-1.5 w-full bg-slate-100 rounded overflow-hidden -mt-0.5 mb-1 ${
+                  status === "forming" ? "gb-forming-bar" : ""
+                }`}
+              >
                 <div
-                  className={`h-full ${pct >= 100 ? "bg-emerald-500" : "bg-cyan-500"} transition-all`}
+                  className={`h-full ${pct >= 100 ? "bg-emerald-500" : status === "forming" ? "bg-violet-500" : "bg-cyan-500"} transition-all`}
                   style={{ width: `${pct}%` }}
                 />
               </div>
