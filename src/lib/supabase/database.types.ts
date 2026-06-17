@@ -602,6 +602,10 @@ export type Database = {
           unit_bdt_at_commit: number;
           payment_state: string;
           order_id: number | null;
+          // Phase 41: per-member shipping preference. Default 'air'.
+          // Phase 40 hard-coded air; Phase 41 lets the buyer pick
+          // before the cron fires via PUT /api/buyer/group-buys/[id]/shipping-mode.
+          shipping_mode: string;
           created_at: Timestamp;
           charged_at: Timestamp | null;
         };

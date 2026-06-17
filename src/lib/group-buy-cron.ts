@@ -37,6 +37,161 @@ import {
 type SupabaseLike = ReturnType<typeof getServiceRoleClient>;
 
 /**
+ * Create an order for a single member. Used by both the formation
+ * cron (runFormationPass) and the admin retry endpoint
+ * (POST /api/admin/group-buys/[id]/members/[memberId]/retry).
+ *
+ * Returns the new order_id on success, or an error message.
+ * On any failure: marks payment_state='failed' and emails the
+ * buyer with the reason.
+ */
+export async function createOrderForMember(
+  sb: SupabaseLike,
+  args: {
+    group: {
+      id: string;
+      product_id: number;
+      final_unit_bdt: number;
+    };
+    member: {
+      id: string;
+      user_id: string;
+      qty: number;
+      unit_bdt_at_commit: number;
+      shipping_mode: string;
+    };
+    product: {
+      title_en: string;
+      images: string[] | null;
+      category: string;
+      weight_kg: number;
+      volume_cbm: number;
+      customs_duty_per_kg: number;
+    };
+  },
+): Promise<{ ok: true; orderId: number } | { ok: false; reason: string }> {
+  const chargedUnitBdt = Math.min(
+    args.member.unit_bdt_at_commit,
+    args.group.final_unit_bdt,
+  );
+  const cost = groupBuyOrderCost({
+    unit_bdt: chargedUnitBdt,
+    qty: args.member.qty,
+    weight_per_piece_kg: args.product.weight_kg,
+    volume_per_piece_cbm: args.product.volume_cbm,
+    customs_duty_per_kg: args.product.customs_duty_per_kg,
+  });
+
+  const { data: addr } = await sb
+    .from("addresses")
+    .select("id, label, full_name, phone, country, district, address_line")
+    .eq("user_id", args.member.user_id)
+    .eq("is_default", true)
+    .maybeSingle();
+
+  if (!addr) {
+    await sb
+      .from("group_buy_members")
+      .update({ payment_state: "failed" })
+      .eq("id", args.member.id);
+    void import("@/lib/email")
+      .then(({ notifyGroupBuyFailed }) =>
+        notifyGroupBuyFailed(args.member.id, args.group.id, "no_default_address").catch(
+          () => undefined,
+        ),
+      )
+      .catch(() => undefined);
+    return { ok: false, reason: "no_default_address" };
+  }
+
+  const addressSnapshot = {
+    label: addr.label,
+    full_name: addr.full_name,
+    phone: addr.phone,
+    country: addr.country,
+    district: addr.district,
+    address_line: addr.address_line,
+  };
+
+  const rpcArgs = {
+    p_user_id: args.member.user_id,
+    p_shipping_mode: (args.member.shipping_mode as "air" | "sea" | "express") ?? "air",
+    p_payment_method: "bkash",
+    p_product_subtotal_bdt: cost.product_subtotal_bdt,
+    p_shipping_bdt: cost.shipping_bdt,
+    p_duty_bdt: cost.duty_bdt,
+    p_vat_bdt: cost.vat_bdt,
+    p_ait_bdt: cost.ait_bdt,
+    p_total_bdt: cost.total_bdt,
+    p_deposit_bdt: cost.deposit_bdt,
+    p_balance_bdt: cost.balance_bdt,
+    p_address_id: addr.id,
+    p_address_snapshot: addressSnapshot,
+    p_buyer_note: `Group buy ${args.group.id}`,
+    p_items: [
+      {
+        product_id: args.group.product_id,
+        qty: args.member.qty,
+        title_snapshot: args.product.title_en,
+        image_snapshot: args.product.images?.[0] ?? null,
+        unit_cny_fen: 0,
+        fx_cny_to_bdt: 16.85,
+        markup_pct: 0,
+        weight_kg: args.product.weight_kg,
+        volume_cbm: args.product.volume_cbm,
+        category: args.product.category,
+        customs_duty_per_kg: args.product.customs_duty_per_kg,
+        unit_bdt: chargedUnitBdt,
+        line_bdt: cost.product_subtotal_bdt,
+        line_duty_bdt: cost.duty_bdt,
+        position: 0,
+      },
+    ],
+  };
+
+  const { data: orderId, error: rpcErr } = await sb.rpc(
+    "create_order_with_items",
+    rpcArgs as never,
+  );
+  if (rpcErr || !orderId) {
+    await sb
+      .from("group_buy_members")
+      .update({ payment_state: "failed" })
+      .eq("id", args.member.id);
+    void import("@/lib/email")
+      .then(({ notifyGroupBuyFailed }) =>
+        notifyGroupBuyFailed(
+          args.member.id,
+          args.group.id,
+          `order_creation_failed: ${rpcErr?.message ?? "no_order_id"}`,
+        ).catch(() => undefined),
+      )
+      .catch(() => undefined);
+    return {
+      ok: false,
+      reason: `order_creation_failed: ${rpcErr?.message ?? "no_order_id"}`,
+    };
+  }
+
+  await sb
+    .from("group_buy_members")
+    .update({
+      payment_state: "charged",
+      order_id: orderId,
+      charged_at: new Date().toISOString(),
+    })
+    .eq("id", args.member.id);
+
+  void import("@/lib/email")
+    .then(({ notifyGroupBuyFormed }) =>
+      notifyGroupBuyFormed(args.member.id).catch(() => undefined),
+    )
+    .catch(() => undefined);
+
+  return { ok: true, orderId };
+}
+
+/**
  * The single "scan and form" pass the cron invokes every minute.
  * Iterates all `status='open'` group buys whose SUM(qty) has hit
  * `target_qty` and locks each one with an atomic UPDATE. For each
@@ -131,9 +286,10 @@ export async function runFormationPass(sb: SupabaseLike): Promise<{
 
     // We now own this group. Re-read SUM one more time in case a
     // buyer cancelled or joined between the scan and the claim.
+    // Phase 41: include shipping_mode (per-member air/sea/express).
     const { data: freshMembers } = await sb
       .from("group_buy_members")
-      .select("id, user_id, qty, unit_bdt_at_commit, payment_state")
+      .select("id, user_id, qty, unit_bdt_at_commit, payment_state, shipping_mode")
       .eq("group_buy_id", g.id);
     const freshTotal = (freshMembers ?? []).reduce(
       (s, m) => s + (m.qty ?? 0),
@@ -174,132 +330,22 @@ export async function runFormationPass(sb: SupabaseLike): Promise<{
 
     let memberErrors = 0;
     for (const m of freshMembers ?? []) {
-      const chargedUnitBdt = Math.min(m.unit_bdt_at_commit, finalUnitBdt);
-      const cost = groupBuyOrderCost({
-        unit_bdt: chargedUnitBdt,
-        qty: m.qty,
-        weight_per_piece_kg: product.weight_kg,
-        volume_per_piece_cbm: product.volume_cbm,
-        customs_duty_per_kg: product.customs_duty_per_kg,
+      const result = await createOrderForMember(sb, {
+        group: {
+          id: g.id,
+          product_id: g.product_id,
+          final_unit_bdt: finalUnitBdt,
+        },
+        member: {
+          id: m.id,
+          user_id: m.user_id,
+          qty: m.qty,
+          unit_bdt_at_commit: m.unit_bdt_at_commit,
+          shipping_mode: (m.shipping_mode as string) ?? "air",
+        },
+        product,
       });
-
-      // Get the buyer's default address. If none, mark this member
-      // as failed and email them; the rest of the group proceeds.
-      const { data: addr } = await sb
-        .from("addresses")
-        .select(
-          "id, label, full_name, phone, country, district, address_line",
-        )
-        .eq("user_id", m.user_id)
-        .eq("is_default", true)
-        .maybeSingle();
-
-      if (!addr) {
-        await sb
-          .from("group_buy_members")
-          .update({ payment_state: "failed" })
-          .eq("id", m.id);
-        void import("@/lib/email")
-          .then(({ notifyGroupBuyFailed }) =>
-            notifyGroupBuyFailed(m.id, g.id, "no_default_address").catch(
-              () => undefined,
-            ),
-          )
-          .catch(() => undefined);
-        memberErrors += 1;
-        continue;
-      }
-
-      // Build the address snapshot from the live row (the orders
-      // table stores a denormalized copy so the order is self-
-      // contained even if the buyer later edits/deletes the
-      // address).
-      const addressSnapshot = {
-        label: addr.label,
-        full_name: addr.full_name,
-        phone: addr.phone,
-        country: addr.country,
-        district: addr.district,
-        address_line: addr.address_line,
-      };
-
-      // Create the order via the existing RPC (same one the
-      // /api/orders POST route uses). Single-product order.
-      const rpcArgs = {
-        p_user_id: m.user_id,
-        p_shipping_mode: "air", // Phase 40 default; future per-member switch
-        p_payment_method: "bkash",
-        p_product_subtotal_bdt: cost.product_subtotal_bdt,
-        p_shipping_bdt: cost.shipping_bdt,
-        p_duty_bdt: cost.duty_bdt,
-        p_vat_bdt: cost.vat_bdt,
-        p_ait_bdt: cost.ait_bdt,
-        p_total_bdt: cost.total_bdt,
-        p_deposit_bdt: cost.deposit_bdt,
-        p_balance_bdt: cost.balance_bdt,
-        p_address_id: addr.id,
-        p_address_snapshot: addressSnapshot,
-        p_buyer_note: `Group buy ${g.id}`,
-        p_items: [
-          {
-            product_id: g.product_id,
-            qty: m.qty,
-            title_snapshot: product.title_en,
-            image_snapshot: product.images?.[0] ?? null,
-            // CNY fields are zero in group-buy context — the unit_bdt
-            // is already the all-in product price.
-            unit_cny_fen: 0,
-            fx_cny_to_bdt: 16.85,
-            markup_pct: 0,
-            weight_kg: product.weight_kg,
-            volume_cbm: product.volume_cbm,
-            category: product.category,
-            customs_duty_per_kg: product.customs_duty_per_kg,
-            unit_bdt: chargedUnitBdt,
-            line_bdt: cost.product_subtotal_bdt,
-            line_duty_bdt: cost.duty_bdt,
-            position: 0,
-          },
-        ],
-      };
-      const { data: orderId, error: rpcErr } = await sb.rpc(
-        "create_order_with_items",
-        rpcArgs as never,
-      );
-      if (rpcErr || !orderId) {
-        await sb
-          .from("group_buy_members")
-          .update({ payment_state: "failed" })
-          .eq("id", m.id);
-        void import("@/lib/email")
-          .then(({ notifyGroupBuyFailed }) =>
-            notifyGroupBuyFailed(
-              m.id,
-              g.id,
-              `order_creation_failed: ${rpcErr?.message ?? "no_order_id"}`,
-            ).catch(() => undefined),
-          )
-          .catch(() => undefined);
-        memberErrors += 1;
-        continue;
-      }
-
-      // Mark member charged + link to the order.
-      await sb
-        .from("group_buy_members")
-        .update({
-          payment_state: "charged",
-          order_id: orderId,
-          charged_at: new Date().toISOString(),
-        })
-        .eq("id", m.id);
-
-      // Fan out "group formed" email (fire-and-forget).
-      void import("@/lib/email")
-        .then(({ notifyGroupBuyFormed }) =>
-          notifyGroupBuyFormed(m.id).catch(() => undefined),
-        )
-        .catch(() => undefined);
+      if (!result.ok) memberErrors += 1;
     }
 
     // Flip the group to 'formed' with the frozen final_unit_bdt.

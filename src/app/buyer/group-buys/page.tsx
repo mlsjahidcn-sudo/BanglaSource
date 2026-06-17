@@ -23,6 +23,7 @@ import {
 } from "@/lib/pricing";
 import { dict } from "@/lib/i18n-dict";
 import { CancelMembershipButton } from "./_cancel-button";
+import { ShippingSelector } from "./_shipping-selector";
 import { CATEGORIES } from "@/lib/catalog-categories";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +31,7 @@ export const revalidate = 0;
 
 type GBStatus = "open" | "forming" | "formed" | "expired" | "cancelled";
 type PayState = "pending" | "charged" | "failed" | "refunded";
+type ShippingMode = "air" | "sea" | "express";
 
 const GB_STATUS_LABEL: Record<GBStatus, string> = {
   open: "Open",
@@ -90,7 +92,7 @@ export default async function MyGroupBuysPage() {
   const { data: memberships, error: memErr } = await sb
     .from("group_buy_members")
     .select(
-      "id, group_buy_id, qty, unit_bdt_at_commit, payment_state, order_id, created_at, charged_at",
+      "id, group_buy_id, qty, unit_bdt_at_commit, payment_state, order_id, shipping_mode, created_at, charged_at",
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
@@ -340,6 +342,13 @@ export default async function MyGroupBuysPage() {
                   >
                     {dict["group_buy.my.action.view"].en}
                   </Link>
+                  {/* Phase 41: shipping mode selector — editable
+                      while status is 'open' or 'forming' */}
+                  <ShippingSelector
+                    groupBuyId={g.id}
+                    initialMode={(m.shipping_mode as "air" | "sea" | "express") ?? "air"}
+                    locked={status !== "open" && status !== "forming"}
+                  />
                   {status === "open" && pay === "pending" && (
                     <CancelMembershipButton
                       groupBuyId={g.id}

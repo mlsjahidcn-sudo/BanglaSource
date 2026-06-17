@@ -26,6 +26,7 @@ import {
   type GroupBuyPriceTier,
 } from "@/lib/pricing";
 import { CancelGroupBuyButton } from "./_cancel-button";
+import { RetryMemberButton, RemoveMemberButton } from "./_member-actions";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -448,6 +449,21 @@ export default async function GroupBuyDetailPage({
                             #{m.order_id}
                           </a>
                         )}
+                        {/* Phase 41: per-member admin actions */}
+                        {status === "formed" && m.payment_state === "failed" && (
+                          <span className="ml-2">
+                            <RetryMemberButton
+                              groupBuyId={id}
+                              memberId={m.id}
+                            />
+                          </span>
+                        )}
+                        <span className="ml-2">
+                          <RemoveMemberButton
+                            groupBuyId={id}
+                            memberId={m.id}
+                          />
+                        </span>
                       </td>
                       <td>
                         <div className="text-[12px]">
