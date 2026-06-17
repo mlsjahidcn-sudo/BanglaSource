@@ -957,3 +957,93 @@ export function groupBuyLineTotalBdt(
 ): number {
   return unitBdt * qty;
 }
+
+/**
+ * Compute the per-order landed cost for a group buy member. Mirrors
+ * `landedCost` but skips the FOB CNY→BDT math — the `unit_bdt` here
+ * is the BDT unit price the buyer agreed to (final tier-reached
+ * price, not lower than `unit_bdt_at_commit`).
+ *
+ * Treats `unit_bdt` as the FOB-equivalent (no separate markup line)
+ * and applies the SAME Bangladesh rules:
+ *   - shipping: tiered rate by chargeable weight + min ladder
+ *   - duty: customs_duty_per_kg × weight (specific, ৳/kg)
+ *   - VAT: (product_subtotal + shipping + duty) × 0.15
+ *   - AIT: (product_subtotal + shipping) × 0.05
+ *
+ * For Phase 40 the shipping mode is hard-coded to "air" — see
+ * `/api/cron/group-buys/form/route.ts`. A future enhancement could
+ * let members pick `sea` / `express` per their preference.
+ *
+ * Returns the same breakdown shape that `create_order_with_items`
+ * expects on the orders/order_items rows. `totalBdt` includes
+ * everything (product + shipping + duty + VAT + AIT). `depositBdt`
+ * is set to `totalBdt` (full-prepayment model — same as the rest
+ * of the app).
+ */
+export function groupBuyOrderCost(input: {
+  unit_bdt: number;
+  qty: number;
+  weight_per_piece_kg: number;
+  volume_per_piece_cbm: number;
+  customs_duty_per_kg: number;
+}): {
+  product_subtotal_bdt: number;
+  shipping_bdt: number;
+  duty_bdt: number;
+  vat_bdt: number;
+  ait_bdt: number;
+  total_bdt: number;
+  deposit_bdt: number;
+  balance_bdt: number;
+} {
+  const {
+    unit_bdt,
+    qty,
+    weight_per_piece_kg,
+    volume_per_piece_cbm,
+    customs_duty_per_kg,
+  } = input;
+
+  // Product subtotal — the unit_bdt already INCLUDES any markup
+  // the admin baked into the tier price (group buys skip the
+  // per-product markup_pct line; the tier price is end-to-end).
+  const product_subtotal_bdt = unit_bdt * qty;
+
+  // Weight + volumetric weight (chargeable = max of actual and vol)
+  const totalWeight = weight_per_piece_kg * qty;
+  const totalVol = volume_per_piece_cbm * qty;
+  const volumetricKg = totalVol * 1000; // 1 m³ ≈ 1000 kg for chargeable
+  const chargeableKg = Math.max(totalWeight, volumetricKg);
+
+  // Air-freight shipping (the only mode used in Phase 40).
+  const perKgTier =
+    AIR_TIERS.find((t) => chargeableKg <= t.maxKg) ?? AIR_TIERS[AIR_TIERS.length - 1];
+  const shippingBdt = Math.round(chargeableKg * perKgTier.rateBdtPerKg);
+  const minBdt = airMinBdt(chargeableKg);
+  const shipping_bdt = Math.max(shippingBdt, minBdt);
+
+  // Specific duty (৳/kg)
+  const duty_bdt = Math.round(totalWeight * customs_duty_per_kg);
+
+  // VAT on (CIF + duty). CIF here = product_subtotal + shipping.
+  const cif = product_subtotal_bdt + shipping_bdt;
+  const vat_bdt = Math.round((cif + duty_bdt) * VAT_PCT);
+
+  // AIT on CIF (5%)
+  const ait_bdt = Math.round(cif * AIT_PCT);
+
+  const total_bdt = product_subtotal_bdt + shipping_bdt + duty_bdt + vat_bdt + ait_bdt;
+
+  return {
+    product_subtotal_bdt,
+    shipping_bdt,
+    duty_bdt,
+    vat_bdt,
+    ait_bdt,
+    total_bdt,
+    // Phase 13 full-prepayment model
+    deposit_bdt: total_bdt,
+    balance_bdt: 0,
+  };
+}

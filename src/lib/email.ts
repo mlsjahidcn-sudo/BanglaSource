@@ -974,3 +974,274 @@ export async function notifyGroupBuyMembershipCancelled(
     ],
   });
 }
+
+/**
+ * notifyGroupBuyFormed — fires once the formation cron has flipped
+ * status='formed' and created the buyer's order. Tells them the
+ * locked-in price they ACTUALLY pay (MIN of unit_bdt_at_commit and
+ * final_unit_bdt — never more than they saw, possibly less), their
+ * order id, and links to the order detail page to pay via bKash /
+ * bank / USDT.
+ *
+ * Phase 40 — fired by `/api/cron/group-buys/form` after the
+ * `create_order_with_items` RPC returns the new order id.
+ */
+export async function notifyGroupBuyFormed(
+  memberId: string,
+): Promise<EmailResult> {
+  const sb = getServiceRoleClient();
+  const { data: member } = await sb
+    .from("group_buy_members")
+    .select(
+      "id, group_buy_id, user_id, qty, unit_bdt_at_commit, payment_state, order_id, group_buys(final_unit_bdt, products(title_en))",
+    )
+    .eq("id", memberId)
+    .maybeSingle();
+  if (!member) {
+    return { ok: false, error: "member_not_found", to: [], provider: "resend" };
+  }
+  const gb = (member as unknown as {
+    group_buys: {
+      final_unit_bdt: number | null;
+      products: { title_en: string | null } | null;
+    } | null;
+  }).group_buys;
+  if (!gb) {
+    return { ok: false, error: "group_buy_not_found", to: [], provider: "resend" };
+  }
+
+  const { data: profile } = await sb
+    .from("profiles")
+    .select("email, full_name")
+    .eq("id", member.user_id)
+    .maybeSingle();
+  if (!profile?.email) {
+    return { ok: false, error: "buyer_no_email", to: [], provider: "resend" };
+  }
+  if (!member.order_id) {
+    return { ok: false, error: "order_not_created", to: [], provider: "resend" };
+  }
+
+  // The unit_bdt the buyer pays: never MORE than what they saw
+  // at commit time. If the group crossed a deeper tier, they get
+  // the lower price.
+  const finalBdt = gb.final_unit_bdt ?? member.unit_bdt_at_commit;
+  const chargedUnitBdt = Math.min(member.unit_bdt_at_commit, finalBdt);
+  const priceDropped = chargedUnitBdt < member.unit_bdt_at_commit;
+  const lineTotal = member.qty * chargedUnitBdt;
+
+  const greet = profile.full_name ? `Hi ${profile.full_name},` : "Hi,";
+  const productTitle = gb.products?.title_en ?? "your selected product";
+
+  const subject = `Your group buy formed — order #${member.order_id} is ready`;
+  const html = `
+    <div style="font-family: -apple-system, system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #0f172a;">
+      <h1 style="font-size: 22px; margin-bottom: 4px;">${greet}</h1>
+      <p>Good news — the <strong>${productTitle}</strong> group buy has reached its target. Your commitment is now an order.</p>
+
+      <table cellpadding="0" cellspacing="0" style="margin: 16px 0; border-collapse: collapse; width: 100%;">
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; color: #64748b;">Your qty</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">${member.qty.toLocaleString()} pcs</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; color: #64748b;">Price you saw at commit</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; text-align: right;">৳${member.unit_bdt_at_commit.toLocaleString()}/pc</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; color: #64748b;">Final group price</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; text-align: right;">৳${finalBdt.toLocaleString()}/pc</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #0f172a; font-weight: 600;">You pay (the lower of the two)</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: 700; color: #0e7490; font-size: 18px;">৳${chargedUnitBdt.toLocaleString()}/pc</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #64748b;">Product line total</td>
+          <td style="padding: 8px 0; text-align: right;">৳${lineTotal.toLocaleString()}</td>
+        </tr>
+      </table>
+
+      ${
+        priceDropped
+          ? `<p style="background: #ecfdf5; border: 1px solid #a7f3d0; padding: 12px; border-radius: 6px; color: #065f46;">
+               <strong>Price dropped!</strong> The group crossed a deeper tier — you're paying ৳${chargedUnitBdt.toLocaleString()}/pc instead of the ৳${member.unit_bdt_at_commit.toLocaleString()}/pc you saw at commit.
+             </p>`
+          : ""
+      }
+
+      <p>Your order is in <strong>Pending payment</strong>. Pay via bKash / bank transfer / USDT and submit the reference on the order page to mark it as paid. We ship within 24h of payment confirmation.</p>
+
+      <p style="margin: 24px 0;">
+        <a href="${SITE_URL}/orders/${member.order_id}" style="display: inline-block; background: #0891b2; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+          View order &amp; pay
+        </a>
+      </p>
+
+      <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">BanglaSource · Group buys</p>
+    </div>`;
+  return sendEmail({
+    to: profile.email,
+    subject,
+    html,
+    tags: [
+      { name: "type", value: "group_buy_formed" },
+      { name: "group_buy", value: String(member.group_buy_id).slice(0, 8) },
+      { name: "order", value: String(member.order_id) },
+    ],
+  });
+}
+
+/**
+ * notifyGroupBuyFailed — fires when the formation cron tried to
+ * create an order for a member but couldn't (no default address,
+ * RPC error, or the buyer's profile is gone). Tells them what to
+ * do next: add a default address, then reply to ops who will
+ * manually retry the formation for this member.
+ *
+ * Phase 40 — fired by `/api/cron/group-buys/form` when an
+ * individual member's order creation fails. The cron DOES NOT
+ * abort the rest of the formation — other members proceed
+ * normally.
+ */
+export async function notifyGroupBuyFailed(
+  memberId: string,
+  groupBuyId: string,
+  reason: string,
+): Promise<EmailResult> {
+  const sb = getServiceRoleClient();
+  const [{ data: member }, { data: gb }] = await Promise.all([
+    sb
+      .from("group_buy_members")
+      .select("id, user_id, qty, unit_bdt_at_commit, group_buys(products(title_en))")
+      .eq("id", memberId)
+      .maybeSingle(),
+    sb
+      .from("group_buys")
+      .select("id, status, final_unit_bdt, products(title_en)")
+      .eq("id", groupBuyId)
+      .maybeSingle(),
+  ]);
+  if (!member) {
+    return { ok: false, error: "member_not_found", to: [], provider: "resend" };
+  }
+  const gbProducts =
+    (gb as unknown as { products: { title_en: string | null } | null } | null)?.products ??
+    (member as unknown as { group_buys: { products: { title_en: string | null } | null } | null })
+      .group_buys?.products;
+  const productTitle = gbProducts?.title_en ?? "your selected product";
+
+  const { data: profile } = await sb
+    .from("profiles")
+    .select("email, full_name")
+    .eq("id", member.user_id)
+    .maybeSingle();
+  if (!profile?.email) {
+    return { ok: false, error: "buyer_no_email", to: [], provider: "resend" };
+  }
+
+  const greet = profile.full_name ? `Hi ${profile.full_name},` : "Hi,";
+  const isNoAddress = reason === "no_default_address";
+  const subject = isNoAddress
+    ? `Action needed: add a delivery address for your group buy order`
+    : `Heads up: we couldn't process your group buy order — please contact support`;
+
+  const html = `
+    <div style="font-family: -apple-system, system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #0f172a;">
+      <h1 style="font-size: 22px; margin-bottom: 4px;">${greet}</h1>
+      <p>The <strong>${productTitle}</strong> group buy you committed to has reached its target. We're creating orders for everyone, but we couldn't create yours automatically.</p>
+
+      ${
+        isNoAddress
+          ? `<p style="background: #fef3c7; border: 1px solid #fde68a; padding: 12px; border-radius: 6px; color: #92400e;">
+               <strong>Reason:</strong> We don't have a default delivery address on file for you.
+             </p>
+             <p>Add your address now and we'll process your order the next time we run the formation retry. Your locked-in price (৳${member.unit_bdt_at_commit.toLocaleString()}/pc × ${member.qty.toLocaleString()} pcs) is preserved.</p>
+             <p style="margin: 24px 0;">
+               <a href="${SITE_URL}/buyer/addresses?next=${encodeURIComponent(`/group-buys/${groupBuyId}`)}" style="display: inline-block; background: #0891b2; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+                 Add delivery address
+               </a>
+             </p>`
+          : `<p style="background: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 6px; color: #991b1b;">
+               <strong>Reason:</strong> ${reason}
+             </p>
+             <p>Please reply to this email — our ops team will manually retry your order or release your commitment.</p>`
+      }
+
+      <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">BanglaSource · Group buys</p>
+    </div>`;
+  return sendEmail({
+    to: profile.email,
+    subject,
+    html,
+    tags: [
+      { name: "type", value: "group_buy_failed" },
+      { name: "group_buy", value: String(groupBuyId).slice(0, 8) },
+      { name: "reason", value: reason.slice(0, 32) },
+    ],
+  });
+}
+
+/**
+ * notifyGroupBuyExpired — fires when the deadline cron flips a
+ * group buy from 'open' to 'expired' (target not reached by the
+ * deadline). Tells each member that no charge happened and their
+ * commitment was released.
+ *
+ * Phase 40 — fired by `/api/cron/group-buys/expire` for every
+ * member of an expired group.
+ */
+export async function notifyGroupBuyExpired(
+  memberId: string,
+): Promise<EmailResult> {
+  const sb = getServiceRoleClient();
+  const { data: member } = await sb
+    .from("group_buy_members")
+    .select(
+      "id, user_id, qty, unit_bdt_at_commit, group_buy_id, group_buys(products(title_en))",
+    )
+    .eq("id", memberId)
+    .maybeSingle();
+  if (!member) {
+    return { ok: false, error: "member_not_found", to: [], provider: "resend" };
+  }
+  const productTitle =
+    (member as unknown as { group_buys: { products: { title_en: string | null } | null } | null })
+      .group_buys?.products?.title_en ?? "your selected product";
+
+  const { data: profile } = await sb
+    .from("profiles")
+    .select("email, full_name")
+    .eq("id", member.user_id)
+    .maybeSingle();
+  if (!profile?.email) {
+    return { ok: false, error: "buyer_no_email", to: [], provider: "resend" };
+  }
+
+  const greet = profile.full_name ? `Hi ${profile.full_name},` : "Hi,";
+  const subject = `Group buy didn't reach its target — your commitment is released`;
+  const html = `
+    <div style="font-family: -apple-system, system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #0f172a;">
+      <h1 style="font-size: 22px; margin-bottom: 4px;">${greet}</h1>
+      <p>The <strong>${productTitle}</strong> group buy deadline passed without reaching its target quantity. <strong>No charge has been made</strong> — your commitment has been released.</p>
+
+      <p>Browse other active group buys or place a regular order any time.</p>
+
+      <p style="margin: 24px 0;">
+        <a href="${SITE_URL}/group-buys" style="display: inline-block; background: #0891b2; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+          Browse group buys
+        </a>
+      </p>
+
+      <p style="color: #94a3b8; font-size: 12px; margin-top: 32px;">BanglaSource · Group buys</p>
+    </div>`;
+  return sendEmail({
+    to: profile.email,
+    subject,
+    html,
+    tags: [
+      { name: "type", value: "group_buy_expired" },
+      { name: "group_buy", value: String(member.group_buy_id).slice(0, 8) },
+    ],
+  });
+}
