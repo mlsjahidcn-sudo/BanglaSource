@@ -617,10 +617,6 @@ export const dict: Dict = {
     en: "Photo QC on every order, before ship",
     bn: "প্রতিটি অর্ডারে ছবি QC, শিপের আগে",
   },
-  "login.trust_footer": {
-    en: "🔒 Auth secured by Supabase",
-    bn: "🔒 Supabase দ্বারা সুরক্ষিত",
-  },
   "login.signin_tab": { en: "Sign in", bn: "সাইন ইন" },
   "login.signup_tab": { en: "Create account", bn: "অ্যাকাউন্ট তৈরি করুন" },
   "login.signin_lede": {

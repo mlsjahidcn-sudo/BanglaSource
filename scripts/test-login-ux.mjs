@@ -53,7 +53,6 @@ async function checkI18nKeys() {
     "login.bullet1",
     "login.bullet2",
     "login.bullet3",
-    "login.trust_footer",
     "login.signin_tab",
     "login.signup_tab",
     "login.signin_lede",
@@ -123,9 +122,42 @@ async function main() {
     "bullet 3 (Photo QC)",
     html.includes("Photo QC"),
   );
+
+  console.log("\n[2b] No chrome (header + footer) on /login (Phase 47)");
+  // The Nav + Footer come from src/app/chrome-wrapper.tsx. On /login
+  // they should be skipped (chrome-less full-height split-pane).
+  // Probe by looking for typical site-nav markers that DO appear on
+  // / (homepage) but NOT on /login.
+  const homeHtml = await getHtml("/");
+  const hasHomeNavMarker =
+    homeHtml.includes("Sign in") &&
+    homeHtml.includes("Browse") &&
+    (homeHtml.includes("Shop by category") ||
+      homeHtml.includes("How it works"));
+  const hasLoginNav =
+    html.includes("Shop by category") || html.includes("How it works");
   check(
-    "trust footer (Supabase)",
-    html.includes("🔒 Auth secured by Supabase"),
+    "/ (home) renders site nav markers",
+    hasHomeNavMarker,
+    "sanity check — nav IS present on public pages",
+  );
+  check(
+    "/login does NOT render site nav markers",
+    !hasLoginNav,
+    "chrome-less layout",
+  );
+  // Site footer contains the copyright / contact marker
+  check(
+    "/login does NOT render site footer markers",
+    !html.includes("All rights reserved") &&
+      !html.includes("© ") &&
+      !html.includes("Contact us"),
+    "no footer on auth page",
+  );
+  check(
+    "/login does NOT render trust badge text",
+    !html.includes("Auth secured by Supabase"),
+    "trust badge removed (Phase 47)",
   );
 
   console.log("\n[3] Marketing pane is mobile-hidden");

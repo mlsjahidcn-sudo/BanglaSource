@@ -96,10 +96,10 @@ export function AuthMarketingPane() {
         }}
       />
 
-      <div className="relative z-10 flex flex-col justify-between w-full p-10 lg:p-14">
+      <div className="relative z-10 flex flex-col justify-center w-full p-10 lg:p-14">
         <Logo />
 
-        <div className="max-w-md">
+        <div className="mt-12 max-w-md">
           <h1 className="text-[32px] lg:text-[40px] font-semibold tracking-tight text-slate-900 leading-[1.1]">
             {t("login.headline")}
           </h1>
@@ -118,23 +118,6 @@ export function AuthMarketingPane() {
               </li>
             ))}
           </ul>
-        </div>
-
-        <div className="flex items-center gap-2 text-[12px] text-slate-500">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="w-3.5 h-3.5"
-            aria-hidden
-          >
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-            <path d="M7 11V7a5 5 0 0110 0v4" />
-          </svg>
-          <span>{t("login.trust_footer")}</span>
         </div>
       </div>
     </div>
