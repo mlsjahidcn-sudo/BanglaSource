@@ -204,7 +204,7 @@ export async function POST(req: NextRequest) {
   //    unit price or weight — fetch the live product, recompute.
   //    The locked `markup_pct` is the buyer's "what you saw on the
   //    PDP", so we use THAT markup (not the admin's current one).
-  const admin = getServiceRoleClient();
+const admin = getServiceRoleClient();
   type Resolved = {
     wire: WireCartItem;
     // After the early-return in the for-loop below, db is guaranteed
@@ -213,11 +213,26 @@ export async function POST(req: NextRequest) {
     // here so the downstream `r.db` accesses are clean.
     db: NonNullable<Awaited<ReturnType<typeof getProduct>>>;
     legacy: ReturnType<typeof dbProductToLegacy>;
+    breakdown: ReturnType<typeof landedCost>;
+    /** Per-piece BDT from `breakdown.unitBdt` (= ceil(totalBdt/qty)).
+     *  NOT used for line totals — see `cn_subtotal_bdt` /
+     *  `markup_bdt` for the FOB/markup split. Kept for snapshot
+     *  on the order_items row. */
     unit_bdt: number;
-    line_bdt: number;
+    /** FOB (in BDT, after FX) × qty — what landedCost calls
+     *  `cnSubtotalBdt`. Used for CIF computation (NOT for the
+     *  buyer-facing product line, which adds markup). */
+    cn_subtotal_bdt: number;
+    /** Markup × qty — what landedCost calls `markupBdt`. Tracked
+     *  separately so we can compute CIF without markup (per
+     *  Bangladesh NBR rules: VAT is on CIF+duty, not on the
+     *  seller's margin). */
+    markup_bdt: number;
+    /** Freight × qty (cnDomestic+agent+consol+intl) for this
+     *  line. */
+    line_shipping_bdt: number;
+    /** Duty × qty for this line. */
     line_duty_bdt: number;
-    product_subtotal_bdt: number; // = line_bdt (FOB+markup, no shipping)
-    line_shipping_bdt: number; // proportional shipping for this line
   };
   const resolved: Resolved[] = [];
   for (const it of body.items) {
@@ -242,32 +257,44 @@ export async function POST(req: NextRequest) {
       wire: it,
       db,
       legacy,
+      breakdown,
       unit_bdt: breakdown.unitBdt,
-      line_bdt: breakdown.unitBdt * it.qty,
-      line_duty_bdt: breakdown.dutyBdt,
-      product_subtotal_bdt: breakdown.unitBdt * it.qty,
+      cn_subtotal_bdt: breakdown.cnSubtotalBdt, // FOB × qty in BDT
+      markup_bdt: breakdown.markupBdt,           // markup × qty in BDT
       // Each line gets its own shipping slice (so the invoice
       // matches the buyer's mental model: "per-product shipping").
       // Total shipping for the order is the sum of all lines'
       // (intl + cn_domestic + agent + consol) — see below.
       line_shipping_bdt:
         breakdown.intlBdt + breakdown.cnDomesticBdt + breakdown.agentBdt + breakdown.consolBdt,
+      line_duty_bdt: breakdown.dutyBdt,
     });
   }
 
-  // ── Aggregate totals
-  const product_subtotal_bdt = resolved.reduce((s, r) => s + r.product_subtotal_bdt, 0);
+  // ── Aggregate totals.
+  //   product_subtotal_bdt = FOB + markup × qty (the buyer-facing "Product price" line)
+  //   shipping_bdt         = freight × qty (cnDomestic+agent+consol+intl)
+  //   duty_bdt             = customs duty × qty (specific ৳/kg)
+  //   cifBdt               = FOB + freight × qty  (NO markup — per Bangladesh NBR)
+  //   vat_bdt              = (cifBdt + duty_bdt) × 0.15
+  //   ait_bdt              = cifBdt × 0.05
+  //   total_bdt            = product_subtotal + shipping + duty + vat + ait
+  //
+  // AUDIT FIX 2026-06-17 (C1): the original orders POST computed
+  //   cifBdt = product_subtotal_bdt + shipping_bdt
+  // and vat_bdt = cifBdt * 0.15 — both wrong. (a) VAT was on a base
+  // missing the customs duty (undercharging by duty × 0.15). (b)
+  // cifBdt included the seller's markup, which inflates the VAT
+  // AND AIT bases (overcharging by markup × 0.20). The fix tracks
+  // cn_subtotal_bdt (FOB) and markup_bdt separately per line, and
+  // builds cifBdt from FOB + freight only — matching landedCost().
+  const product_subtotal_bdt = resolved.reduce((s, r) => s + r.cn_subtotal_bdt + r.markup_bdt, 0);
   const shipping_bdt = resolved.reduce((s, r) => s + r.line_shipping_bdt, 0);
   const duty_bdt = resolved.reduce((s, r) => s + r.line_duty_bdt, 0);
-  // VAT + AIT are computed off the global CIF (sum of all lines).
-  // For multi-product orders the math is technically: VAT × Σ(cif_i),
-  // AIT × Σ(cif_i), where cif_i = line product + line shipping. We
-  // approximate by treating the whole order as one big shipment,
-  // which is how the customs broker would actually invoice.
-  const cifBdt = product_subtotal_bdt + shipping_bdt;
-  const vat_bdt = Math.round(cifBdt * 0.15);
+  const cifBdt = resolved.reduce((s, r) => s + r.cn_subtotal_bdt, 0) + shipping_bdt;
+  const vat_bdt = Math.round((cifBdt + duty_bdt) * 0.15);
   const ait_bdt = Math.round(cifBdt * 0.05);
-  const total_bdt = cifBdt + duty_bdt + vat_bdt + ait_bdt;
+  const total_bdt = product_subtotal_bdt + shipping_bdt + duty_bdt + vat_bdt + ait_bdt;
   // Phase 13 (full-prepayment model): the buyer pays 100% of the
   // landed cost at order confirm. There is no balance due on
   // delivery. The columns `deposit_bdt` / `balance_bdt` are
@@ -312,7 +339,7 @@ export async function POST(req: NextRequest) {
       category: r.wire.category,
       customs_duty_per_kg: r.wire.customs_duty_per_kg,
       unit_bdt: r.unit_bdt,
-      line_bdt: r.line_bdt,
+      line_bdt: r.unit_bdt * r.wire.qty,
       line_duty_bdt: r.line_duty_bdt,
       position: i,
     })),

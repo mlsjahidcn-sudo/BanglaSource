@@ -10,6 +10,16 @@ type Bucket = {
 
 const buckets = new Map<string, Bucket>();
 
+// AUDIT FIX 2026-06-17 (C2): unbounded Map growth under sustained
+// traffic. Each unique (IP × endpoint) pair creates a Map entry
+// that never expires. With 100 unique IPs hitting 20 endpoints,
+// that's 2000 entries per second the bucket fills. We cap it at
+// MAX_BUCKETS; when exceeded, opportunistically drop the
+// half-of-entries with the oldest `lastRefill` (cold buckets
+// haven't been used recently and are safe to discard — the next
+// request from that IP will just create a fresh full bucket).
+const MAX_BUCKETS = 10_000;
+
 export type RateLimitOptions = {
   /** Identifier (IP, user id, etc.) */
   key: string;
@@ -25,12 +35,26 @@ export type RateLimitResult = {
   resetIn: number; // ms until next token
 };
 
+function gcIfNeeded() {
+  if (buckets.size <= MAX_BUCKETS) return;
+  // Drop the coldest half. Sort by lastRefill ASC, drop the first
+  // half. O(n log n) but only runs when we hit the cap (rare).
+  const entries = Array.from(buckets.entries()).sort(
+    (a, b) => a[1].lastRefill - b[1].lastRefill,
+  );
+  const toDrop = Math.floor(entries.length / 2);
+  for (let i = 0; i < toDrop; i++) {
+    buckets.delete(entries[i][0]);
+  }
+}
+
 export function rateLimit(opts: RateLimitOptions): RateLimitResult {
   const now = Date.now();
   const refillRate = opts.capacity / opts.windowMs;
   const existing = buckets.get(opts.key);
 
   if (!existing) {
+    gcIfNeeded();
     buckets.set(opts.key, {
       tokens: opts.capacity - 1,
       lastRefill: now,

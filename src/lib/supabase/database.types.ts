@@ -261,6 +261,12 @@ export type Database = {
           updated_at: Timestamp;
           payment_model: string;
           address_id: number | null;
+          // Audit C3 (2026-06-17): buyer-supplied payment reference
+          // (bKash TrxID, bank ref, USDT hash). Required by the
+          // /api/orders/[id]/paid endpoint; the admin verifies it
+          // against their statement before shipping. Added by
+          // migration 20260617000002_orders_payment_reference.sql.
+          payment_reference: string | null;
         };
         Insert: Omit<
           Database["public"]["Tables"]["orders"]["Row"],

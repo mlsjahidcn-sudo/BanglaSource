@@ -42,6 +42,9 @@ type OrderRow = {
   payment_model: "full_prepay" | "deposit_balance";
   payment_method: "bkash" | "bank" | "cod" | "usdt";
   paid_at: string | null;
+  // Audit C3: bKash TrxID / bank reference supplied by the buyer
+  // at mark-paid time. Surface it for the admin to verify.
+  payment_reference: string | null;
   tracking_number: string | null;
   internal_note: string | null;
   buyer_note: string | null;
@@ -191,6 +194,14 @@ export default async function AdminOrderDetailPage({
                 <span className="text-fg font-mono tnum">
                   {fmtDate(o.paid_at)}
                 </span>
+                {o.payment_reference && (
+                  <>
+                    {" "}· ref{" "}
+                    <span className="text-fg font-mono tnum">
+                      {o.payment_reference}
+                    </span>
+                  </>
+                )}
               </span>
             )}
             <span>

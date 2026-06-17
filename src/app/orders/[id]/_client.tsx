@@ -27,6 +27,11 @@ type OrderRow = {
   paid_at: string | null;
   payment_method: "bkash" | "bank" | "cod" | "usdt";
   payment_model: "full_prepay" | "deposit_balance";
+  /** Audit C3: buyer-supplied bKash TrxID / bank reference. The admin
+   *  verifies this against their statement before shipping. Null for
+   *  orders paid before the migration was applied, OR if the buyer
+   *  bypassed the requirement (which the API now rejects). */
+  payment_reference: string | null;
   address_snapshot: null | {
     full_name: string;
     phone: string;
@@ -65,6 +70,11 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
   const [notFound, setNotFound] = useState(false);
   const [markingPaid, setMarkingPaid] = useState(false);
   const [marked, setMarked] = useState(false);
+  // Audit C3: buyer MUST supply a payment reference when marking paid
+  // (bKash TrxID, bank ref, etc.). The admin verifies it against their
+  // statement before shipping.
+  const [paymentReference, setPaymentReference] = useState("");
+  const [markPaidError, setMarkPaidError] = useState<string | null>(null);
 
   useEffect(() => {
     const sb = getBrowserClient();
@@ -99,13 +109,35 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
 
   async function markOrderPaid() {
     if (!order) return;
+    const ref = paymentReference.trim();
+    if (ref.length < 4) {
+      setMarkPaidError(
+        "Please enter your payment reference (bKash TrxID, bank ref, etc.) — at least 4 characters.",
+      );
+      return;
+    }
     setMarkingPaid(true);
+    setMarkPaidError(null);
     try {
-      const r = await fetch(`/api/orders/${orderId}/paid`, { method: "POST" });
+      const r = await fetch(`/api/orders/${orderId}/paid`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ payment_reference: ref }),
+      });
       if (r.ok) {
         setMarked(true);
-        setOrder({ ...order, status: "paid", paid_at: new Date().toISOString() });
+        setOrder({
+          ...order,
+          status: "paid",
+          paid_at: new Date().toISOString(),
+          payment_reference: ref,
+        });
+      } else {
+        const body = await r.json().catch(() => ({}));
+        setMarkPaidError(body.message ?? body.error ?? "Could not mark paid.");
       }
+    } catch {
+      setMarkPaidError("Network error. Please try again.");
     } finally {
       setMarkingPaid(false);
     }
@@ -168,6 +200,30 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
             amount={null /* Phase 14: amount is shared by email/WhatsApp, not hard-coded here */}
           />
 
+          {/* Audit C3: payment reference field. Buyer MUST provide their
+              bKash TrxID / bank transfer reference so the admin can
+              verify against their bank statement before shipping. */}
+          <div className="mt-4">
+            <label className="block text-[12.5px] font-medium mb-1.5">
+              Payment reference <span className="text-red-600">*</span>
+            </label>
+            <input
+              type="text"
+              value={paymentReference}
+              onChange={(e) => setPaymentReference(e.target.value)}
+              placeholder="bKash TrxID, bank ref, or USDT hash"
+              disabled={markingPaid || marked}
+              className="h-10 w-full max-w-md rounded-md border border-border bg-bg px-3 text-[13px] font-mono focus:border-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+            />
+            <p className="mt-1 text-[11px] text-fg-subtle">
+              Your payment reference helps us confirm receipt. Without
+              it, we can't verify the payment before shipping.
+            </p>
+            {markPaidError && (
+              <p className="mt-1 text-[11px] text-red-600">{markPaidError}</p>
+            )}
+          </div>
+
           <div className="mt-4 flex items-center gap-3">
             <button
               onClick={markOrderPaid}
@@ -198,6 +254,11 @@ export function OrderDetailClient({ orderId }: { orderId: string }) {
           <p className="font-medium text-cyan-900">
             ✓ {t("order.paid_at")}: {new Date(order.paid_at).toLocaleString()}
           </p>
+          {order.payment_reference && (
+            <p className="mt-1 text-[12.5px] text-fg-muted font-mono">
+              Payment ref: <span className="text-fg">{order.payment_reference}</span>
+            </p>
+          )}
         </section>
       ) : null}
 
