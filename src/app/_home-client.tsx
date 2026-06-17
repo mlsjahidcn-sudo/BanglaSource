@@ -327,10 +327,6 @@ function Hero({
 }) {
   return (
     <div className="relative overflow-hidden rounded-xl border border-border bg-bg h-[420px]">
-      {/* Subtle cyan accent stripe down the left edge — the brand mark
-          for the hero block. Reads as "this is a featured block" without
-          being a full bleed gradient. */}
-      <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-600" aria-hidden />
       <div className="relative h-full grid md:grid-cols-12 gap-6 p-8 md:p-10">
         <div className="md:col-span-7 flex flex-col justify-center min-w-0">
           <HeroCopy
