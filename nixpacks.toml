@@ -1,0 +1,27 @@
+# nixpacks.toml — Railway build configuration.
+#
+# Why nixPkgs and not corepack: Node 20.18.x ships an older corepack
+# whose signing keys are stale, so `corepack prepare pnpm@10 --activate`
+# fails with "Signature verification failed for pnpm@10.x.x". Installing
+# pnpm via nixPkgs sidesteps that entirely. See memory/sica-railway-build.md
+# for the full postmortem on this gotcha.
+#
+# Why we set NODE_ENV=production for install but not for build:
+# Next.js reads NODE_ENV at BUILD time to decide whether to do React
+# production optimizations. We only want it set during the build/start
+# phases. Letting install use it triggers pnpm's "devDependencies skipped"
+# warning — fine — but more importantly it tells the pnpm lockfile
+# resolver to pick the prod variant of hoisted deps. Build then
+# re-overrides it for the actual `next build` invocation.
+
+[phases.setup]
+nixPkgs = ["nodejs_20", "pnpm"]
+
+[phases.install]
+cmds = ["pnpm install --frozen-lockfile"]
+
+[phases.build]
+cmds = ["pnpm run build"]
+
+[start]
+cmd = "pnpm run start"
