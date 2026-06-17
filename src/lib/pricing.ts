@@ -9,7 +9,19 @@
 // Every other cost line — shipping, agent, markup, duty, VAT, AIT — is
 // quoted by Bangladeshi freight forwarders in BDT directly, so we model
 // them in BDT.
-export const FX_CNY_BDT = 16.85;
+//
+// Phase 48 (2026-06-18): this is now the FALLBACK only. The live value
+// lives in public.settings.fx_cny_bdt and is read via getFxCnyBdt()
+// in src/lib/settings.ts. Admin can change it from /admin/settings
+// without redeploying. Update the default below ONLY if the seeded DB
+// value should change for new installs.
+export const FX_CNY_BDT_DEFAULT = 18.25;
+
+// Back-compat alias: a lot of client-side code imports `FX_CNY_BDT`
+// (no parentheses, plain constant). Keep the old name working as
+// the fallback so those imports keep compiling. Server-side callers
+// should use `getFxCnyBdt()` from src/lib/settings.ts for the live value.
+export const FX_CNY_BDT = FX_CNY_BDT_DEFAULT;
 
 // Air freight volumetric divisor: 1 CBM = 167 kg chargeable (standard IATA).
 // Carriers charge MAX(actual_weight, volume_weight).

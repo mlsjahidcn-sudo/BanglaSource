@@ -623,6 +623,33 @@ export type Database = {
           { foreignKeyName: "profiles_implicit_user_id", columns: ["user_id"], referencedRelation: "profiles", referencedColumns: ["id"] },
         ];
       };
+      // Phase 48 (2026-06-18): admin-configurable runtime settings.
+      // Each row is one key/value pair, plus audit metadata
+      // (updated_at + updated_by). Admin reads/writes via
+      // /api/admin/settings (server-side helpers in src/lib/settings.ts).
+      // jsonb column keeps the schema flexible — fx_cny_bdt is
+      // numeric today, future settings can be strings/bools/objects.
+      settings: {
+        Row: {
+          key: string;
+          value: unknown; // jsonb — typed at read time
+          updated_at: Timestamp;
+          updated_by: Uuid | null;
+        };
+        Insert: {
+          key: string;
+          value: unknown;
+          updated_at?: Timestamp;
+          updated_by?: Uuid | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["settings"]["Insert"]>;
+        // Note: settings.updated_by FK references auth.users, which
+        // is NOT exposed via PostgREST (auth schema is private).
+        // We omit the Relationship entry to keep the GenericSchema
+        // constraint satisfied — `referencedRelation: undefined`
+        // breaks type narrowing for the other tables.
+        Relationships: [],
+      };
     };
     Views: { [_ in never]: never };
     Functions: {

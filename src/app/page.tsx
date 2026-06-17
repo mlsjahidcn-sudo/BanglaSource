@@ -12,6 +12,7 @@ import {
   recentlyChanged,
   type PopularProduct,
 } from "@/lib/popular";
+import { getFxCnyBdt } from "@/lib/settings";
 
 // refresh every 5 minutes
 export const revalidate = 60;
@@ -65,9 +66,13 @@ async function loadCarousels() {
 }
 
 export default async function HomePage() {
-  const [syncStats, carousels] = await Promise.all([
+  const [syncStats, carousels, fxCnyBdt] = await Promise.all([
     loadSyncStats(),
     loadCarousels(),
+    // Phase 48: read the live FX rate from public.settings.fx_cny_bdt
+    // (with default fallback in src/lib/settings.ts). Admin can change
+    // this at /admin/settings without redeploying.
+    getFxCnyBdt(),
   ]);
   // Phase 25: Organization + WebSite JSON-LD so Google has
   // a single canonical entity + a sitelinks search box.
@@ -89,6 +94,7 @@ export default async function HomePage() {
         syncStats={syncStats}
         heroProduct={carousels.popular[0] ?? null}
         aiPicks={carousels.popular}
+        fxCnyBdt={fxCnyBdt}
       />
       {/* Phase 45: the bottom carousel is now JUST the
           "Recently restocked" strip — the "Trending" carousel

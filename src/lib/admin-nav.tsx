@@ -26,6 +26,7 @@ import {
   IconLink,
   IconOrders,
   IconGroupBuy,
+  IconSettings,
 } from "@/components/portal-icons";
 import type { NavGroup } from "@/components/portal-shell";
 import type { ServiceClient } from "@/lib/supabase/server";
@@ -122,6 +123,12 @@ export const adminNav = (counts: {
     label: "Intelligence",
     items: [
       { label: "AI Ops Chat", href: "/admin/ai", icon: <IconAI /> },
+    ],
+  },
+  {
+    label: "System",
+    items: [
+      { label: "Settings", href: "/admin/settings", icon: <IconSettings /> },
     ],
   },
 ];

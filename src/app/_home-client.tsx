@@ -24,6 +24,7 @@ export function HomeClient({
   syncStats,
   heroProduct,
   aiPicks,
+  fxCnyBdt,
 }: {
   syncStats: {
     activeCount: number;
@@ -40,6 +41,15 @@ export function HomeClient({
    * shows.
    */
   aiPicks: PopularProduct[];
+  /**
+   * Phase 48 (2026-06-18): live CNY → BDT FX rate, read by
+   * page.tsx from public.settings.fx_cny_bdt (admin-editable
+   * via /admin/settings). Replaces the hardcoded constant in
+   * pricing.ts so admin rate changes apply to the home page
+   * display ("1 CNY = X BDT") and to any client-side landedCost()
+   * calls without a redeploy.
+   */
+  fxCnyBdt: number;
   heroProduct: PopularProduct | null;
 }) {
   const { t, lang } = useLang();
@@ -81,7 +91,7 @@ export function HomeClient({
           </div>
           <div className="flex items-center gap-4 shrink-0">
             <span className="hidden sm:inline font-mono tnum">
-              1 CNY = {FX_CNY_BDT.toFixed(2)} BDT
+              1 CNY = {fxCnyBdt.toFixed(2)} BDT
             </span>
             <span className="hidden sm:inline text-slate-300">·</span>
             <a href="https://wa.me/8801732576417" className="hover:text-fg">
@@ -95,7 +105,7 @@ export function HomeClient({
       <section className="bg-bg-soft border-b border-border">
         <Container className="py-5 overflow-visible">
           <div className="grid md:grid-cols-12 gap-4 overflow-visible">
-            <SidebarRail products={allProducts} />
+            <SidebarRail products={allProducts} fxCnyBdt={fxCnyBdt} />
             <div className="md:col-span-9">
               <Hero
                 activeCount={syncStats.activeCount}
@@ -148,6 +158,7 @@ export function HomeClient({
                   key={c.key}
                   categoryKey={c.key}
                   products={allProducts}
+                  fxCnyBdt={fxCnyBdt}
                 />
               ))
             : null}
@@ -187,7 +198,13 @@ export function HomeClient({
 
 /* ───────────────────────────  SIDEBAR RAIL  ─────────────────────────── */
 
-function SidebarRail({ products: allProducts }: { products: CatalogProduct[] }) {
+function SidebarRail({
+  products: allProducts,
+  fxCnyBdt,
+}: {
+  products: CatalogProduct[];
+  fxCnyBdt: number;
+}) {
   const { t, lang } = useLang();
   const [hovered, setHovered] = useState<CategoryKey | null>(null);
   const hoveredCat = hovered ? categories[hovered] : null;
@@ -315,7 +332,7 @@ function SidebarRail({ products: allProducts }: { products: CatalogProduct[] }) 
                           (p.price_tiers[p.price_tiers.length - 1]
                             .price_cny_fen /
                             100) *
-                            FX_CNY_BDT,
+                            fxCnyBdt,
                         ),
                       )}
                     </p>
@@ -497,9 +514,11 @@ function HeroVisual({ product }: { product: PopularProduct | null }) {
 function CategoryStrip({
   categoryKey,
   products: allProducts,
+  fxCnyBdt,
 }: {
   categoryKey: CategoryKey;
   products: CatalogProduct[];
+  fxCnyBdt: number;
 }) {
   const { t, lang } = useLang();
   const cat = categories[categoryKey];
@@ -531,14 +550,14 @@ function CategoryStrip({
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {items.map((p) => (
-          <StripCard key={p.source_id} product={p} />
+          <StripCard key={p.source_id} product={p} fxCnyBdt={fxCnyBdt} />
         ))}
       </div>
     </div>
   );
 }
 
-function StripCard({ product }: { product: CatalogProduct }) {
+function StripCard({ product, fxCnyBdt }: { product: CatalogProduct; fxCnyBdt: number }) {
   const { t, lang } = useLang();
   const title = lang === "bn" ? product.title_bn : product.title_en;
   const lowestPrice =
@@ -550,6 +569,7 @@ function StripCard({ product }: { product: CatalogProduct }) {
     product as unknown as Parameters<typeof landedCost>[0],
     tier.qty_min,
     "air",
+    fxCnyBdt,
   );
   const saving =
     product.price_tiers.length > 1
