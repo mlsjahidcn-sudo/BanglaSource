@@ -268,3 +268,99 @@ export const IconGroupBuy = ({ size = 16, className }: IconProps) =>
     </>,
     className,
   );
+
+// Chevron pointing down — used by FAQ accordion rows to show
+// the row is collapsed. When the row is open, parent CSS rotates
+// it 180deg. Stroke 1.6 (slightly heavier) so it reads at small
+// sizes on mobile.
+export const IconChevron = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <path d="M3.5 6L8 10.5L12.5 6" />,
+    className,
+  );
+
+// Checkmark inside a circle — used by the "with us" / positive
+// comparison cells. Drawn open (not filled) to match the stroke
+// aesthetic of the rest of the icon set.
+export const IconCheck = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <>
+      <circle cx="8" cy="8" r="6" />
+      <path d="M5 8.2l2 2 4-4.4" />
+    </>,
+    className,
+  );
+
+// X mark inside a circle — used by the "without us" / negative
+// comparison cells. Drawn as two diagonal strokes, no fill.
+export const IconX = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <>
+      <circle cx="8" cy="8" r="6" />
+      <path d="M5.5 5.5l5 5M10.5 5.5l-5 5" />
+    </>,
+    className,
+  );
+
+// Airplane — used by shipping comparison row (air freight).
+// Drawn in profile, wing + tail fins, no fill.
+export const IconPlane = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <>
+      <path d="M2 8.5l3 1l1 4.5l1.5-1l-.2-3.5l3.7 1l.5-.8l-3.7-3.3l.5-3.3l-1.3-.5l-1.5 3L2.5 6.5z" />
+    </>,
+    className,
+  );
+
+// Boat / ship — used by shipping comparison row (sea freight).
+// Hull + cabin + 2 funnels for a simple cargo-craft silhouette.
+export const IconShip = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <>
+      <path d="M2 11h12l-1.5 2.5h-9z" />
+      <path d="M3 8l1 3h8l1-3" />
+      <rect x="6" y="4.5" width="1.5" height="3.5" />
+      <rect x="8.5" y="4.5" width="1.5" height="3.5" />
+      <path d="M8 2v2.5" />
+    </>,
+    className,
+  );
+
+// Lightning bolt — used by express / urgent shipping row.
+// Drawn open to keep stroke consistency.
+export const IconBolt = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <path d="M9 1.5L4 9h3l-1 5.5l5-7.5H8z" />,
+    className,
+  );
+
+// Wallet / payment — used by the payment methods row in how-it-works.
+// Card outline + 2 dots representing chips.
+export const IconWallet = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <>
+      <rect x="2" y="4" width="12" height="9" rx="1.2" />
+      <path d="M2 7h12" />
+      <path d="M11.5 10h.5" />
+    </>,
+    className,
+  );
+
+// Calendar / clock — used by delivery / timeline cells.
+// Inner clock hands 10:10 look.
+export const IconClock = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <>
+      <circle cx="8" cy="8" r="6" />
+      <path d="M8 4.5V8l2 1.5" />
+    </>,
+    className,
+  );

@@ -182,11 +182,17 @@ body {
 }
 
 /* Headings — enterprise hierarchy. Tighter tracking on h1/h2 so
-   the line ends cleanly even at the larger 36/40/48 sizes. */
-h1, h2, h3, h4 {
-  color: var(--fg);
-  font-weight: 600;
-  letter-spacing: -0.02em;
+   the line ends cleanly even at the larger 36/40/48 sizes.
+   Wrapped in @layer base so Tailwind utilities (text-white, etc.)
+   can override on dark backgrounds. Without @layer, this rule
+   would outrank utilities because of source-order, leaving h2s
+   invisible on bg-slate-900 CTAs. */
+@layer base {
+  h1, h2, h3, h4 {
+    color: var(--fg);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
 }
 
 *:focus-visible {

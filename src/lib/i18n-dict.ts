@@ -200,6 +200,356 @@ export const dict: Dict = {
     bn: "আপনার টাকা নড়ার আগে প্রতিটি SKU ছবি তোলা হয়। গণনা ভুল হলে, রঙ ভুল হলে বা মানের সাথে অমিল থাকলে আপনি রিফান্ড পান।",
   },
 
+  // ── How It Works · shipping comparison (Phase 53) ─────────────
+  "how.ship_compare.eyebrow": { en: "Shipping modes", bn: "শিপিং মোড" },
+  "how.ship_compare.title": {
+    en: "Three ways from Guangzhou to your door",
+    bn: "গুয়াংজু থেকে আপনার দোয়ারে তিনটি উপায়",
+  },
+  "how.ship_compare.subtitle": {
+    en: "Each mode has a different speed/cost trade-off. We pick the right one for your order based on weight, deadline, and category.",
+    bn: "প্রতিটি মোডের গতি/খরচ ট্রেড-অফ আলাদা। আমরা ওজন, সময়সীমা ও ক্যাটাগরি অনুযায়ী আপনার অর্ডারের জন্য সঠিকটি বেছে নিই।",
+  },
+  "how.ship_compare.mode": { en: "Mode", bn: "মোড" },
+  "how.ship_compare.days": { en: "Door-to-door", bn: "দোয়ার-টু-দোয়ার" },
+  "how.ship_compare.best": { en: "Best for", bn: "সেরা ব্যবহার" },
+  "how.ship_compare.air.name": { en: "Air express", bn: "এয়ার এক্সপ্রেস" },
+  "how.ship_compare.air.days": { en: "7–12 days", bn: "৭-১২ দিন" },
+  "how.ship_compare.air.best": {
+    en: "Samples, urgent restocks, low-weight high-value items",
+    bn: "স্যাম্পল, জরুরি রিস্টক, কম ওজনের উচ্চ-মূল্যের পণ্য",
+  },
+  "how.ship_compare.sea.name": { en: "Sea freight", bn: "সি ফ্রেইট" },
+  "how.ship_compare.sea.days": { en: "30–45 days", bn: "৩০-৪৫ দিন" },
+  "how.ship_compare.sea.best": {
+    en: "Heavy or bulky orders above 30 kg, non-urgent",
+    bn: "৩০ কেজির উপরে ভারী বা বাল্ক অর্ডার, জরুরি নয়",
+  },
+  "how.ship_compare.express.name": { en: "Express courier", bn: "এক্সপ্রেস কুরিয়ার" },
+  "how.ship_compare.express.days": { en: "4–7 days", bn: "৪-৭ দিন" },
+  "how.ship_compare.express.best": {
+    en: "Single samples, replacement parts, sub-1kg items",
+    bn: "একক স্যাম্পল, রিপ্লেসমেন্ট পার্টস, ১ কেজির কম পণ্য",
+  },
+
+  // ── How It Works · with/without us (Phase 53) ─────────────────
+  "how.compare.eyebrow": { en: "Why a desk, not a list", bn: "কেন ডেস্ক, লিস্ট নয়" },
+  "how.compare.title": {
+    en: "What changes when you go through us",
+    bn: "আমাদের মাধ্যমে গেলে কী বদলায়",
+  },
+  "how.compare.row1.thing": { en: "Finding a factory", bn: "কারখানা খোঁজা" },
+  "how.compare.row1.us": {
+    en: "Pre-vetted, 141 suppliers with order history",
+    bn: "অর্ডার ইতিহাসসহ প্রি-ভেটেড ১৪১ সরবরাহকারী",
+  },
+  "how.compare.row1.them": {
+    en: "Cold-message 50+ factories, no order history to check",
+    bn: "৫০+ কারখানায় কোল্ড-মেসেজ, যাচাইয়ের অর্ডার ইতিহাস নেই",
+  },
+  "how.compare.row2.thing": { en: "Customs math", bn: "কাস্টমস হিসাব" },
+  "how.compare.row2.us": {
+    en: "Server-side per-kg duty + 15% VAT + 5% AIT, shown upfront",
+    bn: "সার্ভার-সাইড প্রতি-কেজি শুল্ক + ১৫% ভ্যাট + ৫% এআইটি, আগেই দেখানো",
+  },
+  "how.compare.row2.them": {
+    en: "Hidden in the freight quote; you find out at the broker",
+    bn: "ফ্রেইট কোটে লুকানো; ব্রোকারের কাছে গিয়ে জানতে পারবেন",
+  },
+  "how.compare.row3.thing": { en: "Payment", bn: "পেমেন্ট" },
+  "how.compare.row3.us": {
+    en: "Single BDT wire to one Dhaka account, escrowed until QC passes",
+    bn: "একটি ঢাকা অ্যাকাউন্টে একক BDT ওয়্যার, QC পাস পর্যন্ত এসক্রো",
+  },
+  "how.compare.row3.them": {
+    en: "Wire CNY to a Chinese supplier, no recourse if the goods are wrong",
+    bn: "চীনা সরবরাহকারীর কাছে CNY ওয়্যার, পণ্য ভুল হলে প্রতিকার নেই",
+  },
+  "how.compare.row4.thing": { en: "If the goods are wrong", bn: "পণ্য ভুল হলে" },
+  "how.compare.row4.us": {
+    en: "We photograph, count, and reject before shipping. You get a refund request.",
+    bn: "আমরা শিপের আগে ছবি তুলি, গণনা করি ও প্রত্যাখ্যান করি। আপনি রিফান্ড পান।",
+  },
+  "how.compare.row4.them": {
+    en: "You find out at delivery, then chase the supplier for months",
+    bn: "ডেলিভারিতে জানতে পারবেন, তারপর মাসের পর মাস সরবরাহকারীকে তাড়া করুন",
+  },
+  "how.compare.col.thing": { en: "Step", bn: "ধাপ" },
+  "how.compare.col.us": { en: "With us", bn: "আমাদের মাধ্যমে" },
+  "how.compare.col.them": { en: "Going direct", bn: "সরাসরি গেলে" },
+
+  // ── How It Works · payment methods (Phase 53) ─────────────────
+  "how.pay.eyebrow": { en: "Payment", bn: "পেমেন্ট" },
+  "how.pay.title": {
+    en: "Pay in BDT, the way you already do",
+    bn: "আপনি যেভাবে ইতিমধ্যে BDT-তে পেমেন্ট করেন, সেভাবেই",
+  },
+  "how.pay.subtitle": {
+    en: "Three methods. All show in your bank statement or wallet as a normal local transfer.",
+    bn: "তিনটি পদ্ধতি। সব আপনার ব্যাঙ্ক স্টেটমেন্ট বা ওয়ালেটে সাধারণ লোকাল ট্রান্সফার হিসেবে দেখায়।",
+  },
+  "how.pay.bkash.name": { en: "bKash", bn: "বিকাশ" },
+  "how.pay.bkash.desc": {
+    en: "Merchant payment from any bKash account. Instant confirmation.",
+    bn: "যেকোনো বিকাশ অ্যাকাউন্ট থেকে মার্চেন্ট পেমেন্ট। তাৎক্ষণিক নিশ্চিতকরণ।",
+  },
+  "how.pay.nagad.name": { en: "Nagad", bn: "নগদ" },
+  "how.pay.nagad.desc": {
+    en: "Direct transfer to our Nagad merchant. No fee on your end.",
+    bn: "আমাদের নগদ মার্চেন্টে সরাসরি ট্রান্সফার। আপনার দিকে কোনো ফি নেই।",
+  },
+  "how.pay.bank.name": { en: "Bank transfer", bn: "ব্যাংক ট্রান্সফার" },
+  "how.pay.bank.desc": {
+    en: "BEFTN / RTGS / SWIFT to our Dhaka City Bank account. 1-2 hour confirm.",
+    bn: "আমাদের ঢাকা সিটি ব্যাংক অ্যাকাউন্টে BEFTN / RTGS / SWIFT। ১-২ ঘণ্টায় নিশ্চিত।",
+  },
+
+  // ── How It Works · FAQ (Phase 53) ─────────────────────────────
+  "how.faq.eyebrow": { en: "Common questions", bn: "সাধারণ প্রশ্ন" },
+  "how.faq.title": { en: "Things buyers ask us first", bn: "ক্রেতারা আমাদের প্রথমে যা জিজ্ঞেস করেন" },
+  "how.faq.q1": { en: "Is there a minimum order size?", bn: "ন্যূনতম অর্ডার সাইজ আছে?" },
+  "how.faq.a1": {
+    en: "Yes — 5 kg total order weight, or ৳15,000 in product value, whichever is higher. The minimums exist because customs + freight + duty have fixed per-shipment costs; below this the math doesn't work for you or for us.",
+    bn: "হ্যাঁ — মোট ৫ কেজি অর্ডার ওজন, বা ৳১৫,০০০ পণ্য মূল্য, যেটি বেশি। কাস্টমস + ফ্রেইট + শুল্কে প্রতি-শিপমেন্ট ফিক্সড খরচ আছে; এর নিচে আপনার বা আমাদের জন্য হিসাব মেলে না।",
+  },
+  "how.faq.q2": { en: "What if the factory sends the wrong product?", bn: "কারখানা ভুল পণ্য পাঠালে কী হবে?" },
+  "how.faq.a2": {
+    en: "We photograph every SKU at our Guangzhou hub before consolidation. If the count, color, or quality doesn't match the listing, we hold the shipment and you get a refund request before your money moves to the factory. This is the actual answer to 'why a desk and not a list'.",
+    bn: "আমাদের গুয়াংজু হাবে একত্রিতকরণের আগে প্রতিটি SKU-র ছবি তোলা হয়। গণনা, রঙ বা মান লিস্টিংয়ের সাথে না মিললে আমরা শিপমেন্ট আটকে রাখি এবং আপনার টাকা কারখানায় যাওয়ার আগে আপনি রিফান্ড পান। 'কেন ডেস্ক, লিস্ট নয়'-এর আসল উত্তর এটাই।",
+  },
+  "how.faq.q3": { en: "Can I order products that are not in your catalog?", bn: "আপনার ক্যাটালগে নেই এমন পণ্য কি অর্ডার করতে পারি?" },
+  "how.faq.a3": {
+    en: "Yes. Post a Request-for-Quote with the product spec, target qty, and any reference photos. We forward to 3-5 verified factories in the same category and return sealed bids in 48 hours. You see the BDT landed cost per bid before you commit.",
+    bn: "হ্যাঁ। পণ্যের স্পেক, টার্গেট পরিমাণ ও রেফারেন্স ছবিসহ একটি RFQ পোস্ট করুন। আমরা একই ক্যাটাগরিতে ৩-৫টি যাচাইকৃত কারখানায় ফরওয়ার্ড করি এবং ৪৮ ঘণ্টায় সিল করা বিড দিই। কমিটের আগে প্রতি বিডের BDT ল্যান্ডেড খরচ দেখতে পারবেন।",
+  },
+  "how.faq.q4": { en: "Do you ship to Chittagong and other cities?", bn: "চট্টগ্রাম ও অন্যান্য শহরে কি শিপ করেন?" },
+  "how.faq.a4": {
+    en: "Yes. Our C&F partner clears customs at Chittagong port, and Pathao/Steadfast/RedX deliver to anywhere in Bangladesh. Same price as Dhaka. Add the city at checkout and we'll route correctly.",
+    bn: "হ্যাঁ। আমাদের C&F পার্টনার চট্টগ্রাম পোর্টে কাস্টমস ক্লিয়ার করে, এবং পাঠাও/স্টেডফাস্ট/রেডএক্স বাংলাদেশের যেকোনো জায়গায় ডেলিভারি দেয়। ঢাকার সমান দাম। চেকআউটে শহর যোগ করুন, আমরা সঠিকভাবে রাউট করব।",
+  },
+  "how.faq.q5": { en: "How long until I have the product in my shop?", bn: "আমার দোকানে পণ্য কতদিনে আসবে?" },
+  "how.faq.a5": {
+    en: "Air: 7-12 days door-to-door from order confirm. Sea: 30-45 days. Express: 4-7 days. We track each shipment and send the customs broker name + airway bill number on the day your goods land in Chittagong.",
+    bn: "এয়ার: অর্ডার নিশ্চিত থেকে দোয়ার-টু-দোয়ার ৭-১২ দিন। সি: ৩০-৪৫ দিন। এক্সপ্রেস: ৪-৭ দিন। আমরা প্রতিটি শিপমেন্ট ট্র্যাক করি এবং চট্টগ্রামে পণ্য পৌঁছানোর দিন কাস্টমস ব্রোকারের নাম + এয়ারওয়ে বিল নম্বর পাঠাই।",
+  },
+  "how.faq.q6": { en: "Can I see the product before I commit?", bn: "কমিটের আগে কি পণ্য দেখতে পারি?" },
+  "how.faq.a6": {
+    en: "Yes. Order a single sample via express courier (4-7 days) for the standard sample fee (typically ৳400-800 depending on weight). Sample fee is credited back against any catalog order within 30 days.",
+    bn: "হ্যাঁ। একক স্যাম্পল এক্সপ্রেস কুরিয়ারে (৪-৭ দিন) অর্ডার করুন স্ট্যান্ডার্ড স্যাম্পল ফিতে (সাধারণত ওজন অনুযায়ী ৳৪০০-৮০০)। ৩০ দিনের মধ্যে যেকোনো ক্যাটালগ অর্ডারে স্যাম্পল ফি ফেরত।",
+  },
+
+  // ── How It Works · bottom CTA (Phase 53) ─────────────────────
+  "how.cta.eyebrow": { en: "Ready to start?", bn: "শুরু করতে প্রস্তুত?" },
+  "how.cta.title": { en: "Browse the catalog or post an RFQ", bn: "ক্যাটালগ ব্রাউজ করুন বা RFQ পোস্ট করুন" },
+  "how.cta.subtitle": {
+    en: "If it's in stock, you'll see the BDT landed cost on the product page. If it's not, an RFQ gets sealed bids in 48 hours.",
+    bn: "স্টকে থাকলে পণ্য পেজে BDT ল্যান্ডেড খরচ দেখবেন। না থাকলে RFQ থেকে ৪৮ ঘণ্টায় সিল বিড পাবেন।",
+  },
+  "how.cta.browse": { en: "Browse catalog", bn: "ক্যাটালগ ব্রাউজ" },
+  "how.cta.rfq": { en: "Post an RFQ", bn: "RFQ পোস্ট করুন" },
+  "how.cta.whatsapp": { en: "Chat on WhatsApp", bn: "WhatsApp-এ চ্যাট" },
+
+  // ── About · timeline (Phase 53) ────────────────────────────────
+  "about.timeline.eyebrow": { en: "Our story", bn: "আমাদের গল্প" },
+  "about.timeline.title": {
+    en: "From a Guangzhou back-office to a Dhaka-headquartered desk",
+    bn: "গুয়াংজু ব্যাক-অফিস থেকে ঢাকা-সদর দপ্তরের ডেস্ক",
+  },
+  "about.timeline.subtitle": {
+    en: "Four years, three cities, one continuous workflow.",
+    bn: "চার বছর, তিনটি শহর, একটি ধারাবাহিক ওয়ার্কফ্লো।",
+  },
+  "about.timeline.2022.title": { en: "The Guangzhou years", bn: "গুয়াংজুর বছরগুলো" },
+  "about.timeline.2022.body": {
+    en: "Founded in Guangzhou as a sourcing side-desk for Bangladeshi resellers who were getting ghosted by Taobao and 1688. The first office was a 40 sqm room above a hardware market.",
+    bn: "বাংলাদেশি রিসেলারদের জন্য সোর্সিং সাইড-ডেস্ক হিসেবে গুয়াংজুতে প্রতিষ্ঠিত, যারা তাওবাও ও ১৬৮৮-এ ভূতুড়ে হয়ে যাচ্ছিল। প্রথম অফিস ছিল একটি হার্ডওয়্যার মার্কেটের উপরে ৪০ বর্গমিটার ঘর।",
+  },
+  "about.timeline.2024.title": { en: "Dhaka desk opens", bn: "ঢাকা ডেস্ক খোলে" },
+  "about.timeline.2024.body": {
+    en: "Opened a Dhaka office in Satmasjid Road. This was the unlock for the model: a local address, a TIN, an Import Registration Certificate, and a bKash account. Now we could quote the landed cost ourselves, not just the FOB.",
+    bn: "সাতমসজিদ রোডে ঢাকা অফিস খোলা হয়। এটাই মডেলের আনলক: একটি স্থানীয় ঠিকানা, একটি TIN, একটি আমদানি নিবন্ধন সনদ এবং একটি বিকাশ অ্যাকাউন্ট। এখন আমরা শুধু FOB নয়, ল্যান্ডেড খরচও কোট করতে পারতাম।",
+  },
+  "about.timeline.2025.title": { en: "Chittagong customs + last-mile", bn: "চট্টগ্রাম কাস্টমস + লাস্ট-মাইল" },
+  "about.timeline.2025.body": {
+    en: "Brought customs clearance and Pathao/Steadfast last-mile in-house. The 7-step process on /how-it-works is what the workflow looked like at the end of that year.",
+    bn: "কাস্টমস ক্লিয়ারেন্স ও পাঠাও/স্টেডফাস্ট লাস্ট-মাইল ইন-হাউসে আনা হয়। /how-it-works-এ ৭-ধাপ প্রক্রিয়াটি সেই বছরের শেষে ওয়ার্কফ্লোটির চেহারা ছিল।",
+  },
+  "about.timeline.2026.title": { en: "167 SKUs, 141 verified suppliers", bn: "১৬৭ SKU, ১৪১ যাচাইকৃত সরবরাহকারী" },
+  "about.timeline.2026.body": {
+    en: "Switched from a Taobao/1688 sourcing desk to a hand-picked catalog. Every product is now inspected, photographed, and translated before it goes live. The desk is now the catalog, not a list that points at the catalog.",
+    bn: "তাওবাও/১৬৮৮ সোর্সিং ডেস্ক থেকে হাতে-বাছাই ক্যাটালগে সুইচ করা হয়। এখন প্রতিটি পণ্য লাইভ হওয়ার আগে পরিদর্শিত, ছবি তোলা ও অনুবাদ করা হয়। ডেস্ক এখন ক্যাটালগ, ক্যাটালগে পয়েন্ট করা লিস্ট নয়।",
+  },
+
+  // ── About · what we don't do (Phase 53) ───────────────────────
+  "about.dontdo.eyebrow": { en: "Transparency", bn: "স্বচ্ছতা" },
+  "about.dontdo.title": {
+    en: "What we don't do, on purpose",
+    bn: "আমরা কোন জিনিসগুলো ইচ্ছে করে করি না",
+  },
+  "about.dontdo.subtitle": {
+    en: "Other desks in this space do some of these. We made a different call on each. Here's why.",
+    bn: "এই স্পেসের অন্য ডেস্কগুলো এর কিছু করে। আমরা প্রতিটিতে আলাদা সিদ্ধান্ত নিয়েছি। কারণ এখানে।",
+  },
+  "about.dontdo.1.title": { en: "We don't do open-buyer consignment", bn: "আমরা ওপেন-বায়ার কনসাইনমেন্ট করি না" },
+  "about.dontdo.1.body": {
+    en: "No 'pay 30% deposit, balance on delivery' model. We confirm the full landed cost upfront, you wire 100% once, and we move. The consignment model means the supplier carries the working-capital risk; we find it gets mis-priced when the FX moves.",
+    bn: "'৩০% ডিপোজিট দিন, ডেলিভারিতে ব্যালেন্স' মডেল নেই। আমরা আগে থেকে সম্পূর্ণ ল্যান্ডেড খরচ নিশ্চিত করি, আপনি একবারে ১০০% ওয়্যার করেন, আমরা এগোই। কনসাইনমেন্ট মডেলে ওয়ার্কিং-ক্যাপিটাল ঝুঁকি সরবরাহকারীর; FX নড়লে দাম ভুল হয়।",
+  },
+  "about.dontdo.2.title": { en: "We don't offer buyer credit", bn: "আমরা বায়ার ক্রেডিট দিই না" },
+  "about.dontdo.2.body": {
+    en: "No 'pay in 30 days' or 'this month's order, next month's payment'. Credit is offered by every platform that wants to grow GMV, and it's how most of the failures in this space started. We keep it pay-in-full and we stay small.",
+    bn: "'৩০ দিনে পেমেন্ট' বা 'এই মাসের অর্ডার, পরের মাসের পেমেন্ট' নেই। প্রতিটি প্ল্যাটফর্ম GMV বাড়াতে ক্রেডিট দেয়, এবং এই স্পেসের বেশিরভাগ ব্যর্থতা এভাবেই শুরু হয়েছে। আমরা পেমেন্ট ফুল-অন রাখি ও ছোট থাকি।",
+  },
+  "about.dontdo.3.title": { en: "We don't do COD inside Bangladesh", bn: "আমরা বাংলাদেশে COD করি না" },
+  "about.dontdo.3.body": {
+    en: "Every order is pre-paid in BDT. We tried COD on a pilot with one courier; the return rate made the unit economics a 5x worse than pre-pay. Pre-pay is the only way landed cost can be one number.",
+    bn: "প্রতিটি অর্ডার BDT-তে প্রি-পেইড। আমরা একটি কুরিয়ারে COD পাইলট করেছিলাম; রিটার্ন রেট ইউনিট ইকোনমিক্সকে প্রি-পের চেয়ে ৫ গুণ খারাপ করেছিল। প্রি-পে-ই একমাত্র উপায় যেখানে ল্যান্ডেড খরচ একটি সংখ্যা হতে পারে।",
+  },
+  "about.dontdo.4.title": { en: "We don't list anything we haven't inspected", bn: "আমরা যা পরিদর্শন করিনি তা লিস্ট করি না" },
+  "about.dontdo.4.body": {
+    en: "The catalog is 167 SKUs because that's what passed inspection. We turn down 5-10 products for every one we list. The other desks that list 50,000 products are showing you a list, not a catalog.",
+    bn: "ক্যাটালগ ১৬৭ SKU কারণ এগুলোই পরিদর্শনে পাস করেছে। আমরা প্রতিটি লিস্ট করা পণ্যের জন্য ৫-১০টি পণ্য ফেরত দিই। ৫০,০০০ পণ্যের লিস্ট করা অন্য ডেস্কগুলো আপনাকে লিস্ট দেখাচ্ছে, ক্যাটালগ নয়।",
+  },
+
+  // ── About · FAQ (Phase 53) ────────────────────────────────────
+  "about.faq.eyebrow": { en: "Common questions", bn: "সাধারণ প্রশ্ন" },
+  "about.faq.title": { en: "Things we get asked on WhatsApp", bn: "WhatsApp-এ আমাদের জিজ্ঞেস করা প্রশ্ন" },
+  "about.faq.q1": { en: "Are you a marketplace, or do you actually own the inventory?", bn: "আপনারা কি মার্কেটপ্লেস, নাকি আসলেই ইনভেন্টরির মালিক?" },
+  "about.faq.a1": {
+    en: "Neither. We're a sourcing desk. We source from factories, we QC at our Guangzhou hub, we consolidate, we ship. We don't list 50,000 products and we don't buy from a factory until you order. We're a 141-supplier Rolodex that does the work for you.",
+    bn: "কোনোটিই না। আমরা সোর্সিং ডেস্ক। আমরা কারখানা থেকে সোর্স করি, আমাদের গুয়াংজু হাবে QC করি, একত্রিত করি, শিপ করি। আমরা ৫০,০০০ পণ্য লিস্ট করি না এবং আপনি অর্ডার না করা পর্যন্ত কারখানা থেকে কিনি না। আমরা একটি ১৪১-সরবরাহকারী রোলডেক্স যা আপনার জন্য কাজ করে।",
+  },
+  "about.faq.q2": { en: "Do you do dropshipping?", bn: "আপনারা কি ড্রপশিপিং করেন?" },
+  "about.faq.a2": {
+    en: "No. Dropshipping is single-piece, single-destination, no-QC shipping from the factory to the end buyer. We do bulk B2B — minimum 5 kg order, full QC, consolidated freight. Different cost structure, different workflow, different math.",
+    bn: "না। ড্রপশিপিং হলো সিঙ্গেল-পিস, সিঙ্গেল-ডেস্টিনেশন, কোনো QC ছাড়া কারখানা থেকে শেষ ক্রেতায় শিপিং। আমরা বাল্ক B2B করি — ন্যূনতম ৫ কেজি অর্ডার, ফুল QC, কনসোলিডেটেড ফ্রেইট। ভিন্ন খরচ কাঠামো, ভিন্ন ওয়ার্কফ্লো, ভিন্ন হিসাব।",
+  },
+  "about.faq.q3": { en: "What's your markup on the factory price?", bn: "কারখানার দামে আপনাদের মার্কআপ কত?" },
+  "about.faq.a3": {
+    en: "Default 10% on the all-in landed cost (CIF + duty + VAT + AIT). It's the only number on the desk. Admin can adjust per-buyer 0-50% based on order history; the buyer never sees the markup line — the BDT they see is the BDT they pay.",
+    bn: "অল-ইন ল্যান্ডেড খরচের (CIF + শুল্ক + ভ্যাট + এআইটি) উপর ডিফল্ট ১০%। এটিই ডেস্কের একমাত্র সংখ্যা। অর্ডার ইতিহাস অনুযায়ী অ্যাডমিন প্রতি-ক্রেতায় ০-৫০% সামঞ্জস্য করতে পারে; ক্রেতা কখনো মার্কআপ লাইন দেখে না — তারা যে BDT দেখে সেটাই পেমেন্ট করে।",
+  },
+  "about.faq.q4": { en: "What if I find a product cheaper somewhere else?", bn: "আমি যদি অন্য কোথাও সস্তায় পণ্য পাই?" },
+  "about.faq.a4": {
+    en: "That happens. The factory price is the same; the difference is whether you eat the freight, customs, duty, VAT, AIT, and a week of customs broker back-and-forth yourself, or whether we handle it for 10% of landed. We're not the cheapest; we're the only-one-number.",
+    bn: "এটা হয়। কারখানার দাম একই; পার্থক্য হলো আপনি নিজে ফ্রেইট, কাস্টমস, শুল্ক, ভ্যাট, এআইটি ও এক সপ্তাহের কাস্টমস ব্রোকার ব্যাক-অ্যান্ড-ফোর্থ সামলাবেন, নাকি আমরা ল্যান্ডেডের ১০% এ সামলাব। আমরা সস্তা না; আমরা একমাত্র-এক-সংখ্যা।",
+  },
+  "about.faq.q5": { en: "Who handles the customs broker relationship?", bn: "কাস্টমস ব্রোকার সম্পর্ক কে সামলায়?" },
+  "about.faq.a5": {
+    en: "We do. Our C&F partner in Chittagong clears the shipment and the C&F fee is already in the landed cost number we quote you. You get the broker name + airway bill on the day your goods land. You don't have to know what a 'CD' is.",
+    bn: "আমরা। চট্টগ্রামে আমাদের C&F পার্টনার শিপমেন্ট ক্লিয়ার করে এবং C&F ফি ইতিমধ্যে আমাদের কোট করা ল্যান্ডেড খরচে আছে। আপনার পণ্য পৌঁছানোর দিন আপনি ব্রোকারের নাম + এয়ারওয়ে বিল পান। 'CD' কী তা আপনাকে জানতে হবে না।",
+  },
+  "about.faq.q6": { en: "Can I visit your office in Guangzhou?", bn: "আমি কি আপনাদের গুয়াংজু অফিস দেখতে পারি?" },
+  "about.faq.a6": {
+    en: "Yes — drop us a message on WhatsApp with dates. The Guangzhou desk is staffed Mon-Sun 09:00-21:00 CST. Most factory tours are at our Yiwu or Guangzhou warehouse on a Tuesday or Thursday. Bring your QC checklist.",
+    bn: "হ্যাঁ — তারিখসহ WhatsApp-এ মেসেজ দিন। গুয়াংজু ডেস্ক সোম-রবি ০৯:০০-২১:০০ CST-তে স্টাফড। বেশিরভাগ কারখানা ট্যুর আমাদের ইউউ বা গুয়াংজু ওয়্যারহাউসে মঙ্গল বা বৃহস্পতিবারে হয়। আপনার QC চেকলিস্ট আনুন।",
+  },
+
+  // ── About · bottom CTA (Phase 53) ─────────────────────────────
+  "about.cta.eyebrow": { en: "Get in touch", bn: "যোগাযোগ করুন" },
+  "about.cta.title": { en: "Talk to a human in 10 minutes", bn: "১০ মিনিটে একজন মানুষের সাথে কথা বলুন" },
+  "about.cta.subtitle": {
+    en: "WhatsApp gets the fastest reply during Dhaka + China desk hours. Email for anything that needs a paper trail.",
+    bn: "ঢাকা + চীন ডেস্ক ঘণ্টায় WhatsApp-এ সবচেয়ে দ্রুত রিপ্লাই। পেপার-ট্রেইল প্রয়োজন হলে ইমেইল।",
+  },
+  // about.cta.title and .subtitle get reused for the bottom dark band.
+  // The about.cta.whatsapp_prefill (defined below) is the message text
+  // pre-filled in the wa.me link so the desk knows why the user is
+  // messaging.
+  "about.cta.whatsapp": { en: "WhatsApp the desk", bn: "ডেস্কে WhatsApp" },
+  "about.cta.email": { en: "Email us", bn: "আমাদের ইমেইল করুন" },
+  "about.cta.hours_label": { en: "Hours", bn: "ঘণ্টা" },
+  "about.cta.hours_dhaka": {
+    en: "Sat-Thu 9:00-18:00 BST (Dhaka office)",
+    bn: "শনি-বৃহঃ ৯:০০-১৮:০০ BST (ঢাকা অফিস)",
+  },
+  "about.cta.hours_china": {
+    en: "Mon-Sun 09:00-21:00 CST (China desk)",
+    bn: "সোম-রবি ০৯:০০-২১:০০ CST (চীন ডেস্ক)",
+  },
+
+  // ── About · shared UI (Phase 53) ──────────────────────────────
+  "about.hero.eyebrow": { en: "About", bn: "সম্পর্কে" },
+  "about.hero.title": {
+    en: "Built for Bangladeshi resellers, run from Dhaka + Guangzhou.",
+    bn: "বাংলাদেশি রিসেলারদের জন্য তৈরি, ঢাকা + গুয়াংজু থেকে পরিচালিত।",
+  },
+  "about.hero.subtitle": {
+    en: "We started in 2022 after watching too many Bangladeshi shop owners get burned buying from wholesale platforms directly — wrong shipments, ghost factories, customs holds. We built the desk we wished existed.",
+    bn: "২০২২ সালে শুরু করেছিলাম, বাংলাদেশি দোকানদারদের হোলসেল প্ল্যাটফর্ম থেকে সরাসরি কিনে প্রতারিত হতে দেখে — ভুল শিপমেন্ট, ভূতুড়ে কারখানা, কাস্টমস হোল্ড। আমরা সেই ডেস্কটি তৈরি করেছি যেটা আমরা চাইতাম।",
+  },
+  "about.cta.whatsapp_prefill": {
+    en: "Hi BanglaSource, I have a question about your service.",
+    bn: "হ্যালো বাংলাসোর্স, আপনাদের সার্ভিস সম্পর্কে একটি প্রশ্ন আছে।",
+  },
+  "about.cta.see_process": { en: "See the 7-step process", bn: "৭-ধাপ প্রক্রিয়া দেখুন" },
+
+  "about.numbers.title": { en: "By the numbers", bn: "সংখ্যায়" },
+  "about.numbers.subtitle": {
+    en: "Live figures from the catalog and traffic. The catalog syncs weekly; the 30-day traffic is real page-view data.",
+    bn: "ক্যাটালগ ও ট্রাফিক থেকে লাইভ তথ্য। ক্যাটালগ সাপ্তাহিক সিঙ্ক হয়; ৩০ দিনের ট্রাফিক হলো আসল পেজ-ভিউ ডেটা।",
+  },
+  "about.numbers.active": { en: "Active products", bn: "সক্রিয় পণ্য" },
+  "about.numbers.suppliers": { en: "Verified suppliers", bn: "যাচাইকৃত সরবরাহকারী" },
+  "about.numbers.views": { en: "Page views · 30 days", bn: "পেজ ভিউ · ৩০ দিন" },
+
+  "about.reasons.title": { en: "6 reasons buyers choose us", bn: "ক্রেতারা আমাদের বেছে নেওয়ার ৬টি কারণ" },
+  "about.reasons.subtitle": {
+    en: "The full version. The short version: we remove every part of the cross-border import process that's a surprise.",
+    bn: "পূর্ণ সংস্করণ। সংক্ষিপ্ত সংস্করণ: ক্রস-বর্ডার আমদানি প্রক্রিয়ার প্রতিটি অংশ আমরা বাদ দিই যেটা চমকপ্রদ।",
+  },
+  "about.reasons.eyebrow": { en: "Why us", bn: "কেন আমরা" },
+  "about.reasons.r1.title": { en: "One all-in BDT price", bn: "একটি সব-অন্তর্ভুক্ত BDT দাম" },
+  "about.reasons.r1.body": {
+    en: "Every catalog product shows a single BDT figure that includes factory FOB, FX, air or sea freight, BD customs duty, VAT, and AIT. No surprises at the customs broker.",
+    bn: "প্রতিটি ক্যাটালগ পণ্য একটি একক BDT সংখ্যা দেখায় যা কারখানার FOB, FX, এয়ার বা সি ফ্রেইট, BD কাস্টমস শুল্ক, ভ্যাট ও এআইটি অন্তর্ভুক্ত করে। কাস্টমস ব্রোকারে কোনো চমক নেই।",
+  },
+  "about.reasons.r2.title": {
+    en: "Pre-pay 100%, no balance on delivery",
+    bn: "১০০% প্রি-পে, ডেলিভারিতে কোনো ব্যালেন্স নেই",
+  },
+  "about.reasons.r2.body": {
+    en: "We confirm the full landed cost within an hour of your order. You wire the total once and we move. No '30% balance to the courier' pattern that other desks use.",
+    bn: "আপনার অর্ডারের এক ঘণ্টার মধ্যে আমরা সম্পূর্ণ ল্যান্ডেড খরচ নিশ্চিত করি। আপনি একবারে মোট ওয়্যার করেন এবং আমরা এগোই। অন্য ডেস্কের 'কুরিয়ারে ৩০% ব্যালেন্স' প্যাটার্ন নেই।",
+  },
+  "about.reasons.r3.title": {
+    en: "Verified-desk model, not an open marketplace",
+    bn: "যাচাইকৃত-ডেস্ক মডেল, ওপেন মার্কেটপ্লেস নয়",
+  },
+  "about.reasons.r3.body": {
+    en: "Every product is hand-vetted, every supplier is verified, every order passes through our consolidation warehouse in Guangzhou before shipping. We are the desk, not a list.",
+    bn: "প্রতিটি পণ্য হাতে-ভেটেড, প্রতিটি সরবরাহকারী যাচাইকৃত, প্রতিটি অর্ডার শিপের আগে গুয়াংজুতে আমাদের কনসোলিডেশন ওয়্যারহাউসের মধ্য দিয়ে যায়। আমরা ডেস্ক, লিস্ট নয়।",
+  },
+  "about.reasons.r4.title": {
+    en: "Bangladesh-specific tax math",
+    bn: "বাংলাদেশ-নির্দিষ্ট ট্যাক্স হিসাব",
+  },
+  "about.reasons.r4.body": {
+    en: "Customs duty is per-kg specific (not ad-valorem %), VAT is 15% of (CIF + duty), AIT is 5% of CIF. The math is non-trivial; we encode it so the price you see is the price you pay.",
+    bn: "কাস্টমস শুল্ক প্রতি-কেজি নির্দিষ্ট (অ্যাড-ভ্যালোরেম % নয়), ভ্যাট হলো (CIF + শুল্ক) এর ১৫%, এআইটি হলো CIF এর ৫%। হিসাবটি সহজ নয়; আমরা এটি এনকোড করি যাতে আপনি যে দাম দেখেন সেটাই পেমেন্ট করেন।",
+  },
+  "about.reasons.r5.title": {
+    en: "Bangla + English support, real humans",
+    bn: "বাংলা + ইংরেজি সাপোর্ট, আসল মানুষ",
+  },
+  "about.reasons.r5.body": {
+    en: "Sat-Thu 9-18 BST Dhaka office, plus a China desk staffed 24/7 for factory emergencies. WhatsApp first, email if you prefer paper. No ticket system, no bots.",
+    bn: "শনি-বৃহঃ ৯-১৮ BST ঢাকা অফিস, প্লাস কারখানা জরুরি অবস্থার জন্য ২৪/৭ স্টাফড চীন ডেস্ক। প্রথমে WhatsApp, কাগজ পছন্দ হলে ইমেইল। টিকিট সিস্টেম নেই, বট নেই।",
+  },
+  "about.reasons.r6.title": { en: "Open to RFQs, not just catalog", bn: "শুধু ক্যাটালগ নয়, RFQ-ও খোলা" },
+  "about.reasons.r6.body": {
+    en: "If the catalog doesn't have it, post a Request-for-Quote with spec + qty + photos. We forward to 3-5 verified factories and return sealed bids in 48 hours.",
+    bn: "ক্যাটালগে না থাকলে স্পেক + পরিমাণ + ছবিসহ একটি RFQ পোস্ট করুন। আমরা ৩-৫টি যাচাইকৃত কারখানায় ফরওয়ার্ড করি এবং ৪৮ ঘণ্টায় সিল বিড দিই।",
+  },
+
+  "about.team.title": { en: "The team", bn: "টিম" },
+  "about.team.subtitle": {
+    en: "Three desks, three timezones. Whoever you talk to, they own the outcome.",
+    bn: "তিনটি ডেস্ক, তিনটি টাইমজোন। আপনি যার সাথেই কথা বলুন, তিনি ফলাফলের মালিক।",
+  },
+  "about.licenses.title": { en: "Licenses & compliance", bn: "লাইসেন্স ও কমপ্লায়েন্স" },
+  "about.address.eyebrow": { en: "Dhaka office", bn: "ঢাকা অফিস" },
+
   // ── Shipping rates page ───────────────────────────────────────────
   "ship.title": { en: "Shipping & landed cost", bn: "শিপিং ও ল্যান্ডেড খরচ" },
   "ship.subtitle": {
