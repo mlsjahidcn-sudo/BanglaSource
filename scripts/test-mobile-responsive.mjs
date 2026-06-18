@@ -459,6 +459,92 @@ async function main() {
     coBtnData.smallCount > 0 ? JSON.stringify(coBtnData.samples) : "all OK",
   );
 
+  // ────────────────────────────────────────────────────────────
+  // Phase 52: home page hero slider (product-specific, multi-slide)
+  // ────────────────────────────────────────────────────────────
+  console.log("\n[13] Hero slider — product-specific, multi-slide, mobile-optimized");
+  mavisCall("browser_navigate", { url: `${URL}/` });
+  await new Promise((r) => setTimeout(r, 1500));
+  const sliderCheck = mavisCall("browser_evaluate", {
+    function: `() => {
+      const dots = Array.from(document.querySelectorAll('button[aria-label*="Slide"]'));
+      const dotCount = dots.length;
+      const activeIdx = dots.findIndex(d => d.getAttribute('aria-current') === 'true');
+      const firstActive = activeIdx === 0;
+      // Mobile track width = viewport width (full-bleed)
+      const track = Array.from(document.querySelectorAll('div')).find(d => d.className && d.className.includes('md:hidden flex') && d.className.includes('snap-x'));
+      const trackW = track ? Math.round(track.clientWidth) : 0;
+      const trackScrollable = track ? (track.scrollWidth > track.clientWidth) : false;
+      // Dot tap targets must be 44x44
+      const dotTaps = dots.map(d => { const r = d.getBoundingClientRect(); return { w: Math.round(r.width), h: Math.round(r.height) }; });
+      const minDotW = dotTaps.reduce((m, t) => Math.min(m, t.w), 999);
+      const minDotH = dotTaps.reduce((m, t) => Math.min(m, t.h), 999);
+      return { dotCount, activeIdx, firstActive, trackW, trackScrollable, minDotW, minDotH };
+    }`,
+  });
+  const sliderData = JSON.parse(sliderCheck);
+  check(`hero slider has ${sliderData.dotCount} dot indicators (≥ 3)`, sliderData.dotCount >= 3, `dots=${sliderData.dotCount}`);
+  check("first slide active on load", sliderData.firstActive, `active=${sliderData.activeIdx}`);
+  check(`hero mobile track fills mobile width (got ${sliderData.trackW}px, expect ≥ 320)`, sliderData.trackW >= 320, `trackW=${sliderData.trackW}`);
+  check("hero mobile track is horizontally scrollable", sliderData.trackScrollable);
+  check(`hero dot tap targets ≥ 44x44 (min got ${sliderData.minDotW}x${sliderData.minDotH})`, sliderData.minDotW >= 44 && sliderData.minDotH >= 44);
+
+  // Click a dot to verify manual control works.
+  // Pause the auto-rotation first by triggering mouseenter on the
+  // slider region, so the click + check happens in a single
+  // rotation window.
+  mavisCall("browser_evaluate", {
+    function: `() => { const region = document.querySelector('div[role="region"]'); if (region) region.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true })); return { paused: true }; }`,
+  });
+  await new Promise((r) => setTimeout(r, 200));
+  mavisCall("browser_evaluate", {
+    function: `() => { const dots = document.querySelectorAll('button[aria-label*="Slide"]'); if (dots[2]) dots[2].click(); return { clicked: !!dots[2] }; }`,
+  });
+  await new Promise((r) => setTimeout(r, 300));
+  const afterDotClick = mavisCall("browser_evaluate", {
+    function: `() => { const dots = Array.from(document.querySelectorAll('button[aria-label*="Slide"]')); const active = dots.findIndex(d => d.getAttribute('aria-current') === 'true'); return { active, activeLabel: dots[active]?.getAttribute('aria-label') || '' }; }`,
+  });
+  const dotData = JSON.parse(afterDotClick);
+  check(
+    "clicking dot 3 activates slide 3 (or 4 if auto-rotate advanced)",
+    dotData.active === 2 || dotData.active === 3,
+    `active=${dotData.active} label=${dotData.activeLabel}`,
+  );
+
+  // Verify the dot click is visible: the active dot's inner span
+  // is wider than the others. Whichever dot is active, its
+  // visible bar should be the widest.
+  const dotVisualCheck = mavisCall("browser_evaluate", {
+    function: `() => {
+      const dots = Array.from(document.querySelectorAll('button[aria-label*="Slide"]'));
+      const innerDots = dots.map(d => d.querySelector('span'));
+      const widths = innerDots.map(s => s ? Math.round(s.getBoundingClientRect().width) : 0);
+      const activeIdx = dots.findIndex(d => d.getAttribute('aria-current') === 'true');
+      return { widths, activeIdx };
+    }`,
+  });
+  const dotVisual = JSON.parse(dotVisualCheck);
+  const activeW = dotVisual.widths[dotVisual.activeIdx];
+  const otherMaxW = Math.max(...dotVisual.widths.filter((_, i) => i !== dotVisual.activeIdx));
+  check(
+    `active dot is widest (active=${activeW}px, others ≤ ${otherMaxW}px, idx=${dotVisual.activeIdx})`,
+    activeW > otherMaxW,
+    JSON.stringify(dotVisual.widths),
+  );
+
+  // Click prev (desktop only — on mobile the prev/next are hidden)
+  // Test mobile swipe via track.scrollTo
+  const swipeCheck = mavisCall("browser_evaluate", {
+    function: `() => {
+      const track = Array.from(document.querySelectorAll('div')).find(d => d.className && d.className.includes('md:hidden flex') && d.className.includes('snap-x'));
+      if (!track) return { found: false };
+      track.scrollTo({ left: track.clientWidth * 2, behavior: 'instant' });
+      return { found: true, scrollLeft: track.scrollLeft };
+    }`,
+  });
+  const swipeData = JSON.parse(swipeCheck);
+  check("mobile swipe (scrollTo slide 3) moves the track", swipeData.found && swipeData.scrollLeft > 0, JSON.stringify(swipeData));
+
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail === 0 ? 0 : 1);
 }

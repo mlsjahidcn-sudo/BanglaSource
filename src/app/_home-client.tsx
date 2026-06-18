@@ -10,6 +10,9 @@ import { fmtCny, fmtBdt, FX_CNY_BDT, landedCost } from "@/lib/pricing";
 import { categoryList, categories, type CategoryKey } from "@/lib/categories";
 import { ForYou } from "@/components/for-you";
 import { ProductCarousel } from "@/components/product-carousel";
+// Phase 52: hero is now a multi-product slider (one slide per
+// product) instead of a single static visual. See
+// src/components/hero-slider.tsx for the design.
 // NOTE (Phase 45, 2026-06-18): the RecentlyViewed component is still
 // used on /for-you/page.tsx but is no longer rendered on the home page.
 // The empty RecentlyViewed strip was replaced by an AI Picks carousel
@@ -18,11 +21,12 @@ import { NewsletterSignup } from "@/components/newsletter-signup";
 import { TrustBar } from "@/components/trust-bar";
 import { ValueProps } from "@/components/value-props";
 import { Testimonials } from "@/components/testimonials";
-import type { PopularProduct } from "@/lib/popular";
+import { HeroSlider } from "@/components/hero-slider";
+import type { PopularProduct, HeroProduct } from "@/lib/popular";
 
 export function HomeClient({
   syncStats,
-  heroProduct,
+  heroFeed,
   aiPicks,
   fxCnyBdt,
 }: {
@@ -50,7 +54,16 @@ export function HomeClient({
    * calls without a redeploy.
    */
   fxCnyBdt: number;
-  heroProduct: PopularProduct | null;
+  /**
+   * Phase 52 (2026-06-19): the hero is now a multi-product
+   * slider. heroFeed is the server-rendered array of ~6
+   * products with full product context (image, title, MOQ,
+   * supplier, factory, min BDT price). Same popularity
+   * signal as the AI Picks strip below so the two are
+   * coherent. Empty array is allowed — HeroSlider renders
+   * a placeholder card in that case.
+   */
+  heroFeed: HeroProduct[];
 }) {
   const { t, lang } = useLang();
   const { products: allProducts, loaded } = useCatalog();
@@ -109,12 +122,14 @@ export function HomeClient({
         <Container className="py-5 overflow-visible">
           <div className="grid md:grid-cols-12 gap-4 overflow-visible">
             <SidebarRail products={allProducts} fxCnyBdt={fxCnyBdt} />
-            <div className="md:col-span-9">
-              <Hero
-                activeCount={syncStats.activeCount}
-                lastUpdateIso={syncStats.lastUpdateIso}
-                heroProduct={heroProduct}
-              />
+            {/* min-w-0 lets the grid shrink the column on mobile
+                (the slider's snap-scroll track would otherwise
+                push the column to the sum of its children). */}
+            <div className="md:col-span-9 min-w-0">
+              {/* Phase 52: hero is now a product-specific multi-slide
+                  slider. Desktop auto-rotates every 5s; mobile uses
+                  snap-scroll + dot indicators. */}
+              <HeroSlider products={heroFeed} />
             </div>
           </div>
         </Container>
@@ -365,152 +380,6 @@ function SidebarRail({
  * and /shipping-rates owns the calculator. So the hero stays focused
  * on the value prop + the most popular SKU right now.
  */
-
-function Hero({
-  activeCount,
-  lastUpdateIso,
-  heroProduct,
-}: {
-  activeCount: number;
-  lastUpdateIso: string | null;
-  heroProduct: PopularProduct | null;
-}) {
-  return (
-    <div className="relative overflow-hidden rounded-xl border border-border bg-bg h-[420px]">
-      <div className="relative h-full grid md:grid-cols-12 gap-6 p-8 md:p-10">
-        <div className="md:col-span-7 flex flex-col justify-center min-w-0">
-          <HeroCopy
-            activeCount={activeCount}
-            lastUpdateIso={lastUpdateIso}
-          />
-        </div>
-        <div className="md:col-span-5 hidden md:flex items-center justify-center relative">
-          <HeroVisual product={heroProduct} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function HeroCopy({
-  activeCount,
-  lastUpdateIso,
-}: {
-  activeCount: number;
-  lastUpdateIso: string | null;
-}) {
-  const { t, lang } = useLang();
-  const numFmt = lang === "bn" ? "bn-BD" : "en-US";
-  const countStr = activeCount.toLocaleString(numFmt);
-  const freshLabel = useFreshnessLabel(lastUpdateIso, lang);
-  void freshLabel;
-
-  return (
-    <div className="flex flex-col min-w-0">
-      <span className="inline-flex w-fit items-center gap-2 px-2.5 py-1 text-[10px] font-semibold tracking-[0.1em] uppercase rounded-full bg-cyan-600 text-white">
-        <span className="relative flex h-1.5 w-1.5">
-          <span className="absolute inline-flex h-full w-full rounded-full bg-white opacity-60 animate-ping" />
-          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
-        </span>
-        {t("home.hero.eyebrow", { count: countStr })}
-      </span>
-
-      <h2 className="mt-4 text-[32px] md:text-[40px] leading-[1.05] font-semibold tracking-[-0.02em] text-fg max-w-[20ch]">
-        {t("home.hero.title")}
-      </h2>
-      <p className="mt-4 text-[14px] text-fg-muted leading-relaxed max-w-[52ch]">
-        {t("home.hero.subhead", { count: countStr })}
-      </p>
-
-      <div className="mt-6 flex flex-wrap items-center gap-3">
-        <Link
-          href="/categories"
-          className="inline-flex items-center h-11 px-5 text-[14px] font-medium rounded-md bg-cyan-600 text-white hover:bg-cyan-700 transition-colors shadow-[inset_0_-1px_0_rgba(0,0,0,0.08)]"
-        >
-          {t("home.hero.cta.browse", { count: countStr })} →
-        </Link>
-        <Link
-          href="/buyer/rfqs?action=new"
-          className="inline-flex items-center h-11 px-5 text-[14px] font-medium rounded-md border border-border text-fg hover:border-cyan-600 hover:text-cyan-700 transition-colors"
-        >
-          {t("home.hero.cta.quote")} →
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-// Helper: format the time since the last product write. Used by the
-// TopRibbon LiveBadge (existing). Kept here as a placeholder for the
-// hero's per-render freshness — split off if the hero gets its own
-// dynamic copy.
-function useFreshnessLabel(iso: string | null, lang: "en" | "bn"): string {
-  if (!iso) return lang === "bn" ? "আজ" : "today";
-  const then = new Date(iso).getTime();
-  const now = Date.now();
-  const ageH = (now - then) / (1000 * 60 * 60);
-  if (ageH < 1) return lang === "bn" ? "এইমাত্র" : "just now";
-  if (ageH < 24) return lang === "bn" ? `${Math.round(ageH)} ঘন্টা আগে` : `${Math.round(ageH)}h ago`;
-  const ageD = Math.round(ageH / 24);
-  return lang === "bn" ? `${ageD} দিন আগে` : `${ageD}d ago`;
-}
-
-function HeroVisual({ product }: { product: PopularProduct | null }) {
-  if (!product) {
-    // Fallback: a "popular this week" placeholder card with the
-    // same shape, so the layout doesn't collapse if the popular
-    // carousel is empty (very first page render before server
-    // has any view history).
-    return (
-      <div className="relative w-full h-full flex items-center justify-center">
-        <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden border border-border bg-slate-100 flex items-center justify-center">
-          <div className="text-center px-4">
-            <p className="text-[10px] font-semibold tracking-wider uppercase text-slate-400">
-              Popular this week
-            </p>
-            <p className="mt-2 text-[20px] font-semibold text-slate-200">
-              Top picks soon
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className="relative w-full h-full flex items-center justify-center">
-      <Link
-        href={`/products/${product.source_id}`}
-        className="relative w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden border border-border shadow-lg bg-white block group"
-      >
-        <Image
-          src={product.image}
-          alt={product.title_en}
-          fill
-          sizes="320px"
-          className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
-          priority
-        />
-      </Link>
-      {/* landed cost chip — sits below the image, NOT overlapping it.
-          Real number from the DB (min_bdt is the BDT product price
-          the buyer would pay for the starting MOQ). NOT a fabricated
-          marketing number. */}
-      <div className="absolute left-1/2 -translate-x-1/2 -bottom-3 bg-white text-slate-900 px-4 py-2.5 rounded-lg shadow-2xl border border-border w-[300px]">
-        <p className="text-[10px] font-semibold tracking-wider uppercase text-cyan-700">
-          Popular this week
-        </p>
-        <div className="flex items-baseline gap-2 mt-0.5">
-          <p className="price-tag text-[20px] font-semibold leading-none shrink-0">
-            ৳{product.min_bdt.toLocaleString("en-IN")}
-          </p>
-          <p className="text-[10.5px] text-fg-muted truncate min-w-0 flex-1">
-            {product.title_en}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ───────────────────────────  CATEGORY STRIP  ──────────────────────── */
 

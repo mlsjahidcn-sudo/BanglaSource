@@ -10,7 +10,9 @@ import {
 import {
   popularByViews,
   recentlyChanged,
+  heroProducts,
   type PopularProduct,
+  type HeroProduct,
 } from "@/lib/popular";
 import { getFxCnyBdt } from "@/lib/settings";
 
@@ -66,13 +68,20 @@ async function loadCarousels() {
 }
 
 export default async function HomePage() {
-  const [syncStats, carousels, fxCnyBdt] = await Promise.all([
+  // Phase 48: read the live FX rate FIRST so the hero slider
+  // feed (Phase 52) can use it. Admin can change this at
+  // /admin/settings without redeploying.
+  const fxCnyBdt = await getFxCnyBdt();
+  const [syncStats, carousels, heroFeed] = await Promise.all([
     loadSyncStats(),
     loadCarousels(),
-    // Phase 48: read the live FX rate from public.settings.fx_cny_bdt
-    // (with default fallback in src/lib/settings.ts). Admin can change
-    // this at /admin/settings without redeploying.
-    getFxCnyBdt(),
+    // Phase 52: hero slider feed (6 products with full product
+    // context — MOQ, supplier, factory — so each slide can
+    // render a real "Featured" card, not just a placeholder).
+    // Uses the same popularity signal as the AI Picks strip
+    // so the two are coherent. Live FX rate is threaded in so
+    // the price stays consistent with the rest of the page.
+    heroProducts(6, fxCnyBdt).catch(() => [] as HeroProduct[]),
   ]);
   // Phase 25: Organization + WebSite JSON-LD so Google has
   // a single canonical entity + a sitelinks search box.
@@ -92,7 +101,7 @@ export default async function HomePage() {
       />
       <HomeClient
         syncStats={syncStats}
-        heroProduct={carousels.popular[0] ?? null}
+        heroFeed={heroFeed}
         aiPicks={carousels.popular}
         fxCnyBdt={fxCnyBdt}
       />

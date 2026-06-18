@@ -253,3 +253,118 @@ export async function recentlyChanged(
   }
   return out;
 }
+
+/**
+ * Phase 52: hero slider feed. Returns N products with the
+ * full set of fields the hero card needs (image, title, MOQ,
+ * supplier city, factory). Uses the same `popular_by_views`
+ * RPC as the AI Picks strip so the hero and the strip below
+ * are coherent ("this is what's moving this week"), but with
+ * a wider select so the hero card can show real product
+ * context instead of just a placeholder.
+ *
+ * The CNY→BDT conversion uses the historical 1.65 sentinel
+ * for now (same as the other helpers). When Phase 48's live
+ * FX rate matters here — e.g. the hero price drift would be
+ * noticeable — we can pass `fxCnyBdt` in and recompute.
+ */
+export type HeroProduct = {
+  source_id: string;
+  title_en: string;
+  title_bn: string;
+  image: string;
+  category: string;
+  min_bdt: number;
+  moq: number;
+  factory_moq: number;
+  supplier_city: string;
+  supplier_province: string;
+  rank_score: number;
+};
+
+export async function heroProducts(
+  limit: number = 6,
+  fxCnyBdt: number = 1.65,
+): Promise<HeroProduct[]> {
+  const sb = getServiceRoleClient();
+  // Reuse the popularity RPC to keep the hero and the AI
+  // Picks strip consistent. Fall back to a JS-side group-by
+  // if the RPC isn't installed (defense for fresh envs).
+  let top: { source_id: string; count: number }[] = [];
+  const { data: rpcData, error: rpcErr } = await sb.rpc("popular_by_views", {
+    p_since: sinceIso(7),
+    p_limit: limit * 3, // overscan to drop inactive below
+  });
+  if (!rpcErr && rpcData) {
+    top = (rpcData as any[]).map((r) => ({
+      source_id: r.source_id,
+      count: r.count ?? r.rank_score ?? 0,
+    }));
+  } else {
+    // Fallback path: replicate popularByViewsFallback
+    // up to the source-id ranking. Then enrich below.
+    const { data: rows } = await sb
+      .from("page_views")
+      .select("path")
+      .gte("recorded_at", sinceIso(7))
+      .like("path", "/products/%")
+      .limit(50_000);
+    if (!rows) return [];
+    const counts = new Map<string, number>();
+    for (const r of rows) {
+      const m = (r.path ?? "").match(/^\/products\/(.+)$/);
+      if (!m) continue;
+      counts.set(m[1], (counts.get(m[1]) ?? 0) + 1);
+    }
+    top = [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit * 3)
+      .map(([source_id, count]) => ({ source_id, count }));
+  }
+  if (top.length === 0) return [];
+  // Pull the product detail. We grab a wider select than
+  // popularByViews so the hero card can render MOQ + supplier
+  // context.
+  const { data: products } = await sb
+    .from("products")
+    .select(
+      "source_id, title_en, title_bn, images, category, factory_moq, supplier_city, supplier_province, price_tiers(price_cny_fen, qty_min)",
+    )
+    .eq("active", true)
+    .in(
+      "source_id",
+      top.map((t) => t.source_id),
+    );
+  if (!products) return [];
+  const byId = new Map((products as any[]).map((p) => [p.source_id, p]));
+  const out: HeroProduct[] = [];
+  for (const t of top) {
+    const p = byId.get(t.source_id);
+    if (!p) continue;
+    const tiers = (p.price_tiers ?? []) as Array<{
+      price_cny_fen: number;
+      qty_min: number;
+    }>;
+    if (tiers.length === 0) continue;
+    const lowest = tiers.reduce(
+      (a, b) => (!a || b.price_cny_fen < a.price_cny_fen ? b : a),
+      null as null | { price_cny_fen: number; qty_min: number },
+    );
+    if (!lowest) continue;
+    out.push({
+      source_id: p.source_id,
+      title_en: p.title_en,
+      title_bn: p.title_bn,
+      image: (p.images ?? [])[0] ?? "",
+      category: p.category,
+      min_bdt: Math.ceil((lowest.price_cny_fen / 100) * fxCnyBdt),
+      moq: lowest.qty_min,
+      factory_moq: p.factory_moq ?? 1,
+      supplier_city: p.supplier_city ?? "",
+      supplier_province: p.supplier_province ?? "",
+      rank_score: t.count,
+    });
+    if (out.length >= limit) break;
+  }
+  return out;
+}

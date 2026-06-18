@@ -41,6 +41,29 @@ export const dict: Dict = {
   "home.hero.cta.browse": { en: "Browse {count} products", bn: "{count}টি পণ্য দেখুন" },
   "home.hero.cta.quote": { en: "Request a quote", bn: "কোটেশন চান" },
 
+  // ── Phase 52: hero slider (product-specific slides) ────────
+  "home.hero_slider.eyebrow": {
+    en: "Featured · popular this week",
+    bn: "বিশেষ · এই সপ্তাহের জনপ্রিয়",
+  },
+  "home.hero_slider.cta.view": { en: "View product", bn: "পণ্য দেখুন" },
+  "home.hero_slider.from": { en: "from", bn: "থেকে" },
+  "home.hero_slider.per_pc": { en: "/ pc at {qty}+", bn: "/ পিস {qty}+ এ" },
+  "home.hero_slider.shipping": {
+    en: "Air 7-12 days · Sea 30-45 days",
+    bn: "এয়ার ৭-১২ দিন · সি ৩০-৪৫ দিন",
+  },
+  "home.hero_slider.prev": { en: "Previous slide", bn: "আগের স্লাইড" },
+  "home.hero_slider.next": { en: "Next slide", bn: "পরের স্লাইড" },
+  "home.hero_slider.slide_of": {
+    en: "Slide {n} of {total}",
+    bn: "{total} এর {n} নম্বর স্লাইড",
+  },
+  "home.hero_slider.empty": {
+    en: "Featured products loading…",
+    bn: "বিশেষ পণ্য লোড হচ্ছে…",
+  },
+
   // ── Home: left rail + strip layout ───────────────────────────────
   "home.rail.title": { en: "Shop by category", bn: "ক্যাটাগরি" },
   "home.rail.all": { en: "All categories", bn: "সব ক্যাটাগরি" },

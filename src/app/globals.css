@@ -499,3 +499,14 @@ h1, h2, h3, h4 {
   outline: none;
   box-shadow: 0 0 0 2px var(--cyan-100), 0 0 0 3px var(--cyan-600);
 }
+
+/* Phase 52: hide scrollbar on the hero slider's mobile
+   snap-scroll track. The dots below the card are the
+   visible scroll affordance. WebKit + Firefox + IE/Edge. */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
