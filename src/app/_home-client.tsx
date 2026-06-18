@@ -405,7 +405,7 @@ function CategoryStrip({
           <span
             className={`w-1.5 h-1.5 rounded-full ${cat.accent} mb-2.5`}
           />
-          <h2 className="h-3 !font-semibold">
+          <h2 className="heading-3 !font-semibold">
             {lang === "bn" ? cat.name_bn : cat.name_en}
           </h2>
           <span className="text-[12px] text-fg-subtle font-mono tnum pb-1.5 hidden sm:inline">

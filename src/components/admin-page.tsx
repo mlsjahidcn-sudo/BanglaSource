@@ -85,7 +85,7 @@ export function AdminPageHeader({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2.5">
             <span
-              className={`inline-block w-2 h-2 rounded-full ${dotClass}`}
+              className={`inline-block w-2 heading-2 rounded-full ${dotClass}`}
               aria-hidden
             />
             <p

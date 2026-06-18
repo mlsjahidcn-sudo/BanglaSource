@@ -60,7 +60,7 @@ export default function BuyerSettingsPage() {
               className="sr-only peer"
             />
             <div className="w-9 h-5 rounded-full bg-bg-soft peer-checked:bg-emerald-500 relative transition-colors">
-              <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform peer-checked:translate-x-4" />
+              <div className="absolute top-0.5 left-0.5 w-4 heading-4 rounded-full bg-white transition-transform peer-checked:translate-x-4" />
             </div>
           </label>
         </div>
@@ -78,7 +78,7 @@ export default function BuyerSettingsPage() {
               className="sr-only peer"
             />
             <div className="w-9 h-5 rounded-full bg-bg-soft peer-checked:bg-emerald-500 relative transition-colors">
-              <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform peer-checked:translate-x-4" />
+              <div className="absolute top-0.5 left-0.5 w-4 heading-4 rounded-full bg-white transition-transform peer-checked:translate-x-4" />
             </div>
           </label>
         </div>

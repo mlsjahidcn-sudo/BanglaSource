@@ -68,7 +68,7 @@ export function CategoriesIndexClient() {
             className="bg-slate-900 hover:bg-slate-800 text-white min-h-[44px] inline-flex items-center gap-2 px-5 rounded-md text-[14px] font-medium transition-colors"
           >
             {t("cat.hero.cta_browse")}
-            <IconArrowRight className="w-4 h-4" />
+            <IconArrowRight className="w-4 heading-4" />
           </a>
           <a
             href={whatsappLink()}
@@ -76,7 +76,7 @@ export function CategoriesIndexClient() {
             rel="noopener noreferrer"
             className="border border-border hover:border-border-strong text-fg min-h-[44px] inline-flex items-center gap-2 px-5 rounded-md text-[14px] font-medium transition-colors"
           >
-            <IconWhatsApp className="w-4 h-4" />
+            <IconWhatsApp className="w-4 heading-4" />
             {t("cat.hero.cta_help")}
           </a>
         </div>
@@ -220,7 +220,7 @@ export function CategoriesIndexClient() {
             ].map((r) => (
               <div key={r.key}>
                 <span className={`inline-block w-1.5 h-1.5 rounded-full ${r.tone} mb-3`} />
-                <h3 className="h-4 !text-[12px] !font-medium uppercase tracking-wider !text-fg-muted">
+                <h3 className="heading-4 !text-[12px] !font-medium uppercase tracking-wider !text-fg-muted">
                   {t(`cat.why.${r.key}.title`)}
                 </h3>
                 <p className="mt-1.5 text-[12px] text-fg-muted leading-relaxed">
@@ -248,7 +248,7 @@ export function CategoriesIndexClient() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-semibold px-5 py-3 rounded-md min-h-[44px] text-[14px] transition-colors"
             >
-              <IconWhatsApp className="w-4 h-4" />
+              <IconWhatsApp className="w-4 heading-4" />
               {t("cat.cta.whatsapp")}
             </a>
             <Link
@@ -256,7 +256,7 @@ export function CategoriesIndexClient() {
               className="inline-flex items-center gap-2 border border-slate-600 hover:border-slate-400 text-white font-medium px-5 py-3 rounded-md min-h-[44px] text-[14px] transition-colors"
             >
               {t("cat.cta.rfq")}
-              <IconArrowRight className="w-4 h-4" />
+              <IconArrowRight className="w-4 heading-4" />
             </Link>
           </div>
         </div>

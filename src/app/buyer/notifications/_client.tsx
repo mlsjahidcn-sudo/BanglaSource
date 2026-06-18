@@ -117,7 +117,7 @@ export function NotificationsList({
             const inner = (
               <div className="flex items-start gap-3">
                 {!n.read_at && (
-                  <span className="mt-1.5 w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+                  <span className="mt-1.5 w-2 heading-2 rounded-full bg-rose-500 shrink-0" />
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-2">

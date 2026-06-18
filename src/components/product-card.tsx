@@ -90,7 +90,7 @@ export function ProductCard({
 
         {!compact && supplier && (
           <p className="mt-1.5 text-[11.5px] text-fg-subtle line-clamp-1 flex items-center gap-1.5">
-            <span className="inline-block w-1 h-1 rounded-full bg-emerald-500 shrink-0" />
+            <span className="inline-block w-1 heading-1 rounded-full bg-emerald-500 shrink-0" />
             <span className="truncate">{supplier}</span>
             {product.rating_overall > 0 && (
               <span className="ml-auto font-mono tnum shrink-0">

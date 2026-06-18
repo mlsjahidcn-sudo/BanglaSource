@@ -373,7 +373,7 @@ function AddressForm({
           type="checkbox"
           checked={isDefault}
           onChange={(e) => setIsDefault(e.target.checked)}
-          className="w-4 h-4 rounded border-border text-cyan-600 focus:ring-cyan-500"
+          className="w-4 heading-4 rounded border-border text-cyan-600 focus:ring-cyan-500"
         />
         Set as default (used to pre-fill /checkout)
       </label>

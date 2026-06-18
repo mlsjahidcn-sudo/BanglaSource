@@ -105,7 +105,7 @@ export default async function AdminLayout({
           >
             <IconBell size={16} />
             {counts.openAlerts > 0 && (
-              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500" />
+              <span className="absolute top-2 right-2 w-2 heading-2 rounded-full bg-rose-500" />
             )}
           </Link>
           <Link

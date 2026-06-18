@@ -90,8 +90,8 @@ export function ForYou({ limit = 12, title = "For you", eyebrow, className = "" 
             <div key={i} className="card overflow-hidden">
               <div className="aspect-[4/3] bg-slate-100 animate-pulse" />
               <div className="p-3 space-y-2">
-                <div className="h-3 bg-slate-100 rounded animate-pulse w-3/4" />
-                <div className="h-3 bg-slate-100 rounded animate-pulse w-1/2" />
+                <div className="heading-3 bg-slate-100 rounded animate-pulse w-3/4" />
+                <div className="heading-3 bg-slate-100 rounded animate-pulse w-1/2" />
               </div>
             </div>
           ))}

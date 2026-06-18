@@ -647,12 +647,12 @@ function PaymentRadio({
     >
       <div className="flex items-center gap-2">
         <span
-          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+          className={`w-4 heading-4 rounded-full border-2 flex items-center justify-center ${
             active ? "border-cyan-600" : "border-border"
           }`}
         >
           {active ? (
-            <span className="w-2 h-2 rounded-full bg-emerald-600" />
+            <span className="w-2 heading-2 rounded-full bg-emerald-600" />
           ) : null}
         </span>
         <span

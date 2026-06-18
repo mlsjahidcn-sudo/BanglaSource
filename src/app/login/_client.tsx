@@ -116,7 +116,7 @@ function Spinner() {
   return (
     <svg
       aria-hidden
-      className="animate-spin w-4 h-4"
+      className="animate-spin w-4 heading-4"
       viewBox="0 0 24 24"
       fill="none"
     >
@@ -419,7 +419,7 @@ export function LoginClient() {
                         strokeWidth="2.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="w-4 h-4"
+                        className="w-4 heading-4"
                       >
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
@@ -520,7 +520,7 @@ export function LoginClient() {
                       </span>
                     </div>
                     <div
-                      className="mt-1.5 h-1 bg-slate-100 rounded-full overflow-hidden"
+                      className="mt-1.5 heading-1 bg-slate-100 rounded-full overflow-hidden"
                       role="progressbar"
                       aria-valuenow={passwordScore.score}
                       aria-valuemin={0}

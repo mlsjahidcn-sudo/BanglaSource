@@ -302,8 +302,8 @@ function Skeleton() {
         <div key={i} className="flex gap-3 animate-pulse">
           <div className="w-20 h-20 rounded-md bg-slate-100" />
           <div className="flex-1 space-y-2">
-            <div className="h-3 bg-slate-100 rounded w-3/4" />
-            <div className="h-3 bg-slate-100 rounded w-1/2" />
+            <div className="heading-3 bg-slate-100 rounded w-3/4" />
+            <div className="heading-3 bg-slate-100 rounded w-1/2" />
             <div className="h-6 bg-slate-100 rounded w-24" />
           </div>
         </div>

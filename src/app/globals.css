@@ -202,11 +202,12 @@ body {
    the codebase (24/26/28/32/36/40/48/52/56). This is the AI-slop
    symptom: each section is sized independently, no rhythm.
 
-   The scale below is a 4-step hierarchy (h1-h4) plus an eyebrow.
-   Use the bare <hN> tag wherever possible — these rules apply.
-   When you need a different element to LOOK like a heading (a div
-   or span that holds the section title), use .h-1, .h-2, .h-3, .h-4
-   utility classes which inherit the same fluid sizes.
+The scale below is a 4-step hierarchy (h1-h4) plus an eyebrow.
+    Use the bare <hN> tag wherever possible — these rules apply.
+    When you need a different element to LOOK like a heading (a div
+    or span that holds the section title), use .heading-1, .heading-2,
+    .heading-3, .heading-4 utility classes which inherit the same
+    fluid sizes.
 
    Fluid via CSS clamp() — single source of truth, no per-breakpoint
    classes needed. Scroll-driven feel: page title smoothly grows from
@@ -258,29 +259,36 @@ body {
   }
 }
 
-/* .h-1 → .h-4 — heading styles available on any element. Same
-   sizes as the bare h1-h4 tags. Use when you can't change the
-   element type (e.g. a styled link or button that needs heading
-   weight) or when you need heading style on a div. */
-.h-1 {
+/* .heading-1 → .heading-4 — heading styles available on any element.
+    Same sizes as the bare h1-h4 tags. Use when you can't change the
+    element type (e.g. a styled link or button that needs heading
+    weight) or when you need heading style on a div.
+
+    IMPORTANT: do NOT name these `.h-N`. Tailwind v4 ships built-in
+    height utilities with the same names (`.h-2` = height: 0.5rem,
+    `.h-3` = height: 0.75rem, etc.) and the Tailwind height rule wins
+    the cascade — which collapses heading-style elements to a tiny
+    8-pixel box and lets the text overflow visually onto whatever
+    sibling comes next. (See Phase 59: PDP EN/BN title overlap.) */
+.heading-1 {
   font-size: clamp(32px, 5vw, 48px);
   line-height: 1.1;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
-.h-2 {
+.heading-2 {
   font-size: clamp(24px, 3.5vw, 32px);
   line-height: 1.2;
   font-weight: 600;
   letter-spacing: -0.02em;
 }
-.h-3 {
+.heading-3 {
   font-size: clamp(18px, 2vw, 20px);
   line-height: 1.3;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
-.h-4 {
+.heading-4 {
   font-size: 15px;
   line-height: 1.4;
   font-weight: 600;

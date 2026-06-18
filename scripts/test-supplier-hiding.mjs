@@ -438,6 +438,83 @@ async function main() {
     trustBar.hasDhakaInTrust ? "(still lists Dhaka, Chittagong, Sylhet)" : "(generic)",
   );
 
+  // Phase 59: h1 height-collapse bug. The custom `.h-1`/`.h-2`/
+  // `.h-3`/`.h-4` heading utility classes (font-size, line-height,
+  // weight, tracking) collided with Tailwind v4's built-in `.h-1`
+  // /`.h-2`/`.h-3`/`.h-4` height utilities. Tailwind's height
+  // rule won the cascade, collapsing the PDP product title from
+  // ~94px to 8px. The text overflowed the 8px box and visually
+  // landed ON TOP of the next sibling (the Bengali subtitle),
+  // making the two titles appear to overlap.
+  //
+  // Symptom: `h1.offsetHeight` ≪ `h1.scrollHeight`. A healthy
+  // 3-line h1 at 26px font + 31.2px line-height should be ~94px
+  // tall; a collapsed box is ~8px.
+  //
+  // The utility classes were renamed `.heading-N` in this phase,
+  // but we test the underlying invariant: any h1 on a real product
+  // page must have offsetHeight === scrollHeight (no clipping).
+  console.log("\n[15] PDP h1 height not collapsed by Tailwind h-N collision");
+  const pdpTitleUrl = `${ORIGIN}/products/${products[0].source_id}`;
+  mavisCallNoReturn("browser_navigate", { url: pdpTitleUrl });
+  // wait a beat for the SSR-rendered page to settle
+  await new Promise((r) => setTimeout(r, 1500));
+  const titleBox = JSON.parse(
+    mavisCall("browser_evaluate", {
+      function: `() => {
+        const h1 = document.querySelector("h1");
+        if (!h1) return { ok: false };
+        const rect = h1.getBoundingClientRect();
+        return {
+          ok: true,
+          offsetH: h1.offsetHeight,
+          scrollH: h1.scrollHeight,
+          clientH: h1.clientHeight,
+          computedHeight: getComputedStyle(h1).height,
+          fontSize: getComputedStyle(h1).fontSize,
+          lineHeight: getComputedStyle(h1).lineHeight,
+          classList: h1.className,
+          text: (h1.textContent || "").substring(0, 60),
+        };
+      }`,
+    }),
+  );
+  // A collapsed h1 has clientH around 8px. A healthy one is 60+px.
+  // Allow 2px of slack in case Tailwind changes rounding, but
+  // anything near 8 is the bug.
+  check(
+    "PDP h1 is not height-collapsed (offsetHeight ≈ scrollHeight, ≥ 30px)",
+    titleBox.ok && titleBox.offsetH >= 30 && titleBox.offsetH >= titleBox.scrollH - 5,
+    titleBox.ok
+      ? `offsetH=${titleBox.offsetH} scrollH=${titleBox.scrollH} h=${titleBox.computedHeight} cls="${titleBox.classList}"`
+      : "(no h1 found)",
+  );
+  // Also verify the Bengali subtitle is NOT visually inside the
+  // h1 box (the bug was that the h1 box collapsed to 8px and the
+  // subtitle sat in the area the h1 should have occupied).
+  const noVisualOverlap = JSON.parse(
+    mavisCall("browser_evaluate", {
+      function: `() => {
+        const h1 = document.querySelector("h1");
+        const p = h1 && h1.nextElementSibling;
+        if (!p || p.tagName !== "P") return { ok: false };
+        const r1 = h1.getBoundingClientRect();
+        const r2 = p.getBoundingClientRect();
+        return {
+          ok: true,
+          h1Bottom: r1.bottom,
+          pTop: r2.top,
+          gap: r2.top - r1.bottom,
+        };
+      }`,
+    }),
+  );
+  check(
+    "PDP h1 and Bengali subtitle do not visually overlap (gap > 0)",
+    noVisualOverlap.ok && noVisualOverlap.gap > 0,
+    noVisualOverlap.ok ? `gap=${noVisualOverlap.gap}px` : "(no h1/p pair)",
+  );
+
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail === 0 ? 0 : 1);
 }

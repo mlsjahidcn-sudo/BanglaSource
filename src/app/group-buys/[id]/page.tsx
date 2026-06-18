@@ -236,7 +236,7 @@ export default async function GroupBuyDetailPage({
                 {CATEGORIES.find((c) => c.value === detail.product.category)?.label ??
                   detail.product.category}
               </p>
-              <h1 className="mt-2 h-2 !text-[24px] md:!text-[28px]">
+              <h1 className="mt-2 heading-2 !text-[24px] md:!text-[28px]">
                 {detail.product.title_en}
               </h1>
               <p className="text-[12px] text-fg-subtle font-mono mt-1">
@@ -271,7 +271,7 @@ export default async function GroupBuyDetailPage({
                 </span>
               </div>
               <div
-                className={`h-2 w-full bg-slate-100 rounded overflow-hidden mt-1.5 ${
+                className={`heading-2 w-full bg-slate-100 rounded overflow-hidden mt-1.5 ${
                   detail.status === "forming" ? "gb-forming-bar" : ""
                 }`}
               >

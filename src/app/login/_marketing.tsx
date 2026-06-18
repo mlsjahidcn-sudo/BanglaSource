@@ -62,7 +62,7 @@ function CheckIcon() {
         strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="w-3 h-3"
+        className="w-3 heading-3"
       >
         <polyline points="20 6 9 17 4 12" />
       </svg>

@@ -314,7 +314,7 @@ function GroupBuyCardItem({ item }: { item: GroupBuyCard }) {
         <p className="text-[10.5px] uppercase tracking-wider text-fg-subtle font-medium">
           {item.product.category}
         </p>
-        <h2 className="mt-1 h-4 !text-[15px] font-medium leading-snug line-clamp-2">
+        <h2 className="mt-1 heading-4 !text-[15px] font-medium leading-snug line-clamp-2">
           {item.product.title_en}
         </h2>
         <p className="text-[10.5px] text-fg-subtle font-mono mt-0.5">

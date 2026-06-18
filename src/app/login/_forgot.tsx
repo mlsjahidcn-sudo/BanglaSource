@@ -153,7 +153,7 @@ function Spinner() {
   return (
     <svg
       aria-hidden
-      className="animate-spin w-4 h-4"
+      className="animate-spin w-4 heading-4"
       viewBox="0 0 24 24"
       fill="none"
     >

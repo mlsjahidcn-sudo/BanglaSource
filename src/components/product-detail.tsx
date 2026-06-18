@@ -466,7 +466,7 @@ export function ProductDetail({ product }: { product: Product }) {
             <div className="text-[11.5px] text-fg-muted font-mono tnum tracking-[0.06em]">
               ID · {product.source_id}
             </div>
-            <h1 className="mt-2 h-2 !text-[22px] md:!text-[26px]">
+            <h1 className="mt-2 heading-2 !text-[22px] md:!text-[26px]">
               {product.title_en}
             </h1>
             <p className="mt-2 text-[14px] text-fg-muted">
@@ -579,8 +579,8 @@ export function ProductDetail({ product }: { product: Product }) {
               {quoteLoading && !lc && (
                 <div className="space-y-2 animate-pulse">
                   <div className="h-5 bg-slate-100 rounded w-full" />
-                  <div className="h-4 bg-slate-100 rounded w-4/5" />
-                  <div className="h-4 bg-slate-100 rounded w-4/5" />
+                  <div className="heading-4 bg-slate-100 rounded w-4/5" />
+                  <div className="heading-4 bg-slate-100 rounded w-4/5" />
                 </div>
               )}
 

@@ -164,7 +164,7 @@ export default function ContactPage() {
                     />
                   </svg>
                 </div>
-                <h2 className="mt-5 h-3 !text-[20px]">Message sent</h2>
+                <h2 className="mt-5 heading-3 !text-[20px]">Message sent</h2>
                 <p className="mt-2 text-fg-muted max-w-sm mx-auto">
                   We&apos;ll get back to you within one
                   business day via the phone number you

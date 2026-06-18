@@ -161,7 +161,7 @@ export function GroupBuyDetailClient({
     return (
       <div className="rounded-lg border border-cyan-200 bg-cyan-50/50 p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-cyan-500" />
+          <span className="w-2 heading-2 rounded-full bg-cyan-500" />
           <p className="text-[13px] font-semibold text-cyan-900">
             {dict["group_buy.public.detail.already_in"].en
               .replace("{qty}", String(membership.qty))

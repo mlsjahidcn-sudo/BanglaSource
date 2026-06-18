@@ -246,7 +246,7 @@ export default async function AdminGroupBuysPage({
                       <div className="font-mono tnum">
                         {progress.qty.toLocaleString()} / {g.target_qty.toLocaleString()}
                       </div>
-                      <div className="mt-1 h-1 w-24 bg-slate-100 rounded overflow-hidden">
+                      <div className="mt-1 heading-1 w-24 bg-slate-100 rounded overflow-hidden">
                         <div
                           className={`h-full ${pct >= 100 ? "bg-emerald-500" : "bg-cyan-500"} transition-all`}
                           style={{ width: `${pct}%` }}
