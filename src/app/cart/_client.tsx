@@ -181,8 +181,7 @@ export function CartClient() {
                   the per-piece math.
                 */}
                 <p className="mt-1 text-[12px] text-fg-subtle font-mono tnum">
-                  {product?.supplier_city ?? "—"},{" "}
-                  {product?.supplier_province ?? "—"} · MOQ{" "}
+                  China · MOQ{" "}
                   {product?.factory_moq ?? "—"} · Qty {item.qty}
                 </p>
                 <div className="mt-3 flex items-center justify-between">

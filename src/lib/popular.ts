@@ -92,6 +92,68 @@ export async function similarProducts(
   return scored;
 }
 
+/**
+ * "Same factory" — other active products from the same supplier
+ * as the seed product. Used by the SameFactory component on the
+ * PDP. Server-side only: the public /api/products/by-supplier
+ * endpoint has been retired (it would let any visitor enumerate
+ * factories by guessing names).
+ *
+ * The `supplierName` is used to match — that's fine, it's a
+ * server-side detail. The output is a public-safe array (no
+ * supplier fields).
+ */
+export async function sameFactoryItems(
+  supplierName: string,
+  excludeSourceId: string,
+  limit: number = 8,
+): Promise<
+  {
+    source_id: string;
+    title_en: string;
+    title_bn: string;
+    image: string;
+    min_bdt: number;
+    factory_moq: number;
+  }[]
+> {
+  if (!supplierName) return [];
+  const sb = getServiceRoleClient();
+  // FX_CNY_BDT here is the same rate the home page uses — we
+  // don't want a stale rate baked into the rendered page.
+  const { getFxCnyBdt } = await import("./settings");
+  const fx = await getFxCnyBdt();
+  const { data: rows, error } = await sb
+    .from("products")
+    .select(
+      "source_id, title_en, title_bn, images, factory_moq, price_tiers(price_cny_fen)",
+    )
+    .eq("active", true)
+    .eq("supplier_name", supplierName)
+    .neq("source_id", excludeSourceId)
+    .order("order_count_30d", { ascending: false })
+    .limit(limit);
+  if (error || !rows) return [];
+  return (rows as any[]).map((p) => {
+    const lowest = (p.price_tiers ?? []).reduce(
+      (a: any, b: any) =>
+        !a || b.price_cny_fen < a.price_cny_fen ? b : a,
+      null,
+    );
+    const minBdt = lowest
+      ? Math.ceil((lowest.price_cny_fen / 100) * fx)
+      : 0;
+    return {
+      source_id: p.source_id as string,
+      title_en: p.title_en as string,
+      title_bn: p.title_bn as string,
+      image: ((p.images ?? [])[0] ?? "") as string,
+      min_bdt: minBdt,
+      factory_moq: p.factory_moq as number,
+    };
+  });
+}
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function sinceIso(days: number): string {

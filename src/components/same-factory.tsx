@@ -1,22 +1,27 @@
 "use client";
 // /components/same-factory.tsx
 //
-// "Same factory" — other active products from the same supplier_name
+// "Same factory" — other active products from the same supplier
 // on the PDP. Helps the buyer add a wider range of goods from a
 // trusted supplier in one consolidated shipment, which is the main
 // economic win of B2B sourcing (shared freight).
 //
-// Loads on mount via /api/products/by-supplier. Renders a 4-up
-// carousel. Falls back to a 2-up grid on mobile. Returns null
-// if the supplier has no other active products.
+// CLIENT component that takes items as a prop. The PDP page
+// fetches the items server-side using the service-role client and
+// passes them in. We never expose the supplier name on the public
+// site, and the by-supplier lookup API has been retired.
+//
+// The component only displays titles + prices + MOQ + a generic
+// "same factory" framing. The factory identity stays in the DB
+// and admin.
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { fmtBdt, FX_CNY_BDT } from "@/lib/pricing";
+import { fmtBdt } from "@/lib/pricing";
 import { useLang } from "@/lib/i18n";
+import { Container } from "@/components/ui/container";
 
-type Item = {
+export type SameFactoryItem = {
   source_id: string;
   title_en: string;
   title_bn: string;
@@ -25,44 +30,12 @@ type Item = {
   factory_moq: number;
 };
 
-export function SameFactory({
-  supplierName,
-  excludeSourceId,
-}: {
-  supplierName: string;
-  excludeSourceId: string;
-}) {
+export function SameFactory({ items }: { items: SameFactoryItem[] }) {
   const { lang } = useLang();
-  const [items, setItems] = useState<Item[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const r = await fetch(
-          `/api/products/by-supplier?name=${encodeURIComponent(supplierName)}&exclude=${encodeURIComponent(excludeSourceId)}&limit=8`,
-          { cache: "no-store" },
-        );
-        if (!r.ok) return;
-        const j = (await r.json()) as { items?: Item[] };
-        if (!cancelled) setItems(j.items ?? []);
-      } catch {
-        /* ignore */
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [supplierName, excludeSourceId]);
-
-  if (loading) return null;
   if (items.length === 0) return null;
 
   return (
-    <section className="mt-10">
+    <Container className="mt-10">
       <div className="mb-4 flex items-end justify-between gap-4">
         <div>
           <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium">
@@ -72,9 +45,8 @@ export function SameFactory({
             Same factory, more products
           </h2>
           <p className="mt-1 text-[12.5px] text-fg-muted max-w-lg">
-            Add these to your order to consolidate shipment from{" "}
-            <span className="font-medium text-fg">{supplierName}</span>.
-            You'll split the freight with this one.
+            Add these to your order to consolidate shipment from one factory.
+            You'll split the freight with one pickup.
           </p>
         </div>
       </div>
@@ -118,6 +90,6 @@ export function SameFactory({
           );
         })}
       </div>
-    </section>
+    </Container>
   );
 }

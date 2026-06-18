@@ -485,8 +485,14 @@ function StripCard({ product, fxCnyBdt }: { product: CatalogProduct; fxCnyBdt: n
         <p className="text-[13.5px] font-medium leading-snug line-clamp-2 min-h-[2.6em]">
           {title}
         </p>
+        {/*
+          Phase 56: replaced "{city}, {province}" with just "China"
+          — supplier city/province are no longer on the public
+          product shape. We still want a provenance line so the
+          card doesn't feel sparse.
+        */}
         <p className="mt-1 text-[10.5px] text-fg-subtle truncate">
-          {product.supplier_city}, {product.supplier_province}
+          China
         </p>
         <div className="mt-3 flex items-baseline gap-1.5">
           <span className="price-tag text-[16px] font-semibold text-fg">

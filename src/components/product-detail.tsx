@@ -165,19 +165,15 @@ export function ProductDetail({ product }: { product: Product }) {
             Product specifications
           </h2>
           <dl className="mt-5 border-t border-border">
+            {/*
+              We removed the "Supplier" data row — the factory name
+              used to be visible here. Now we just show "Verified
+              China factory" so buyers know it's vetted, without
+              revealing the specific factory.
+            */}
             <div className="data-row">
-              <dt>Supplier</dt>
-              <dd>
-                {product.supplier_name}
-                {product.supplier_city && (
-                  <span className="text-fg-muted">
-                    , {product.supplier_city}
-                    {product.supplier_province
-                      ? `, ${product.supplier_province}`
-                      : ""}
-                  </span>
-                )}
-              </dd>
+              <dt>Source</dt>
+              <dd>Verified China factory</dd>
             </div>
             <div className="data-row">
               <dt>Category</dt>
@@ -422,16 +418,26 @@ export function ProductDetail({ product }: { product: Product }) {
           </p>
         </div>
 
-        {/* Supplier card */}
+        {/*
+          Phase 56: replaced the "Factory" card with a generic
+          "Verified sourcing" card. We used to expose the factory
+          name + city + province here — that's the seller's
+          competitive moat and exposing it lets a buyer bypass us
+          to order direct. Now we just show the operational stats
+          (30-day orders, stock, rating) plus a generic "verified
+          China factory" badge.
+        */}
         <div className="mt-10 card p-6">
           <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium">
-            Factory
+            Verified sourcing
           </p>
           <p className="mt-1.5 text-[16px] font-semibold tracking-tight">
-            {product.supplier_name}
+            China factory · visited & audited
           </p>
           <p className="mt-1 text-[13px] text-fg-muted">
-            {product.supplier_city}, {product.supplier_province}, China
+            We don't publish which factory this comes from. If you're
+            a serious buyer, request a call and we'll walk you through
+            the supply chain.
           </p>
           <div className="mt-5 grid grid-cols-3 gap-4 text-[12px]">
             <Stat label="30-day orders" value={product.order_count_30d.toLocaleString()} />
@@ -731,7 +737,7 @@ export function ProductDetail({ product }: { product: Product }) {
               />
               <Spec
                 label="Ships from"
-                value={`${product.supplier_city}`}
+                value="China"
               />
             </dl>
           </div>

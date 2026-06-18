@@ -5,7 +5,7 @@ import { RecommendationsCarousel } from "@/components/recommendations-carousel";
 import { ForYou } from "@/components/for-you";
 import { SameFactory } from "@/components/same-factory";
 import { ProductCarousel } from "@/components/product-carousel";
-import { getCatalog, getProduct, dbProductToLegacy } from "@/lib/catalog";
+import { getCatalog, getProduct, dbProductToLegacy, publicProduct } from "@/lib/catalog";
 import { categories } from "@/lib/categories";
 import { FX_CNY_BDT } from "@/lib/pricing";
 import {
@@ -13,7 +13,7 @@ import {
   jsonLdScript,
   SITE_URL,
 } from "@/lib/seo";
-import { similarProducts } from "@/lib/popular";
+import { similarProducts, sameFactoryItems } from "@/lib/popular";
 
 const SITE = SITE_URL;
 
@@ -54,7 +54,11 @@ export default async function ProductPage({ params }: Params) {
   if (!db) notFound();
 
   const cat = categories[db.category as keyof typeof categories];
-  const product = dbProductToLegacy(db);
+  // Phase 56: strip supplier identity before passing to the
+  // client component. The full data stays in db (used server-
+  // side for same-factory matching + JSON-LD construction) but
+  // the client only sees the public-safe shape.
+  const product = publicProduct(dbProductToLegacy(db));
 
   // Build Product JSON-LD for Google rich results
   const lowestTier = db.price_tiers.reduce(
@@ -70,7 +74,11 @@ export default async function ProductPage({ params }: Params) {
     image: db.images?.slice(0, 4) ?? [],
     sku: db.source_id,
     mpn: db.source_id,
-    brand: { "@type": "Brand", name: db.supplier_name },
+    // The brand shown to search engines is BanglaSource — we are
+    // the seller of record, not the factory. Exposing the factory
+    // name in the JSON-LD would let a buyer bypass us and order
+    // direct from the source.
+    brand: { "@type": "Brand", name: "BanglaSource" },
     category: cat?.name_en ?? db.category,
     offers: {
       "@type": "Offer",
@@ -128,6 +136,15 @@ export default async function ProductPage({ params }: Params) {
     10,
   ).catch(() => []);
 
+  // Same-factory items, server-side. The supplier name is
+  // matched in SQL but never rendered or returned to the
+  // client (we only ship title/image/price/MOQ down).
+  const sameFactory = await sameFactoryItems(
+    db.supplier_name ?? "",
+    db.source_id,
+    8,
+  ).catch(() => []);
+
   return (
     <>
       <script
@@ -160,10 +177,7 @@ export default async function ProductPage({ params }: Params) {
             product as unknown as Parameters<typeof ProductDetail>[0]["product"]
           }
         />
-        <SameFactory
-          supplierName={db.supplier_name ?? ""}
-          excludeSourceId={db.source_id}
-        />
+        <SameFactory items={sameFactory} />
         {/* Phase 23: same-category ± price-band + same-
             supplier candidates. Falls back silently if
             the query returns empty. */}

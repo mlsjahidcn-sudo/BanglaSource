@@ -66,7 +66,11 @@ export function TrustBar() {
         <Stat
           value={vf > 0 ? `${vf}+` : "120+"}
           label="Verified suppliers"
-          sub="in Guangdong, Zhejiang, Fujian"
+          // Phase 56: changed "in Guangdong, Zhejiang, Fujian" to
+          // a generic "across China" — listing specific provinces
+          // narrowed the search space for buyers trying to bypass
+          // us to order direct.
+          sub="across China"
           tone="cyan"
         />
         <Stat

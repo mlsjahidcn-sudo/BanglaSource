@@ -164,6 +164,7 @@ export const dict: Dict = {
   "cat.sort.cheap": { en: "Price: low → high", bn: "দাম: কম → বেশি" },
   "cat.sort.expensive": { en: "Price: high → low", bn: "দাম: বেশি → কম" },
   "cat.stats.suppliers": { en: "suppliers", bn: "সরবরাহকারী" },
+  "cat.stats.factories": { en: "factories", bn: "কারখানা" },
   "cat.stats.avg_weight": { en: "avg weight", bn: "গড় ওজন" },
   "cat.stats.avg_price": { en: "avg unit price", bn: "গড় ইউনিট মূল্য" },
   "cat.stats.provinces": { en: "sourced from", bn: "সোর্সড" },

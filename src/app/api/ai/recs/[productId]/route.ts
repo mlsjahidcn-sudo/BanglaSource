@@ -287,7 +287,15 @@ export async function GET(
         ok: true,
         seed_source_id: seed.source_id,
         seed_category: seed.category,
-        recommendations: ranked,
+        recommendations: ranked.map((r) => ({
+          ...r,
+          // Strip supplier identity from the public response.
+          // The data is in the DB; we just don't reveal it on
+          // the public site (see publicProduct() in lib/catalog).
+          supplier_name: "",
+          supplier_city: "",
+          supplier_province: "",
+        })),
         meta: {
           co_view_signals: coView.size,
           candidates_scored: catalog.length,

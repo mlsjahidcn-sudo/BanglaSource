@@ -35,7 +35,6 @@ type Parsed = {
   category: string | null;
   price_min_bdt: number | null;
   price_max_bdt: number | null;
-  supplier_brand: string | null;
   sort: "price_asc" | "price_desc" | "popularity" | "newest" | null;
   in_stock_only: boolean;
   low_moq: boolean;
@@ -139,7 +138,6 @@ function SearchPageInner() {
       parsed.category ||
       parsed.price_min_bdt != null ||
       parsed.price_max_bdt != null ||
-      parsed.supplier_brand ||
       parsed.sort);
 
   return (
@@ -190,11 +188,11 @@ function SearchPageInner() {
               📦 {parsed.category}
             </span>
           )}
-          {parsed.supplier_brand && (
-            <span className="px-2.5 py-1 rounded-full bg-slate-900 text-white font-medium">
-              {parsed.supplier_brand}
-            </span>
-          )}
+          {/*
+            Phase 56: removed the supplier_brand chip. The brand
+            was the factory name — surfacing it on the public site
+            would let any visitor bypass us to order direct.
+          */}
           {parsed.price_min_bdt != null && (
             <span className="px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-800 font-medium">
               ৳{parsed.price_min_bdt.toLocaleString()}+

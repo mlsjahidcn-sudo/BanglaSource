@@ -44,11 +44,17 @@ export function CategoryClient({ slug }: { slug: string }) {
   }, [items, sort]);
 
   // Stats: live from the product list.
+  // Phase 56: removed `suppliers` + `provinces` counts — they
+  // depended on supplier_name / supplier_province which are now
+  // empty strings for the public catalog. We expose the same
+  // numbers under different names that don't reveal the source
+  // factory. `factories` here is the count of unique
+  // (supplier_name, supplier_province) pairs in the underlying
+  // data, but the actual names are not surfaced in the UI.
   const stats = useMemo(() => {
-    const suppliers = new Set(
+    const factories = new Set(
       items.map((p) => `${p.supplier_name}|${p.supplier_province}`),
     );
-    const provinces = new Set(items.map((p) => p.supplier_province));
     const avgWeightKg =
       items.length > 0
         ? items.reduce((s, p) => s + p.weight_kg, 0) / items.length
@@ -63,8 +69,10 @@ export function CategoryClient({ slug }: { slug: string }) {
           ) / items.length
         : 0;
     return {
-      suppliers: suppliers.size,
-      provinces: provinces.size,
+      // Subtract 1 for the (empty, empty) bucket that every
+      // stripped product now lands in. We want "0 factories"
+      // in the stripped view, not "1 factory".
+      factories: factories.size > 0 ? factories.size - 1 : 0,
       avgWeightKg,
       avgUnitCny,
     };
@@ -147,18 +155,14 @@ export function CategoryClient({ slug }: { slug: string }) {
           <div className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-3 text-[12px] text-fg-muted">
             <span className="font-mono tnum">
               <span className="text-fg font-semibold text-[14px] mr-1 price-tag">
-                {stats.suppliers}
+                {stats.factories}
               </span>
-              {t("cat.stats.suppliers")}
+              {t("cat.stats.factories")}
             </span>
             <span className="text-slate-300">·</span>
             <span>
               {t("cat.stats.provinces")}{" "}
-              <span className="font-medium text-fg">
-                {Array.from(
-                  new Set(items.map((p) => p.supplier_province)),
-                ).join(", ")}
-              </span>
+              <span className="font-medium text-fg">China</span>
             </span>
             <span className="text-slate-300">·</span>
             <span className="font-mono tnum">

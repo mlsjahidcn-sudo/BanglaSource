@@ -29,7 +29,11 @@ export async function GET(req: NextRequest) {
     )
     .eq("active", true)
     .or(
-      `title_en.ilike.${pat},title_bn.ilike.${pat},supplier_city.ilike.${pat},description_en.ilike.${pat}`,
+      // Search only the buyer-relevant fields. supplier_city /
+      // supplier_name are excluded on purpose — exposing a
+      // search-by-city lets a buyer enumerate which factories we
+      // work with, then bypass us to order direct.
+      `title_en.ilike.${pat},title_bn.ilike.${pat},description_en.ilike.${pat}`,
     )
     .order("id", { ascending: true })
     .limit(limit);

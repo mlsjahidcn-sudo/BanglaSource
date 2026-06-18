@@ -57,10 +57,14 @@ Output JSON with these fields (use null when not specified):
 - category: string | null
 - price_min_bdt: number | null
 - price_max_bdt: number | null
-- supplier_brand: string | null
 - sort: "price_asc" | "price_desc" | "popularity" | "newest" | null
 - in_stock_only: boolean
 - low_moq: boolean
+
+Note: brand/supplier identity is intentionally not extracted — that
+information is internal. If the user asks for a brand by name, fold
+it into the keywords array so the standard title/description search
+picks it up.
 
 Only output the JSON object. No prose, no markdown fences.`;
 
@@ -71,7 +75,6 @@ type ParsedQuery = {
   category: string | null;
   price_min_bdt: number | null;
   price_max_bdt: number | null;
-  supplier_brand: string | null;
   sort: "price_asc" | "price_desc" | "popularity" | "newest" | null;
   in_stock_only: boolean;
   low_moq: boolean;
@@ -135,10 +138,11 @@ async function parseQuery(
         typeof r.price_max_bdt === "number" && r.price_max_bdt > 0
           ? r.price_max_bdt
           : null,
-      supplier_brand:
-        typeof r.supplier_brand === "string" && r.supplier_brand.length > 0
-          ? r.supplier_brand
-          : null,
+      // Phase 56: supplier_brand field removed — the brand was
+      // never a public surface and we never want to accidentally
+      // leak the factory name through the AI parser. We still
+      // get keyword + category + price from the parser; the
+      // "brand" intent is folded into the keywords list.
       sort:
         typeof r.sort === "string" && ALLOWED_SORTS.has(r.sort)
           ? (r.sort as ParsedQuery["sort"])
@@ -157,7 +161,6 @@ async function parseQuery(
       category: null,
       price_min_bdt: null,
       price_max_bdt: null,
-      supplier_brand: null,
       sort: null,
       in_stock_only: false,
       low_moq: false,
@@ -213,14 +216,10 @@ async function runQuery(parsed: ParsedQuery) {
     q = q.lte("factory_moq", 10);
   }
 
-  // Brand keyword hit
-  if (parsed.supplier_brand) {
-    const pat = `%${parsed.supplier_brand}%`;
-    // OR filter; the .or() call is more strict than multiple separate filters
-    q = q.or(
-      `title_en.ilike.${pat},title_bn.ilike.${pat},description_en.ilike.${pat}`,
-    );
-  }
+  // Phase 56: brand keyword hit removed — supplier_brand is no
+  // longer parsed from the AI response. If the user typed a brand
+  // name, the parser folds it into `keywords`, which the standard
+  // search filter below handles.
 
   // Keyword search: build a single ilike OR pattern from the parsed
   // keywords. If empty, no text filter (return by category/sort).

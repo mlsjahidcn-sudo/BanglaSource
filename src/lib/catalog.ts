@@ -89,13 +89,15 @@ export const getCatalog = cache(
     }
 
     return (products as Omit<DbProduct, "price_tiers">[]).map((p) =>
-      dbProductToLegacy({
-        ...p,
-        price_tiers: tiersByProduct.get(p.id) ?? [],
-      }),
+      publicProduct(
+        dbProductToLegacy({
+          ...p,
+          price_tiers: tiersByProduct.get(p.id) ?? [],
+        }),
+      ),
     );
   },
-  ["catalog-v1"],
+  ["catalog-v2"],
   { revalidate: 60, tags: ["catalog"] },
 );
 
@@ -186,5 +188,30 @@ export function dbProductToLegacy(p: DbLike): Product {
     quality_score: p.quality_score ?? undefined,
     customs_duty_per_kg: p.customs_duty_per_kg,
     customs_duty_class: p.customs_duty_class ?? undefined,
+  };
+}
+
+/**
+ * Public-safe version of a Product — strips supplier_name,
+ * supplier_province, supplier_city. The factory behind a listing
+ * is the seller's competitive moat (they've built the relationship,
+ * they're paying for samples, they know the staff). Exposing the
+ * factory name on the public site lets any buyer cut us out and
+ * order direct, which collapses the value BanglaSource adds.
+ *
+ * The supplier data is still in the DB and available to admin via
+ * the service-role client, but it's never returned through the
+ * public /api/catalog endpoint or used in any public page.
+ *
+ * We use empty-string (not undefined) so the type stays the same
+ * and components that already check `product.supplier_name && ...`
+ * naturally skip rendering.
+ */
+export function publicProduct(p: Product): Product {
+  return {
+    ...p,
+    supplier_name: "",
+    supplier_province: "",
+    supplier_city: "",
   };
 }

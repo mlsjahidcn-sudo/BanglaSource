@@ -287,11 +287,7 @@ function HeroSlide({
 
         <p className="mt-2 text-[12px] text-fg-subtle tracking-wider uppercase">
           {product.category}
-          {product.supplier_city && (
-            <>
-              {" · China"}
-            </>
-          )}
+          {" · China"}
         </p>
 
         <div className="mt-5 flex items-baseline gap-2">
@@ -389,7 +385,7 @@ function MobileHeroSlide({
         </h3>
         <p className="text-[11px] text-fg-subtle tracking-wider uppercase">
           {product.category}
-          {product.supplier_city && ` · China`}
+          {" · China"}
         </p>
         <div className="flex items-baseline gap-2">
           <span className="text-[11px] text-fg-subtle uppercase tracking-wider">

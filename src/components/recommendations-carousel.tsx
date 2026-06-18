@@ -262,7 +262,7 @@ export function RecommendationsCarousel({
                   </span>
                 </div>
                 <p className="mt-1 text-[10.5px] text-fg-subtle truncate">
-                  MOQ {r.factory_moq} · {r.supplier_city}
+                  MOQ {r.factory_moq} · China
                 </p>
               </div>
             </Link>

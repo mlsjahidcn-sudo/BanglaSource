@@ -365,7 +365,7 @@ async function main() {
         return {
           hasBreadcrumb: /catalog[\\s\\S]{0,80}gadgets/.test(text),
           hasTitle: text.includes('Gadgets & electronics'),
-          hasSuppliersStat: /suppliers/.test(text),
+          hasFactoriesStat: /factories/.test(text),
           hasAvgWeight: /avg weight[\\s\\S]{0,60}kg/.test(text),
           hasAvgPrice: /avg unit price[\\s\\S]{0,60}¥\\d/.test(text),
           hasSourcedFrom: /sourced from/.test(text),
@@ -376,7 +376,7 @@ async function main() {
   );
   check("breadcrumb (catalog / gadgets)", slugHero.hasBreadcrumb);
   check("title: Gadgets & electronics", slugHero.hasTitle);
-  check("stats: suppliers", slugHero.hasSuppliersStat);
+  check("stats: factories", slugHero.hasFactoriesStat);
   check("stats: avg weight (kg)", slugHero.hasAvgWeight);
   check("stats: avg unit price (¥X.XX)", slugHero.hasAvgPrice);
   check("stats: sourced from provinces", slugHero.hasSourcedFrom);

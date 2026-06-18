@@ -28,7 +28,18 @@ async function loadStats() {
     const sb = getServiceRoleClient();
     const [active, suppliers, viewStats] = await Promise.all([
       sb.from("products").select("id", { count: "exact", head: true }).eq("active", true),
-      sb.from("products").select("supplier_name").eq("active", true).limit(500),
+      // Phase 56: query the RAW supplier_name field directly, NOT
+      // through getCatalog() — the public catalog strips supplier
+      // identity. We need a count here (not the names), and the
+      // count never leaves the server. Filtering out the empty
+      // bucket ensures we only count real factories.
+      sb
+        .from("products")
+        .select("supplier_name")
+        .eq("active", true)
+        .not("supplier_name", "is", null)
+        .neq("supplier_name", "")
+        .limit(2000),
       sb
         .from("page_views")
         .select("id", { count: "exact", head: true })
@@ -38,7 +49,7 @@ async function loadStats() {
         ),
     ]);
     const uniqSuppliers = new Set(
-      (suppliers.data ?? []).map((r: any) => r.supplier_name).filter(Boolean),
+      (suppliers.data ?? []).map((r: any) => r.supplier_name),
     ).size;
     return {
       activeCount: active.count ?? 0,
