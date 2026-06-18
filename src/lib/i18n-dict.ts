@@ -16,6 +16,9 @@ export const dict: Dict = {
   "nav.signin": { en: "Sign in", bn: "সাইন ইন" },
   "nav.start_order": { en: "Start an order", bn: "অর্ডার শুরু করুন" },
   "nav.all_categories": { en: "All categories", bn: "সব ক্যাটাগরি" },
+  "nav.my_account": { en: "My account", bn: "আমার অ্যাকাউন্ট" },
+  "nav.blog": { en: "Blog", bn: "ব্লগ" },
+  "nav.lang": { en: "Language", bn: "ভাষা" },
   "nav.search_placeholder": {
     en: "Search products · TWS earbuds, sunglasses, handbags…",
     bn: "পণ্য খুঁজুন · TWS ইয়ারবাড, সানগ্লাস, হ্যান্ডব্যাগ…",

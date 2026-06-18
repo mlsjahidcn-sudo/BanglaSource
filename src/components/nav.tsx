@@ -1,10 +1,26 @@
 "use client";
-import Link from "next/link";
+// /components/nav.tsx
+//
+// Public site nav. Renders the sticky header with logo, primary
+// navigation, search, lang toggle, and cart.
+//
+// MOBILE (md:hidden):
+//   - Logo (compact, links home)
+//   - Search icon button (opens search bar inline below the header)
+//   - Lang toggle
+//   - Hamburger button (opens MobileMenu drawer)
+//   - Cart button (44x44 touch target)
+//
+// DESKTOP (md:flex):
+//   - Logo + inline nav links + inline SearchBar + lang + cart
+
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useLang } from "@/lib/i18n";
 import { LangToggle } from "@/components/ui/lang-toggle";
 import { SearchBar } from "@/components/search-bar";
 import { CartDrawer } from "@/components/cart-drawer";
+import { MobileMenu } from "@/components/mobile-menu";
 import { useCart } from "@/lib/cart";
 import { getBrowserClient } from "@/lib/supabase/browser";
 
@@ -13,6 +29,8 @@ export function Nav() {
   const { count } = useCart();
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   useEffect(() => {
     const supabase = getBrowserClient();
@@ -28,11 +46,11 @@ export function Nav() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-border bg-bg/90 backdrop-blur supports-[backdrop-filter]:bg-bg/70">
-        <div className="mx-auto max-w-7xl px-6 md:px-10 h-16 flex items-center gap-6">
-          {/* Logo */}
+        <div className="mx-auto max-w-7xl px-4 md:px-10 h-16 flex items-center gap-3 md:gap-6">
+          {/* Logo — link target is full 64px height (h-16 on parent). */}
           <Link
             href="/"
-            className="flex items-center gap-2 shrink-0"
+            className="flex items-center gap-2 shrink-0 min-h-[44px] -ml-1 pl-1 pr-2"
             aria-label="BanglaSource home"
           >
             <svg
@@ -58,15 +76,15 @@ export function Nav() {
             </span>
           </Link>
 
-          {/* Primary nav */}
+          {/* Primary nav — desktop only */}
           <nav className="hidden md:flex items-center gap-6 text-[14px] text-fg-muted">
-            <Link href="/categories" className="nav-link hover:text-fg">
+            <Link href="/categories" className="nav-link hover:text-fg min-h-[44px] inline-flex items-center">
               {t("nav.catalog")}
             </Link>
             {userEmail && (
               <Link
                 href="/buyer/saved"
-                className="nav-link hover:text-fg flex items-center gap-1"
+                className="nav-link hover:text-fg flex items-center gap-1 min-h-[44px]"
               >
                 <svg
                   width="13"
@@ -80,13 +98,10 @@ export function Nav() {
                 Saved
               </Link>
             )}
-            <Link href="/how-it-works" className="nav-link hover:text-fg">
+            <Link href="/how-it-works" className="nav-link hover:text-fg min-h-[44px] inline-flex items-center">
               {t("nav.how")}
             </Link>
-            <Link
-              href="/group-buys"
-              className="nav-link hover:text-fg flex items-center gap-1"
-            >
+            <Link href="/group-buys" className="nav-link hover:text-fg flex items-center gap-1 min-h-[44px]">
               <svg
                 width="13"
                 height="13"
@@ -114,28 +129,61 @@ export function Nav() {
               </svg>
               {t("nav.group_buys")}
             </Link>
-            <Link href="/shipping-rates" className="nav-link hover:text-fg">
+            <Link href="/shipping-rates" className="nav-link hover:text-fg min-h-[44px] inline-flex items-center">
               {t("nav.shipping")}
             </Link>
-            <Link href="/about" className="nav-link hover:text-fg">
+            <Link href="/about" className="nav-link hover:text-fg min-h-[44px] inline-flex items-center">
               {t("nav.about")}
             </Link>
-            <Link href="/contact" className="nav-link hover:text-fg">
+            <Link href="/contact" className="nav-link hover:text-fg min-h-[44px] inline-flex items-center">
               {t("nav.contact")}
             </Link>
           </nav>
 
-          {/* Search */}
+          {/* Search — desktop only, pushed to the right */}
           <div className="hidden md:flex flex-1 max-w-[280px] lg:max-w-[360px] ml-auto">
             <SearchBar />
           </div>
 
-          {/* Auth + cart */}
-          <div className="flex items-center gap-3 ml-auto md:ml-0">
+          {/* Right cluster: mobile = search-icon + hamburger + lang + cart */}
+          <div className="flex items-center gap-1 md:gap-3 ml-auto md:ml-0">
+            {/* Mobile search-icon (only on mobile, opens inline search) */}
+            <button
+              type="button"
+              onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+              aria-label={mobileSearchOpen ? "Close search" : "Open search"}
+              aria-expanded={mobileSearchOpen}
+              className="md:hidden min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md text-fg-muted hover:bg-slate-50 active:bg-slate-100 transition-colors"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+                <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.6" />
+                <path
+                  d="m13.5 13.5 3 3"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+
+            {/* Hamburger — mobile only, opens MobileMenu drawer */}
+            <button
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={menuOpen}
+              className="md:hidden min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md text-fg-muted hover:bg-slate-50 active:bg-slate-100 transition-colors"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+                <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            </button>
+
+            {/* Auth — desktop only */}
             {userEmail ? (
               <Link
                 href="/account"
-                className="hidden lg:flex items-center gap-1.5 text-[13px] text-fg-muted hover:text-fg"
+                className="hidden lg:flex items-center gap-1.5 text-[13px] text-fg-muted hover:text-fg min-h-[44px]"
                 title={userEmail}
               >
                 <svg
@@ -161,13 +209,14 @@ export function Nav() {
               </Link>
             )}
 
+            {/* Cart button — 44x44 touch target (iOS HIG) */}
             <button
               onClick={() => setCartOpen(true)}
               aria-label={t("cart.title")}
               aria-expanded={cartOpen}
-              className="relative w-10 h-10 flex items-center justify-center rounded-md border border-border hover:bg-slate-50 transition-colors text-fg-muted"
+              className="relative min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md border border-border hover:bg-slate-50 active:bg-slate-100 transition-colors text-fg-muted"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path
                   d="M3 3h2l2.4 12.2a2 2 0 0 0 2 1.8h8.6a2 2 0 0 0 2-1.6L21 8H6"
                   stroke="currentColor"
@@ -179,18 +228,37 @@ export function Nav() {
                 <circle cx="18" cy="20" r="1.4" fill="currentColor" />
               </svg>
               {count > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-cyan-600 text-white text-[10px] font-semibold flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-cyan-600 text-white text-[10px] font-semibold flex items-center justify-center">
                   {count > 99 ? "99+" : count}
                 </span>
               )}
             </button>
 
-            <LangToggle />
+            <div className="hidden md:inline-flex">
+              <LangToggle />
+            </div>
           </div>
         </div>
+
+        {/* Mobile search bar — collapsible, full-width below the header.
+            Sits OUTSIDE the h-16 row so it can expand without disturbing
+            the nav. */}
+        {mobileSearchOpen && (
+          <div className="md:hidden border-t border-border bg-bg px-4 py-3">
+            <SearchBar
+              onResultClick={() => setMobileSearchOpen(false)}
+              className="w-full"
+            />
+          </div>
+        )}
       </header>
 
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+      <MobileMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        userEmail={userEmail}
+      />
     </>
   );
 }

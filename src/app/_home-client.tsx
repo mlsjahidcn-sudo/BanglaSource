@@ -94,7 +94,10 @@ export function HomeClient({
               1 CNY = {fxCnyBdt.toFixed(2)} BDT
             </span>
             <span className="hidden sm:inline text-slate-300">·</span>
-            <a href="https://wa.me/8801732576417" className="hover:text-fg">
+            <a
+              href="https://wa.me/8801732576417"
+              className="min-h-[44px] inline-flex items-center hover:text-fg underline-offset-2 hover:underline"
+            >
               WhatsApp
             </a>
           </div>
@@ -542,7 +545,7 @@ function CategoryStrip({
         </div>
         <Link
           href={`/categories/${cat.slug}`}
-          className="text-[13px] font-medium text-cyan-700 hover:text-cyan-800 shrink-0"
+          className="min-h-[44px] inline-flex items-center text-[13px] font-medium text-cyan-700 hover:text-cyan-800 shrink-0 px-2 -mr-2"
         >
           {t("home.strip.see_all")} →
         </Link>

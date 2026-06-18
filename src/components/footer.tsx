@@ -45,22 +45,22 @@ export function Footer() {
             </h4>
             <ul className="space-y-2 text-sm text-fg-muted">
               <li>
-                <Link href="/categories" className="hover:text-fg">
+                <Link href="/categories" className="hover:text-fg inline-block py-2 min-h-[44px] flex items-center">
                   Catalog
                 </Link>
               </li>
               <li>
-                <Link href="/how-it-works" className="hover:text-fg">
+                <Link href="/how-it-works" className="hover:text-fg inline-block py-2 min-h-[44px] flex items-center">
                   How it works
                 </Link>
               </li>
               <li>
-                <Link href="/shipping-rates" className="hover:text-fg">
+                <Link href="/shipping-rates" className="hover:text-fg inline-block py-2 min-h-[44px] flex items-center">
                   Shipping rates
                 </Link>
               </li>
               <li>
-                <Link href="/search" className="hover:text-fg">
+                <Link href="/search" className="hover:text-fg inline-block py-2 min-h-[44px] flex items-center">
                   Search
                 </Link>
               </li>
@@ -74,22 +74,22 @@ export function Footer() {
             </h4>
             <ul className="space-y-2 text-sm text-fg-muted">
               <li>
-                <Link href="/about" className="hover:text-fg">
+                <Link href="/about" className="hover:text-fg inline-block py-2 min-h-[44px] flex items-center">
                   About
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-fg">
+                <Link href="/contact" className="hover:text-fg inline-block py-2 min-h-[44px] flex items-center">
                   Contact
                 </Link>
               </li>
               <li>
-                <Link href="/blog" className="hover:text-fg">
+                <Link href="/blog" className="hover:text-fg inline-block py-2 min-h-[44px] flex items-center">
                   Blog
                 </Link>
               </li>
               <li>
-                <Link href="/for-you" className="hover:text-fg">
+                <Link href="/for-you" className="hover:text-fg inline-block py-2 min-h-[44px] flex items-center">
                   For you
                 </Link>
               </li>
@@ -103,17 +103,17 @@ export function Footer() {
             </h4>
             <ul className="space-y-2 text-sm text-fg-muted">
               <li>
-                <Link href="#" className="hover:text-fg">
+                <Link href="#" className="hover:text-fg inline-block py-2 min-h-[44px] flex items-center">
                   {t("footer.privacy")}
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-fg">
+                <Link href="#" className="hover:text-fg inline-block py-2 min-h-[44px] flex items-center">
                   {t("footer.terms")}
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-fg">
+                <Link href="#" className="hover:text-fg inline-block py-2 min-h-[44px] flex items-center">
                   {t("footer.refund")}
                 </Link>
               </li>
@@ -126,7 +126,7 @@ export function Footer() {
           <p>{t("footer.copyright")}</p>
           <a
             href="mailto:hello@banglasource.com"
-            className="hover:text-fg"
+            className="hover:text-fg inline-block py-2 min-h-[44px] flex items-center"
           >
             hello@banglasource.com
           </a>

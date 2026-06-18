@@ -87,7 +87,7 @@ export function ProductCarousel({
         {hrefAll && (
           <Link
             href={hrefAll}
-            className="text-[12.5px] text-cyan-700 hover:underline shrink-0"
+            className="min-h-[44px] inline-flex items-center text-[12.5px] text-cyan-700 hover:underline shrink-0 px-2 -mr-2"
           >
             {hrefAllLabel ?? "Browse all →"}
           </Link>

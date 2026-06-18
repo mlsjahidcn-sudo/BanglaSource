@@ -129,19 +129,19 @@ export function CartDrawer({ open, onClose }: Props) {
                             onClick={() =>
                               updateQty(it.productId, it.qty - 1)
                             }
-                            className="w-7 h-7 text-fg-muted hover:bg-slate-50"
+                            className="min-h-[44px] min-w-[44px] w-10 h-10 text-fg-muted hover:bg-slate-50 active:bg-slate-100 flex items-center justify-center"
                             aria-label="Decrease"
                           >
                             −
                           </button>
-                          <span className="w-8 h-7 text-center text-[12px] price-tag font-medium flex items-center justify-center">
+                          <span className="w-8 min-h-[44px] text-center text-[12px] price-tag font-medium flex items-center justify-center">
                             {it.qty}
                           </span>
                           <button
                             onClick={() =>
                               updateQty(it.productId, it.qty + 1)
                             }
-                            className="w-7 h-7 text-fg-muted hover:bg-slate-50"
+                            className="min-h-[44px] min-w-[44px] w-10 h-10 text-fg-muted hover:bg-slate-50 active:bg-slate-100 flex items-center justify-center"
                             aria-label="Increase"
                           >
                             +
@@ -149,7 +149,7 @@ export function CartDrawer({ open, onClose }: Props) {
                         </div>
                         <button
                           onClick={() => remove(it.productId)}
-                          className="text-[11px] text-fg-subtle hover:text-fg"
+                          className="min-h-[44px] text-[12px] font-medium text-fg-subtle hover:text-fg hover:underline underline-offset-2 px-2"
                         >
                           {t("cart.remove")}
                         </button>

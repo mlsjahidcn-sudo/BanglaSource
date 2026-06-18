@@ -19,9 +19,15 @@ type Hit = {
 type Props = {
   variant?: "header" | "hero";
   className?: string;
+  /**
+   * Called when the user picks a result OR submits the form. Useful
+   * for closing a mobile search sheet after the user navigates
+   * (without this, the sheet stays open until the new page mounts).
+   */
+  onResultClick?: () => void;
 };
 
-export function SearchBar({ variant = "header", className = "" }: Props) {
+export function SearchBar({ variant = "header", className = "", onResultClick }: Props) {
   const { t, lang } = useLang();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -95,9 +101,11 @@ export function SearchBar({ variant = "header", className = "" }: Props) {
       if (activeIdx >= 0 && hits[activeIdx]) {
         router.push(`/products/${hits[activeIdx].id}`);
         setOpen(false);
+        onResultClick?.();
       } else if (q.trim().length > 0) {
         router.push(`/search?q=${encodeURIComponent(q.trim())}`);
         setOpen(false);
+        onResultClick?.();
       }
     } else if (e.key === "Escape") {
       setOpen(false);
@@ -177,7 +185,10 @@ export function SearchBar({ variant = "header", className = "" }: Props) {
                 <li key={h.id}>
                   <Link
                     href={`/products/${h.id}`}
-                    onClick={() => setOpen(false)}
+                    onClick={() => {
+                      setOpen(false);
+                      onResultClick?.();
+                    }}
                     className={`flex items-center gap-3 p-3 transition-colors ${
                       i === activeIdx ? "bg-slate-50" : "hover:bg-slate-50/60"
                     }`}
@@ -210,7 +221,10 @@ export function SearchBar({ variant = "header", className = "" }: Props) {
           {q.trim().length > 0 && (
             <Link
               href={`/search?q=${encodeURIComponent(q.trim())}`}
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                setOpen(false);
+                onResultClick?.();
+              }}
               className="block p-3 text-center text-[12.5px] font-medium border-t border-border text-fg hover:bg-slate-50"
             >
               {t("search.view_all")} →
