@@ -369,6 +369,75 @@ async function main() {
     );
   }
 
+  // Phase 58: product cards must not say the product is
+  // FROM Dhaka. The price suffix used to be "/ pc · Dhaka"
+  // which made the card look like the SKU was sourced in
+  // Dhaka (contradicting the China provenance). Now it's
+  // "/ pc · landed". A regression here would mislead
+  // buyers into thinking the product was a Dhaka local
+  // pick, which would let them bypass us with a local
+  // importer quote.
+  console.log("\n[13] product cards — no 'Dhaka' / 'Guangzhou' in price suffix");
+  const cardCheck = JSON.parse(
+    mavisCall("browser_evaluate", {
+      function: `() => {
+        // Walk every product card on the home page and look
+        // for the price-suffix span. We're looking for the
+        // "/ pc · X" pattern. Should NEVER be "Dhaka" or
+        // "Guangzhou" or "China" (China is fine in the
+        // product header, but redundant in the price suffix).
+        const cards = Array.from(document.querySelectorAll('a[href*="/products/"]'));
+        const hits = [];
+        for (const c of cards) {
+          const text = c.textContent || "";
+          // The price-suffix span has font-mono tnum
+          const spans = Array.from(c.querySelectorAll('span'));
+          for (const s of spans) {
+            const t = s.textContent || "";
+            if (/\\/\\s*pc\\s*[·\\.]/.test(t)) {
+              // Found a price suffix. Check it doesn't say Dhaka/Guangzhou.
+              if (/Dhaka|Guangzhou|Beijing|Shenzhen/.test(t)) {
+                hits.push({ href: c.getAttribute('href'), suffix: t });
+              }
+            }
+          }
+        }
+        return { cardsChecked: cards.length, hits: hits.slice(0, 5) };
+      }`,
+    }),
+  );
+  check(
+    "no product card on / has 'Dhaka' / 'Guangzhou' in price suffix",
+    cardCheck.hits.length === 0,
+    `${cardCheck.cardsChecked} cards checked, ${cardCheck.hits.length} hits`,
+  );
+  if (cardCheck.hits.length > 0) {
+    console.error(`    examples:`, cardCheck.hits);
+  }
+
+  console.log("\n[14] home trust bar — no specific city list");
+  // Phase 58: changed "Dhaka, Chittagong, Sylhet" to
+  // "across Bangladesh". Specific city lists on the
+  // trust bar were inconsistent with the supplier-city
+  // stripping (we don't list supplier cities, why list
+  // buyer cities?).
+  mavisCallNoReturn("browser_navigate", { url: `${ORIGIN}/` });
+  const trustBar = JSON.parse(
+    mavisCall("browser_evaluate", {
+      function: `() => {
+        const text = document.body.innerText;
+        const m = text.match(/Active buyers\\s+([^·\\n]+?)(?:\\s*across|\\s*Dhaka|$)/i);
+        const hasDhakaInTrust = /Dhaka,\\s*Chittagong,\\s*Sylhet/.test(text);
+        return { activeBuyersLabel: m ? m[1].trim() : null, hasDhakaInTrust };
+      }`,
+    }),
+  );
+  check(
+    "trust bar 'Active buyers' sub is 'across Bangladesh' (not specific cities)",
+    !trustBar.hasDhakaInTrust,
+    trustBar.hasDhakaInTrust ? "(still lists Dhaka, Chittagong, Sylhet)" : "(generic)",
+  );
+
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail === 0 ? 0 : 1);
 }

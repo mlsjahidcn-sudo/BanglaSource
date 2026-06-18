@@ -263,7 +263,7 @@ export function WatchlistGrid({ items: initial }: { items: SavedItem[] }) {
                 <p className="mt-1.5 price-tag text-[15px] font-semibold">
                   {fmtBdt(i.min_bdt)}
                   <span className="text-[10.5px] text-fg-subtle ml-1 font-normal">
-                    / pc · Dhaka
+                    / pc · landed
                   </span>
                 </p>
                 <p className="mt-0.5 text-[10.5px] text-fg-subtle font-mono tnum">

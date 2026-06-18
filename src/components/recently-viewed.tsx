@@ -106,7 +106,7 @@ export function RecentlyViewed({ limit = 8 }: { limit?: number }) {
                     {fmtBdt(h.min_bdt)}
                   </span>
                   <span className="text-[10.5px] text-fg-subtle">
-                    / pc · Dhaka
+                    / pc · landed
                   </span>
                 </div>
                 <p className="mt-0.5 text-[10.5px] text-fg-subtle">

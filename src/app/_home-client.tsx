@@ -498,7 +498,7 @@ function StripCard({ product, fxCnyBdt }: { product: CatalogProduct; fxCnyBdt: n
           <span className="price-tag text-[16px] font-semibold text-fg">
             {fmtBdt(landed.unitBdt)}
           </span>
-          <span className="text-[10.5px] text-fg-subtle">/ pc · Dhaka</span>
+          <span className="text-[10.5px] text-fg-subtle">/ pc · landed</span>
         </div>
         <p className="text-[10.5px] text-fg-subtle mt-0.5 font-mono tnum">
           from MOQ · factory {fmtCny(lowestPrice)}

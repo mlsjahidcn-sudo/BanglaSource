@@ -74,7 +74,14 @@ export function TrustBar() {
         <Stat
           value={tb > 0 ? `${tb}+` : "10+"}
           label="Active buyers"
-          sub="Dhaka, Chittagong, Sylhet"
+          // Phase 58: changed "Dhaka, Chittagong, Sylhet" to
+          // a generic "across Bangladesh" — listing specific
+          // cities on the trust bar was inconsistent with the
+          // Phase 56 supplier-city stripping (we don't list
+          // cities on the supplier side, why list them on the
+          // buyer side?). Generic copy reads as more confident
+          // too: "buyers everywhere", not "3 specific cities".
+          sub="across Bangladesh"
           tone="cyan"
         />
         <Stat

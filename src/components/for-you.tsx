@@ -175,7 +175,7 @@ export function ForYou({ limit = 12, title = "For you", eyebrow, className = "" 
                   <span className="price-tag text-[15px] font-semibold">
                     {fmtBdt(bdt)}
                   </span>
-                  <span className="text-[10.5px] text-fg-subtle">/ pc · Dhaka</span>
+                  <span className="text-[10.5px] text-fg-subtle">/ pc · landed</span>
                 </div>
                 <p className="mt-1 text-[10.5px] text-fg-subtle font-mono tnum">
                   MOQ {h.factory_moq}
