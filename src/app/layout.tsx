@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Noto_Sans_Bengali } from "next/font/google";
+import { Ubuntu, JetBrains_Mono, Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
 import { LangProvider } from "@/lib/i18n";
 import { ChromeWrapper } from "./chrome-wrapper";
 
-const inter = Inter({
-  variable: "--font-inter",
+// Ubuntu is a humanist sans-serif designed for the Ubuntu OS.
+// It reads warmly and slightly rounded — fits a B2B sourcing site
+// that wants to feel local, not corporate. We pull the 3 weights
+// we actually use: 400 (body), 500 (semibold-like emphasis), 700
+// (display headings). 600 isn't in the Ubuntu family; Tailwind's
+// `font-semibold` will fall back to 500.
+const ubuntu = Ubuntu({
+  variable: "--font-ubuntu",
   subsets: ["latin"],
+  weight: ["400", "500", "700"],
   display: "swap",
 });
 
@@ -46,7 +53,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jetbrains.variable} ${notoBn.variable} h-full`}
+      className={`${ubuntu.variable} ${jetbrains.variable} ${notoBn.variable} h-full`}
     >
       <body
         className="min-h-full flex flex-col bg-bg text-fg"

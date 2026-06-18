@@ -190,6 +190,16 @@ async function main() {
   mavisCallNoReturn("browser_resize", { width: 1280, height: 900 });
   mavisCallNoReturn("browser_navigate", { url: `${ORIGIN}/categories` });
 
+  // Force EN locale for deterministic text matches. The lang toggle
+  // is a client-side state, so a previous test run may have left
+  // the page in BN. Click the EN button to reset. We match by
+  // text content (the EN button always exists in the topbar),
+  // not by the active bg class (which would only be set when EN
+  // is already the active locale).
+  mavisCall("browser_evaluate", {
+    function: `() => { const enBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'EN'); if (enBtn) enBtn.click(); return null; }`,
+  });
+
   console.log("\n[3] /categories — hero + CTAs (rendered DOM)");
   const hero = JSON.parse(
     mavisCall("browser_evaluate", {
@@ -341,6 +351,11 @@ async function main() {
 
   // ── /categories/gadgets ─────────────────────────────────────────
   mavisCallNoReturn("browser_navigate", { url: `${ORIGIN}/categories/gadgets` });
+  // Reset to EN (in case the toggle state was changed by a
+  // prior test step — the slug page is a full nav).
+  mavisCall("browser_evaluate", {
+    function: `() => { const enBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'EN'); if (enBtn) enBtn.click(); return null; }`,
+  });
 
   console.log("\n[8] /categories/gadgets — hero + stats");
   const slugHero = JSON.parse(
