@@ -364,3 +364,30 @@ export const IconClock = ({ size = 16, className }: IconProps) =>
     </>,
     className,
   );
+
+// Arrow pointing right — used by category cards' "Browse" link and
+// bottom CTAs. 1.5px stroke keeps it light next to text. Sized for
+// 16x16 inline use (so it doesn't overshadow a 14px label).
+export const IconArrowRight = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <>
+      <path d="M3 8h10" />
+      <path d="M9 4l4 4-4 4" />
+    </>,
+    className,
+  );
+
+// WhatsApp chat bubble — a stylized speech bubble with a tail
+// (lower-left) and a curved "W" inside. Drawn as a single SVG path
+// to match the line-art aesthetic of the rest of the icon set.
+// Used by category hero CTA + bottom CTA "Chat on WhatsApp".
+export const IconWhatsApp = ({ size = 16, className }: IconProps) =>
+  wrap(
+    size,
+    <>
+      <path d="M2.5 13.5l1-3.6A5.5 5.5 0 1 1 5.6 12l-3.1 1.5z" />
+      <path d="M6 6.5c.4-.4 1-.4 1.4 0l.6.7c.3.3.3.7 0 1l-.5.5c.4.8 1 1.4 1.8 1.8l.5-.5c.3-.3.7-.3 1 0l.7.6c.4.4.4 1 0 1.4l-.4.4c-.5.5-1.2.6-1.8.4a6.5 6.5 0 0 1-3.7-3.7c-.2-.6-.1-1.3.4-1.8l.4-.4z" />
+    </>,
+    className,
+  );

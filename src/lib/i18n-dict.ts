@@ -141,12 +141,75 @@ export const dict: Dict = {
   // ── Categories ────────────────────────────────────────────────────
   "cat.title": { en: "Categories", bn: "ক্যাটাগরি" },
   "cat.subtitle": {
-    en: "8 sourcing categories, hand-picked for the Bangladesh market.",
-    bn: "৮টি সোর্সিং ক্যাটাগরি, বাংলাদেশের বাজারের জন্য বাছাই করা।",
+    en: "6 sourcing categories, hand-picked for the Bangladesh market.",
+    bn: "৬টি সোর্সিং ক্যাটাগরি, বাংলাদেশের বাজারের জন্য বাছাই করা।",
   },
   "cat.products": { en: "products", bn: "টি পণ্য" },
   "cat.from": { en: "from", bn: "থেকে" },
   "cat.view": { en: "Browse", bn: "দেখুন" },
+  "cat.hero.eyebrow": { en: "Hand-picked catalog", bn: "হাতে-বাছাই ক্যাটালগ" },
+  "cat.hero.title": {
+    en: "What are you sourcing today?",
+    bn: "আজ আপনি কী সোর্সিং করছেন?",
+  },
+  "cat.hero.subtitle": {
+    en: "Every category is built around a Bangladesh demand signal — TWS earbuds for the mobile accessory market, sunglasses for the Eid rush, sneakers for the back-to-school season. Browse, compare landed cost, RFQ in 30 seconds.",
+    bn: "প্রতিটি ক্যাটাগরি বাংলাদেশের চাহিদার ভিত্তিতে তৈরি — মোবাইল অ্যাকসেসরি মার্কেটের জন্য TWS ইয়ারবাড, ঈদের জন্য সানগ্লাস, স্কুল-ওপেনিংয়ের জন্য স্নিকার্স। ব্রাউজ করুন, ল্যান্ডেড খরচ তুলনা করুন, ৩০ সেকেন্ডে RFQ পাঠান।",
+  },
+  "cat.hero.cta_browse": { en: "Browse 6 categories", bn: "৬টি ক্যাটাগরি দেখুন" },
+  "cat.hero.cta_help": { en: "Not sure? Ask us on WhatsApp", bn: "নিশ্চিত না? WhatsApp-এ জিজ্ঞেস করুন" },
+  "cat.filter_all": { en: "All", bn: "সব" },
+  "cat.sort.newest": { en: "Newest", bn: "নতুন" },
+  "cat.sort.popular": { en: "Most popular", bn: "সবচেয়ে জনপ্রিয়" },
+  "cat.sort.cheap": { en: "Price: low → high", bn: "দাম: কম → বেশি" },
+  "cat.sort.expensive": { en: "Price: high → low", bn: "দাম: বেশি → কম" },
+  "cat.stats.suppliers": { en: "suppliers", bn: "সরবরাহকারী" },
+  "cat.stats.avg_weight": { en: "avg weight", bn: "গড় ওজন" },
+  "cat.stats.avg_price": { en: "avg unit price", bn: "গড় ইউনিট মূল্য" },
+  "cat.stats.provinces": { en: "sourced from", bn: "সোর্সড" },
+  "cat.featured.title": { en: "Top picks across all categories", bn: "সব ক্যাটাগরির সেরা বাছাই" },
+  "cat.featured.subtitle": {
+    en: "Hand-picked bestsellers — the 8 we restock most often and ship out fastest.",
+    bn: "হাতে-বাছাই বেস্টসেলার — যে ৮টি আমরা সবচেয়ে বেশি রিস্টক করি এবং দ্রুত শিপ করি।",
+  },
+  "cat.featured.browse_all": { en: "Browse all 167 products →", bn: "সব ১৬৭টি পণ্য দেখুন →" },
+  "cat.why.title": { en: "Why only 6 categories", bn: "কেন শুধু ৬টি ক্যাটাগরি" },
+  "cat.why.subtitle": {
+    en: "We don't list everything. We list what we can verify, restock, and price competitively for Bangladesh.",
+    bn: "আমরা সব কিছু তালিকাভুক্ত করি না। আমরা যা যাচাই করতে, রিস্টক করতে এবং বাংলাদেশের জন্য প্রতিযোগী দামে দিতে পারি তাই তালিকাভুক্ত করি।",
+  },
+  "cat.why.r1.title": { en: "Real demand", bn: "প্রকৃত চাহিদা" },
+  "cat.why.r1.body": {
+    en: "We turn away categories that don't move in the local market — even if they're popular abroad.",
+    bn: "আমরা এমন ক্যাটাগরি প্রত্যাখ্যান করি যেগুলো স্থানীয় বাজারে বিক্রি হয় না — বিদেশে জনপ্রিয় হলেও।",
+  },
+  "cat.why.r2.title": { en: "Verified factory", bn: "যাচাইকৃত কারখানা" },
+  "cat.why.r2.body": {
+    en: "Each category has at least 3 suppliers we have personally visited, audited, or received samples from.",
+    bn: "প্রতিটি ক্যাটাগরিতে কমপক্ষে ৩টি সরবরাহকারী আছে যাদের আমরা ব্যক্তিগতভাবে পরিদর্শন, নিরীক্ষা বা নমুনা গ্রহণ করেছি।",
+  },
+  "cat.why.r3.title": { en: "Volume that matters", bn: "ভলিউম যা গুরুত্বপূর্ণ" },
+  "cat.why.r3.body": {
+    en: "We pick categories where the 5 kg minimum order makes sense — not $5 gadgets that can't cover shipping.",
+    bn: "আমরা এমন ক্যাটাগরি বাছাই করি যেখানে ৫ কেজি মিনিমাম অর্ডার যুক্তিসঙ্গত — $5 গ্যাজেট নয় যেখানে শিপিং খরচ ওঠে না।",
+  },
+  "cat.why.r4.title": { en: "Restockable in 7 days", bn: "৭ দিনে রিস্টকযোগ্য" },
+  "cat.why.r4.body": {
+    en: "We only list SKUs where the factory can produce a second batch within a week of a sold-out.",
+    bn: "আমরা শুধু এমন SKU তালিকাভুক্ত করি যেখানে কারখানা বিক্রি শেষ হওয়ার এক সপ্তাহের মধ্যে দ্বিতীয় ব্যাচ তৈরি করতে পারে।",
+  },
+  "cat.other.title": { en: "Other categories you might want", bn: "আপনি যে অন্য ক্যাটাগরিগুলো চাইতে পারেন" },
+  "cat.cta.title": {
+    en: "Not sure which category fits your shop?",
+    bn: "আপনার দোকানের জন্য কোন ক্যাটাগরি উপযুক্ত নিশ্চিত না?",
+  },
+  "cat.cta.body": {
+    en: "Tell us what you sell. We'll suggest 3–5 products that match your customer base, with a real landed cost you can compare.",
+    bn: "আপনি কী বিক্রি করেন তা বলুন। আমরা আপনার গ্রাহকদের সাথে মানানসই ৩-৫টি পণ্য সাজেস্ট করব, প্রকৃত ল্যান্ডেড খরচসহ।",
+  },
+  "cat.cta.whatsapp": { en: "Chat on WhatsApp", bn: "WhatsApp-এ চ্যাট করুন" },
+  "cat.cta.rfq": { en: "Or post a free RFQ", bn: "অথবা বিনামূল্যে RFQ পাঠান" },
+  "cat.empty": { en: "No products in this subcategory yet.", bn: "এই সাবক্যাটাগরিতে এখনো কোনো পণ্য নেই।" },
 
   // ── How it works page ─────────────────────────────────────────────
   "how.title": { en: "How BanglaSource works", bn: "বাংলাসোর্স কীভাবে কাজ করে" },
