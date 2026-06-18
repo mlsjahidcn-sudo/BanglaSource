@@ -166,12 +166,16 @@ export function HeroSlider({ products, className }: Props) {
         ))}
       </div>
 
-      {/* Prev / next arrows (desktop only) — 44x44 */}
+      {/* Prev / next arrows (desktop ≥1280 only). Below that
+          the title at col-span-7 only has ~300px of text room
+          and the arrow + pl-14 indent would clip the title on
+          long product names. Users navigate via the dot
+          indicators at <1280. */}
       <button
         type="button"
         onClick={() => go(active - 1)}
         aria-label={t("home.hero_slider.prev")}
-        className="hidden md:inline-flex min-w-[44px] min-h-[44px] absolute left-3 top-1/2 -translate-y-1/2 z-20 rounded-full bg-bg/85 backdrop-blur border border-border shadow-sm items-center justify-center text-fg-muted hover:text-fg hover:bg-bg active:bg-bg-soft"
+        className="hidden xl:inline-flex min-w-[44px] min-h-[44px] absolute left-3 top-1/2 -translate-y-1/2 z-20 rounded-full bg-bg/85 backdrop-blur border border-border shadow-sm items-center justify-center text-fg-muted hover:text-fg hover:bg-bg active:bg-bg-soft"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
           <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -181,7 +185,7 @@ export function HeroSlider({ products, className }: Props) {
         type="button"
         onClick={() => go(active + 1)}
         aria-label={t("home.hero_slider.next")}
-        className="hidden md:inline-flex min-w-[44px] min-h-[44px] absolute right-3 top-1/2 -translate-y-1/2 z-20 rounded-full bg-bg/85 backdrop-blur border border-border shadow-sm items-center justify-center text-fg-muted hover:text-fg hover:bg-bg active:bg-bg-soft"
+        className="hidden xl:inline-flex min-w-[44px] min-h-[44px] absolute right-3 top-1/2 -translate-y-1/2 z-20 rounded-full bg-bg/85 backdrop-blur border border-border shadow-sm items-center justify-center text-fg-muted hover:text-fg hover:bg-bg active:bg-bg-soft"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
           <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -264,10 +268,11 @@ function HeroSlide({
         visible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
       )}
     >
-      {/* Info card — 7 cols. pl-14 leaves room for the 44x44
-          prev arrow positioned at `left-3` so the title + price
-          don't start under the arrow. */}
-      <div className="col-span-7 flex flex-col justify-center min-w-0 pl-14">
+      {/* Info card — 7 cols. pl-14 at xl+ leaves room for the
+          44x44 prev arrow positioned at `left-3`. Below xl the
+          arrows are hidden, so no indent is needed and the
+          title can use the full col width. */}
+      <div className="col-span-7 flex flex-col justify-center min-w-0 pl-2 xl:pl-14">
         <span className="inline-flex w-fit items-center gap-2 px-2.5 py-1 text-[10px] font-semibold tracking-[0.1em] uppercase rounded-full bg-cyan-600 text-white">
           <span className="relative flex h-1.5 w-1.5">
             <span className="absolute inline-flex h-full w-full rounded-full bg-white opacity-60 animate-ping" />
@@ -276,7 +281,7 @@ function HeroSlide({
           {t("home.hero_slider.eyebrow")}
         </span>
 
-        <h3 className="mt-4 text-[28px] leading-[1.1] font-semibold tracking-[-0.02em] text-fg line-clamp-2 max-w-[24ch]">
+        <h3 className="mt-4 text-[22px] md:text-[24px] lg:text-[26px] xl:text-[28px] leading-[1.1] font-semibold tracking-[-0.02em] text-fg line-clamp-2 max-w-[24ch] md:max-w-[26ch] lg:max-w-[30ch] xl:max-w-[36ch]">
           {lang === "bn" ? product.title_bn : product.title_en}
         </h3>
 
