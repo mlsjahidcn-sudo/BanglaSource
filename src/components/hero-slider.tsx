@@ -281,7 +281,7 @@ function HeroSlide({
           {t("home.hero_slider.eyebrow")}
         </span>
 
-        <h3 className="mt-4 text-[22px] md:text-[24px] lg:text-[26px] xl:text-[28px] leading-[1.1] font-semibold tracking-[-0.02em] text-fg line-clamp-2 max-w-[24ch] md:max-w-[26ch] lg:max-w-[30ch] xl:max-w-[36ch]">
+        <h3 className="mt-4 h-3 !text-[20px] md:!text-[22px] lg:!text-[24px] xl:!text-[26px] line-clamp-2 max-w-[24ch] md:max-w-[26ch] lg:max-w-[30ch] xl:max-w-[36ch]">
           {lang === "bn" ? product.title_bn : product.title_en}
         </h3>
 
@@ -380,7 +380,7 @@ function MobileHeroSlide({
 
       {/* Info card below */}
       <div className="p-5 space-y-3">
-        <h3 className="text-[18px] leading-[1.2] font-semibold tracking-[-0.01em] text-fg line-clamp-2">
+        <h3 className="h-4 !text-[15px] line-clamp-2">
           {lang === "bn" ? product.title_bn : product.title_en}
         </h3>
         <p className="text-[11px] text-fg-subtle tracking-wider uppercase">

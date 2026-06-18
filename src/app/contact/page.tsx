@@ -76,13 +76,9 @@ export default function ContactPage() {
     <Container className="pt-16 md:pt-20 pb-24">
       <div className="grid lg:grid-cols-12 gap-12">
         <div className="lg:col-span-5">
-          <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
-            Contact
-          </p>
-          <h1 className="mt-3 text-[40px] md:text-[48px] leading-[1.05] font-semibold tracking-[-0.02em]">
-            Talk to us
-          </h1>
-          <p className="mt-4 text-[16px] text-fg-muted max-w-md leading-relaxed">
+          <p className="eyebrow">Contact</p>
+          <h1 className="mt-3">Talk to us</h1>
+          <p className="mt-4 lead max-w-md">
             We answer in Bangla or English. WhatsApp is
             fastest — same desk, same number whether
             you tap the button on a product or write
@@ -168,9 +164,7 @@ export default function ContactPage() {
                     />
                   </svg>
                 </div>
-                <h2 className="mt-5 text-[22px] font-semibold tracking-tight">
-                  Message sent
-                </h2>
+                <h2 className="mt-5 h-3 !text-[20px]">Message sent</h2>
                 <p className="mt-2 text-fg-muted max-w-sm mx-auto">
                   We&apos;ll get back to you within one
                   business day via the phone number you

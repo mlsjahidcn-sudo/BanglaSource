@@ -194,7 +194,7 @@ export default async function GroupBuysListingPage({
       <Container className="pt-10 md:pt-14 pb-24">
         <header className="max-w-3xl">
           <p className="section-eyebrow">{dict["group_buy.public.title"].en}</p>
-          <h1 className="mt-2 text-[36px] md:text-[44px] leading-[1.05] font-semibold tracking-[-0.02em]">
+          <h1 className="mt-2">
             {dict["group_buy.public.title"].en}
           </h1>
           <p className="mt-3 text-[14px] text-fg-muted max-w-2xl">
@@ -314,7 +314,7 @@ function GroupBuyCardItem({ item }: { item: GroupBuyCard }) {
         <p className="text-[10.5px] uppercase tracking-wider text-fg-subtle font-medium">
           {item.product.category}
         </p>
-        <h2 className="mt-1 text-[14.5px] font-medium leading-snug line-clamp-2">
+        <h2 className="mt-1 h-4 !text-[15px] font-medium leading-snug line-clamp-2">
           {item.product.title_en}
         </h2>
         <p className="text-[10.5px] text-fg-subtle font-mono mt-0.5">

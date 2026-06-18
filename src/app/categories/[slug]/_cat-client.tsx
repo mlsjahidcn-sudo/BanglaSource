@@ -144,10 +144,10 @@ export function CategoryClient({ slug }: { slug: string }) {
               <span className="font-mono tnum">{items.length}</span>
             </p>
           </div>
-          <h1 className="mt-3 text-[36px] md:text-[52px] leading-[1.05] font-semibold tracking-[-0.02em] max-w-2xl">
+          <h1 className="mt-3 max-w-2xl">
             {lang === "bn" ? c.name_bn : c.name_en}
           </h1>
-          <p className="mt-4 text-[16px] text-fg-muted max-w-2xl leading-relaxed">
+          <p className="mt-4 lead max-w-2xl">
             {lang === "bn" ? c.blurb_bn : c.blurb_en}
           </p>
 
@@ -268,7 +268,7 @@ export function CategoryClient({ slug }: { slug: string }) {
                     ) : null}
                   </div>
                   <div className="p-3.5">
-                    <h3 className="text-[13px] font-semibold tracking-tight">
+                    <h3 className="!text-[13px] !font-semibold !tracking-tight">
                       {lang === "bn" ? oc.name_bn : oc.name_en}
                     </h3>
                     <p className="mt-1 text-[10px] text-fg-subtle font-mono tnum">

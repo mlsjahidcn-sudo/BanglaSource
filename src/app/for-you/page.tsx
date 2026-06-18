@@ -63,7 +63,7 @@ export default async function ForYouPage() {
             AI
           </span>
         </p>
-        <h1 className="mt-1 text-[28px] font-semibold tracking-[-0.01em]">
+        <h1 className="mt-1">
           For you, {user.email?.split("@")[0] ?? "buyer"}
         </h1>
         <p className="mt-1.5 text-[13.5px] text-fg-muted max-w-xl">
@@ -77,9 +77,7 @@ export default async function ForYouPage() {
       <section className="mb-12">
         <div className="mb-4 flex items-end justify-between">
           <div>
-            <h2 className="text-[18px] font-semibold tracking-tight">
-              Active price drops
-            </h2>
+            <h2>Active price drops</h2>
             <p className="mt-1 text-[12.5px] text-fg-muted">
               Real-time alerts from your saved products.
             </p>

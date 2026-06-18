@@ -148,7 +148,7 @@ export function ProductDetail({ product }: { product: Product }) {
         {/* Description */}
         <div className="mt-10">
           <p className="section-eyebrow">About this product</p>
-          <h2 className="section-title !text-[22px] md:!text-[26px]">
+          <h2>
             Description
           </h2>
           <p className="mt-3 text-[15px] text-fg-muted leading-relaxed">
@@ -161,7 +161,7 @@ export function ProductDetail({ product }: { product: Product }) {
             Mirrors what an Alibaba / Grainger spec sheet looks like. */}
         <div className="mt-10">
           <p className="section-eyebrow">Specs</p>
-          <h2 className="section-title !text-[22px] md:!text-[26px]">
+          <h2>
             Product specifications
           </h2>
           <dl className="mt-5 border-t border-border">
@@ -274,7 +274,7 @@ export function ProductDetail({ product }: { product: Product }) {
           <div className="flex items-end justify-between flex-wrap gap-2 pb-4 border-b border-border">
             <div>
               <p className="section-eyebrow">Volume discount</p>
-              <h2 className="section-title !text-[22px] md:!text-[26px]">
+              <h2>
                 Bulk pricing
               </h2>
             </div>
@@ -466,7 +466,7 @@ export function ProductDetail({ product }: { product: Product }) {
             <div className="text-[11.5px] text-fg-muted font-mono tnum tracking-[0.06em]">
               ID · {product.source_id}
             </div>
-            <h1 className="mt-2 text-[24px] md:text-[28px] leading-[1.2] font-semibold tracking-[-0.02em]">
+            <h1 className="mt-2 h-2 !text-[22px] md:!text-[26px]">
               {product.title_en}
             </h1>
             <p className="mt-2 text-[14px] text-fg-muted">

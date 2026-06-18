@@ -137,16 +137,10 @@ export function AboutClient({ stats }: { stats: Stats }) {
   return (
     <>
       {/* 1. Hero */}
-      <Container className="pt-16 md:pt-20 pb-12">
-        <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
-          {t("about.hero.eyebrow")}
-        </p>
-        <h1 className="mt-3 text-[36px] md:text-[48px] lg:text-[56px] leading-[1.05] font-semibold tracking-[-0.02em] max-w-3xl">
-          {t("about.hero.title")}
-        </h1>
-        <p className="mt-5 text-[17px] text-fg-muted max-w-2xl leading-relaxed">
-          {t("about.hero.subtitle")}
-        </p>
+      <Container className="section">
+        <p className="eyebrow">{t("about.hero.eyebrow")}</p>
+        <h1 className="mt-3 max-w-3xl">{t("about.hero.title")}</h1>
+        <p className="mt-5 lead max-w-2xl">{t("about.hero.subtitle")}</p>
         {/* Mini-CTA strip under the hero — quick action
             paths to the most common follow-ups. Avoids
             the user scrolling all the way down to find
@@ -171,8 +165,8 @@ export function AboutClient({ stats }: { stats: Stats }) {
       </Container>
 
       {/* 2. By the numbers */}
-      <Container className="pb-14">
-        <h2 className="text-[20px] font-semibold tracking-tight">
+      <Container className="pb-16">
+        <h2>
           {t("about.numbers.title")}
         </h2>
         <p className="mt-2 text-[13.5px] text-fg-muted max-w-2xl">
@@ -198,8 +192,8 @@ export function AboutClient({ stats }: { stats: Stats }) {
       </Container>
 
       {/* 3. 6 reasons */}
-      <Container className="pb-14">
-        <h2 className="text-[20px] font-semibold tracking-tight">
+      <Container className="pb-16">
+        <h2>
           {t("about.reasons.title")}
         </h2>
         <p className="mt-2 text-[13.5px] text-fg-muted max-w-2xl">
@@ -214,7 +208,7 @@ export function AboutClient({ stats }: { stats: Stats }) {
                   {t("about.reasons.eyebrow")}
                 </p>
               </div>
-              <h3 className="mt-3 text-[16px] font-semibold tracking-[-0.005em]">
+              <h3 className="mt-3">
                 {t(r.titleKey)}
               </h3>
               <p className="mt-2 text-[13px] text-fg-muted leading-relaxed">
@@ -226,8 +220,8 @@ export function AboutClient({ stats }: { stats: Stats }) {
       </Container>
 
       {/* 4. Story timeline (Phase 53) */}
-      <Container className="pb-14">
-        <h2 className="text-[20px] font-semibold tracking-tight">
+      <Container className="pb-16">
+        <h2>
           {t("about.timeline.eyebrow")}
         </h2>
         <p className="mt-2 text-[13.5px] text-fg-muted max-w-2xl">
@@ -250,7 +244,7 @@ export function AboutClient({ stats }: { stats: Stats }) {
                 >
                   {tl.year.slice(2)}
                 </span>
-                <h3 className="text-[16px] font-semibold tracking-[-0.005em]">
+                <h3>
                   {t(tl.titleKey)}
                 </h3>
                 <p className="mt-1.5 text-[13.5px] text-fg-muted leading-relaxed max-w-2xl">
@@ -263,8 +257,8 @@ export function AboutClient({ stats }: { stats: Stats }) {
       </Container>
 
       {/* 5. The team */}
-      <Container className="pb-14">
-        <h2 className="text-[20px] font-semibold tracking-tight">
+      <Container className="pb-16">
+        <h2>
           {t("about.team.title")}
         </h2>
         <p className="mt-2 text-[13.5px] text-fg-muted max-w-2xl">
@@ -286,8 +280,8 @@ export function AboutClient({ stats }: { stats: Stats }) {
       </Container>
 
       {/* 6. What we don't do (Phase 53) */}
-      <Container className="pb-14">
-        <h2 className="text-[20px] font-semibold tracking-tight">
+      <Container className="pb-16">
+        <h2>
           {t("about.dontdo.eyebrow")}
         </h2>
         <p className="mt-2 text-[13.5px] text-fg-muted max-w-2xl">
@@ -309,7 +303,7 @@ export function AboutClient({ stats }: { stats: Stats }) {
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
               </span>
               <div className="min-w-0">
-                <h3 className="text-[15px] font-semibold tracking-[-0.005em]">
+                <h3>
                   {t(d.titleKey)}
                 </h3>
                 <p className="mt-1.5 text-[13px] text-fg-muted leading-relaxed">
@@ -322,8 +316,8 @@ export function AboutClient({ stats }: { stats: Stats }) {
       </Container>
 
       {/* 7. Licenses & compliance */}
-      <Container className="pb-14">
-        <h2 className="text-[20px] font-semibold tracking-tight">
+      <Container className="pb-16">
+        <h2>
           {t("about.licenses.title")}
         </h2>
         <div className="mt-5 max-w-3xl card overflow-hidden">
@@ -344,8 +338,8 @@ export function AboutClient({ stats }: { stats: Stats }) {
            behavior. No JS required, accessible by default
            (keyboard, screen reader, focus). Chevron rotates
            180° via CSS when the row is open. */}
-      <Container className="pb-14">
-        <h2 className="text-[20px] font-semibold tracking-tight">
+      <Container className="pb-16">
+        <h2>
           {t("about.faq.eyebrow")}
         </h2>
         <p className="mt-2 text-[13.5px] text-fg-muted max-w-2xl">
@@ -376,7 +370,7 @@ export function AboutClient({ stats }: { stats: Stats }) {
       </Container>
 
       {/* 9. Address card */}
-      <Container className="pb-14">
+      <Container className="pb-16">
         <div className="max-w-3xl card p-6 md:p-8">
           <p className="text-[11px] text-fg-subtle uppercase tracking-wider font-medium">
             {t("about.address.eyebrow")}
@@ -420,12 +414,10 @@ export function AboutClient({ stats }: { stats: Stats }) {
         <div className="bg-slate-900 text-white rounded-2xl px-8 md:px-14 py-12 md:py-14">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
-              <p className="text-[12px] font-medium tracking-wider uppercase text-emerald-400">
+              <p className="eyebrow !text-emerald-400">
                 {t("about.cta.eyebrow")}
               </p>
-              <h2 className="mt-3 text-[26px] md:text-[32px] leading-tight font-semibold tracking-[-0.02em] text-white">
-                {t("about.cta.title")}
-              </h2>
+              <h2 className="mt-3 text-white">{t("about.cta.title")}</h2>
               <p className="mt-3 text-[15px] text-slate-300 leading-relaxed max-w-xl">
                 {t("about.cta.subtitle")}
               </p>
@@ -486,9 +478,7 @@ function Stat({
           {label}
         </p>
       </div>
-      <p className="mt-3 text-[36px] font-semibold tracking-tight font-mono tnum">
-        {value}
-      </p>
+      <p className="mt-3 stat">{value}</p>
     </div>
   );
 }

@@ -58,16 +58,10 @@ export function CategoriesIndexClient() {
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────────────── */}
-      <Container className="pt-14 md:pt-20 pb-10">
-        <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
-          {t("cat.hero.eyebrow")}
-        </p>
-        <h1 className="mt-3 text-[36px] md:text-[52px] leading-[1.05] font-semibold tracking-[-0.02em] max-w-3xl">
-          {t("cat.hero.title")}
-        </h1>
-        <p className="mt-5 text-[16px] md:text-[17px] text-fg-muted max-w-2xl leading-relaxed">
-          {t("cat.hero.subtitle")}
-        </p>
+      <Container className="section">
+        <p className="eyebrow">{t("cat.hero.eyebrow")}</p>
+        <h1 className="mt-3 max-w-3xl">{t("cat.hero.title")}</h1>
+        <p className="mt-5 lead max-w-2xl">{t("cat.hero.subtitle")}</p>
         <div className="mt-7 flex flex-wrap items-center gap-3">
           <a
             href="#categories"
@@ -135,7 +129,7 @@ export function CategoriesIndexClient() {
                   </div>
                 </div>
                 <div className="p-5">
-                  <h3 className="text-[18px] font-semibold tracking-tight">
+                  <h3>
                     {lang === "bn" ? c.name_bn : c.name_en}
                   </h3>
                   <p className="mt-1.5 text-[13px] text-fg-muted line-clamp-2 min-h-[2.6em]">
@@ -184,7 +178,7 @@ export function CategoriesIndexClient() {
             <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
               {t("cat.featured.title")}
             </p>
-            <h2 className="mt-2 text-[24px] md:text-[28px] font-semibold tracking-tight max-w-2xl">
+            <h2 className="mt-2 max-w-2xl">
               {t("cat.featured.subtitle")}
             </h2>
           </div>
@@ -214,7 +208,7 @@ export function CategoriesIndexClient() {
           <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
             {t("cat.why.title")}
           </p>
-          <h2 className="mt-2 text-[22px] md:text-[28px] font-semibold tracking-tight max-w-2xl">
+          <h2 className="mt-2 max-w-2xl">
             {t("cat.why.subtitle")}
           </h2>
           <div className="mt-7 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -226,7 +220,7 @@ export function CategoriesIndexClient() {
             ].map((r) => (
               <div key={r.key}>
                 <span className={`inline-block w-1.5 h-1.5 rounded-full ${r.tone} mb-3`} />
-                <h3 className="text-[14px] font-semibold tracking-tight">
+                <h3 className="h-4 !text-[12px] !font-medium uppercase tracking-wider !text-fg-muted">
                   {t(`cat.why.${r.key}.title`)}
                 </h3>
                 <p className="mt-1.5 text-[12px] text-fg-muted leading-relaxed">
@@ -241,7 +235,7 @@ export function CategoriesIndexClient() {
       {/* ── BOTTOM DARK CTA ──────────────────────────────────────────── */}
       <Container className="pb-24">
         <div className="bg-slate-900 text-white rounded-2xl p-8 md:p-12">
-          <h2 className="text-[24px] md:text-[32px] font-semibold tracking-tight max-w-2xl text-white">
+          <h2 className="text-white max-w-2xl">
             {t("cat.cta.title")}
           </h2>
           <p className="mt-3 text-[15px] text-slate-300 max-w-2xl leading-relaxed">

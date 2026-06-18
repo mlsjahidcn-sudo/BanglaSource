@@ -130,16 +130,10 @@ export function HowClient() {
   const { t } = useLang();
   return (
     <>
-      <Container className="pt-16 md:pt-20 pb-12">
-        <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
-          Process
-        </p>
-        <h1 className="mt-3 text-[36px] md:text-[48px] lg:text-[56px] leading-[1.05] font-semibold tracking-[-0.02em] max-w-3xl">
-          {t("how.title")}
-        </h1>
-        <p className="mt-5 text-[17px] text-fg-muted max-w-2xl leading-relaxed">
-          {t("how.subtitle")}
-        </p>
+      <Container className="section">
+        <p className="eyebrow">Process</p>
+        <h1 className="mt-3 max-w-3xl">{t("how.title")}</h1>
+        <p className="mt-5 lead max-w-2xl">{t("how.subtitle")}</p>
       </Container>
 
       {/* ── 7 steps ─────────────────────────────────────────── */}
@@ -154,7 +148,7 @@ export function HowClient() {
                 <p className="step-num">— {s.n}</p>
               </div>
               <div className="md:col-span-10">
-                <h2 className="text-[20px] font-semibold tracking-tight">
+                <h2>
                   {t(s.titleKey)}
                 </h2>
                 <p className="mt-2.5 text-[15px] text-fg-muted leading-relaxed max-w-2xl">
@@ -171,7 +165,7 @@ export function HowClient() {
         <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
           {t("how.ship_compare.eyebrow")}
         </p>
-        <h2 className="mt-3 text-[24px] md:text-[28px] font-semibold tracking-[-0.01em] max-w-2xl">
+        <h2 className="mt-3 max-w-2xl">
           {t("how.ship_compare.title")}
         </h2>
         <p className="mt-2 text-[13.5px] text-fg-muted max-w-2xl">
@@ -232,7 +226,7 @@ export function HowClient() {
           <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
             Worked example
           </p>
-          <h2 className="mt-3 text-[24px] md:text-[28px] font-semibold tracking-[-0.01em] max-w-2xl">
+          <h2 className="mt-3 max-w-2xl">
             What the landed cost looks like for a 100-unit TWS earbuds order
           </h2>
           <p className="mt-2 text-[13.5px] text-fg-muted max-w-2xl">
@@ -303,7 +297,7 @@ export function HowClient() {
         <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
           {t("how.compare.eyebrow")}
         </p>
-        <h2 className="mt-3 text-[24px] md:text-[28px] font-semibold tracking-[-0.01em] max-w-2xl">
+        <h2 className="mt-3 max-w-2xl">
           {t("how.compare.title")}
         </h2>
         <div className="mt-6 max-w-4xl card overflow-hidden">
@@ -360,7 +354,7 @@ export function HowClient() {
         <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
           {t("how.pay.eyebrow")}
         </p>
-        <h2 className="mt-3 text-[24px] md:text-[28px] font-semibold tracking-[-0.01em] max-w-2xl">
+        <h2 className="mt-3 max-w-2xl">
           {t("how.pay.title")}
         </h2>
         <p className="mt-2 text-[13.5px] text-fg-muted max-w-2xl">
@@ -393,7 +387,7 @@ export function HowClient() {
             <p className="text-[12px] font-medium tracking-wider uppercase text-emerald-400">
               Quality control
             </p>
-            <h2 className="mt-3 text-[28px] md:text-[36px] leading-tight font-semibold tracking-[-0.02em] text-white">
+            <h2 className="mt-3 text-white">
               {t("how.band.title")}
             </h2>
             <p className="mt-4 text-[16px] text-slate-300 leading-relaxed">
@@ -408,7 +402,7 @@ export function HowClient() {
         <p className="text-[12px] font-medium tracking-wider uppercase text-cyan-700">
           {t("how.faq.eyebrow")}
         </p>
-        <h2 className="mt-3 text-[24px] md:text-[28px] font-semibold tracking-[-0.01em] max-w-2xl">
+        <h2 className="mt-3 max-w-2xl">
           {t("how.faq.title")}
         </h2>
         <div className="mt-6 max-w-4xl card overflow-hidden">
@@ -441,7 +435,7 @@ export function HowClient() {
           <p className="text-[12px] font-medium tracking-wider uppercase text-emerald-400">
             {t("how.cta.eyebrow")}
           </p>
-          <h2 className="mt-3 text-[26px] md:text-[32px] leading-tight font-semibold tracking-[-0.02em] max-w-2xl text-white">
+          <h2 className="mt-3 text-white max-w-2xl">
             {t("how.cta.title")}
           </h2>
           <p className="mt-3 text-[15px] text-slate-300 leading-relaxed max-w-xl">

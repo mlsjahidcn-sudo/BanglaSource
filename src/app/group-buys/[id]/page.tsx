@@ -236,7 +236,7 @@ export default async function GroupBuyDetailPage({
                 {CATEGORIES.find((c) => c.value === detail.product.category)?.label ??
                   detail.product.category}
               </p>
-              <h1 className="mt-2 text-[28px] md:text-[34px] leading-[1.1] font-semibold tracking-[-0.015em]">
+              <h1 className="mt-2 h-2 !text-[24px] md:!text-[28px]">
                 {detail.product.title_en}
               </h1>
               <p className="text-[12px] text-fg-subtle font-mono mt-1">

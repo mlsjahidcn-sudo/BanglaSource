@@ -53,9 +53,7 @@ export function TrustBar() {
           Why buyers choose BanglaSource
         </p>
       </div>
-      <h2 className="mt-1 text-center text-[26px] font-semibold tracking-[-0.02em]">
-        Numbers we can prove
-      </h2>
+      <h2 className="mt-1 text-center">Numbers we can prove</h2>
       <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
         <Stat
           value={ap.toLocaleString()}
@@ -116,9 +114,7 @@ function Stat({
       <p className="text-[10px] text-fg-subtle uppercase tracking-wider font-medium">
         {label}
       </p>
-      <p className="mt-2 text-[32px] font-semibold tracking-[-0.02em] text-fg font-mono tnum">
-        {value}
-      </p>
+      <p className="mt-2 stat">{value}</p>
       <p className="mt-1 text-[12px] text-fg-muted">{sub}</p>
     </div>
   );

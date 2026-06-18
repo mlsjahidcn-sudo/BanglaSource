@@ -146,7 +146,7 @@ export function HomeClient({
           matches user mental models and lifts CTR. */}
       {aiPicks.length > 0 && (
         <section className="bg-bg">
-          <Container className="py-10">
+          <Container className="section-sm">
             <ProductCarousel
               eyebrow={t("home.ai_picks.eyebrow")}
               title={t("home.ai_picks.title")}
@@ -161,7 +161,7 @@ export function HomeClient({
       {/* ────────────────────  FOR YOU (personalized)  ──────────────────── */}
       {loaded && (
         <section className="bg-bg">
-          <Container className="py-10">
+          <Container className="section-sm">
             <ForYou limit={12} />
           </Container>
         </section>
@@ -169,7 +169,7 @@ export function HomeClient({
 
       {/* ────────────────────  PER-CATEGORY STRIPS  ──────────────────── */}
       <section className="bg-bg">
-        <Container className="py-10">
+        <Container className="section-sm">
           {loaded
             ? categoryList.map((c) => (
                 <CategoryStrip
@@ -185,28 +185,28 @@ export function HomeClient({
 
       {/* ────────────────────  TRUST BAR  ──────────────────── */}
       <section className="bg-bg-soft border-y border-border">
-        <Container className="py-10">
+        <Container className="section-sm">
           <TrustBar />
         </Container>
       </section>
 
       {/* ────────────────────  VALUE PROPS  ──────────────────── */}
       <section className="bg-bg">
-        <Container className="py-12">
+        <Container className="section-sm">
           <ValueProps />
         </Container>
       </section>
 
       {/* ────────────────────  TESTIMONIALS  ──────────────────── */}
       <section className="bg-bg">
-        <Container className="py-12">
+        <Container className="section-sm">
           <Testimonials />
         </Container>
       </section>
 
       {/* ────────────────────  NEWSLETTER  ──────────────────── */}
       <section className="bg-bg-soft border-t border-border">
-        <Container className="py-12">
+        <Container className="section-sm">
           <NewsletterSignup />
         </Container>
       </section>
@@ -405,7 +405,7 @@ function CategoryStrip({
           <span
             className={`w-1.5 h-1.5 rounded-full ${cat.accent} mb-2.5`}
           />
-          <h2 className="section-title !text-[22px] md:!text-[26px]">
+          <h2 className="h-3 !font-semibold">
             {lang === "bn" ? cat.name_bn : cat.name_en}
           </h2>
           <span className="text-[12px] text-fg-subtle font-mono tnum pb-1.5 hidden sm:inline">

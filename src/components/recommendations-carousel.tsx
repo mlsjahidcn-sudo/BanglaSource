@@ -98,7 +98,7 @@ export function RecommendationsCarousel({
   if (loading) {
     return (
       <section className="mt-12">
-        <h2 className="text-[18px] font-semibold tracking-tight">
+        <h2>
           You might also like
         </h2>
         <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
@@ -123,7 +123,7 @@ export function RecommendationsCarousel({
     <section className="mt-12">
       <div className="flex items-baseline justify-between">
         <div>
-          <h2 className="text-[18px] font-semibold tracking-tight">
+          <h2>
             You might also like
           </h2>
           <p className="mt-1 text-[12px] text-fg-subtle">
