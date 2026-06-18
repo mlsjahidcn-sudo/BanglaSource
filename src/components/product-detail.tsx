@@ -103,8 +103,15 @@ export function ProductDetail({ product }: { product: Product }) {
 
   return (
     <div className="grid lg:grid-cols-12 gap-10 lg:gap-14">
-      {/* ───── Gallery ───── */}
-      <div className="lg:col-span-7">
+      {/* ───── Gallery ─────
+          NOTE: min-w-0 on the grid items is critical for mobile.
+          Without it, the grid item's intrinsic min-content (driven
+          by the aspect-square image inside) makes the column wider
+          than the available container width, causing horizontal
+          overflow. The `aspect-square` parent already enforces
+          square aspect; the image is `fill` so it scales to 100%
+          of the parent once the parent can shrink. */}
+      <div className="lg:col-span-7 min-w-0">
         <div className="relative aspect-square bg-slate-50 rounded-lg overflow-hidden border border-border">
           <Image
             src={product.images[activeImage]}
@@ -293,41 +300,101 @@ export function ProductDetail({ product }: { product: Product }) {
               </span>
             </div>
           </div>
-          <table className="table-pro mt-4">
-            <thead>
-              <tr>
-                <th>Quantity</th>
-                <th className="text-right">Factory (CNY)</th>
-                <th className="text-right">Per piece (৳)</th>
-                <th className="text-right">Saving</th>
-              </tr>
-            </thead>
-            <tbody>
-              {product.price_tiers.map((tier, i) => {
-                const base = product.price_tiers[0].price_cny_fen;
-                const saving = i === 0 ? 0 : Math.round((1 - tier.price_cny_fen / base) * 100);
-                const isCurrent =
-                  qty >= tier.qty_min && qty <= tier.qty_max;
-                // Show landed BDT/pc as a ballpark: CNY × FX × (1 + duty% + 15%VAT + 5%AIT + markup%)
-                // This is an "all-in landed" preview. Exact per-tot is in the right panel.
-                const fen = tier.price_cny_fen;
-                const cny = fen / 100;
-                const landedBdtPerPc = Math.ceil(
-                  cny *
-                    16.85 *
-                    (1 + effectiveMarkupPct(product) / 100) *
-                    1.30, // rough: 10% duty + 15% VAT + 5% AIT average for 7 categories
-                );
-                return (
-                  <tr
-                    key={i}
-                    className={isCurrent ? "bg-cyan-50/60" : ""}
-                  >
-                    <td>
-                      <span className="font-mono tnum">
-                        {tier.qty_min}
-                        {tier.qty_max === 9999 ? "+" : `–${tier.qty_max}`}
+          {/* MOBILE: stacked tier cards (cleaner on small screens).
+              DESKTOP: dense data table wrapped in horizontal
+              scroll for any future overflow. The cards use the
+              same data but render vertically on mobile so columns
+              don't get squeezed below 12px. */}
+          <div className="md:hidden mt-4 space-y-2">
+            {product.price_tiers.map((tier, i) => {
+              const base = product.price_tiers[0].price_cny_fen;
+              const saving = i === 0 ? 0 : Math.round((1 - tier.price_cny_fen / base) * 100);
+              const isCurrent =
+                qty >= tier.qty_min && qty <= tier.qty_max;
+              const fen = tier.price_cny_fen;
+              const cny = fen / 100;
+              const landedBdtPerPc = Math.ceil(
+                cny *
+                  16.85 *
+                  (1 + effectiveMarkupPct(product) / 100) *
+                  1.30,
+              );
+              return (
+                <div
+                  key={i}
+                  className={`rounded-md border p-3 ${
+                    isCurrent
+                      ? "border-cyan-600 bg-cyan-50/60"
+                      : "border-border"
+                  }`}
+                >
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="font-mono tnum text-[13px] font-medium">
+                      {tier.qty_min}
+                      {tier.qty_max === 9999 ? "+" : `–${tier.qty_max}`} pcs
+                    </span>
+                    {saving > 0 && (
+                      <span className="text-[11px] text-emerald-700 font-medium">
+                        −{saving}%
                       </span>
+                    )}
+                  </div>
+                  <div className="mt-1.5 flex items-baseline justify-between gap-2">
+                    <span className="text-[11px] uppercase tracking-wider text-fg-subtle">
+                      Factory
+                    </span>
+                    <span className="text-[12px] text-fg-muted price-tag">
+                      {fmtCny(fen)}
+                    </span>
+                  </div>
+                  <div className="mt-0.5 flex items-baseline justify-between gap-2">
+                    <span className="text-[11px] uppercase tracking-wider text-fg-subtle">
+                      Per piece
+                    </span>
+                    <span className="text-[14px] font-semibold text-fg price-tag">
+                      {fmtBdt(landedBdtPerPc)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="hidden md:block mt-4 -mx-6 md:mx-0 overflow-x-auto">
+            <table className="table-pro min-w-full">
+              <thead>
+                <tr>
+                  <th>Quantity</th>
+                  <th className="text-right">Factory (CNY)</th>
+                  <th className="text-right">Per piece (৳)</th>
+                  <th className="text-right">Saving</th>
+                </tr>
+              </thead>
+              <tbody>
+                {product.price_tiers.map((tier, i) => {
+                  const base = product.price_tiers[0].price_cny_fen;
+                  const saving = i === 0 ? 0 : Math.round((1 - tier.price_cny_fen / base) * 100);
+                  const isCurrent =
+                    qty >= tier.qty_min && qty <= tier.qty_max;
+                  // Show landed BDT/pc as a ballpark: CNY × FX × (1 + duty% + 15%VAT + 5%AIT + markup%)
+                  // This is an "all-in landed" preview. Exact per-tot is in the right panel.
+                  const fen = tier.price_cny_fen;
+                  const cny = fen / 100;
+                  const landedBdtPerPc = Math.ceil(
+                    cny *
+                      16.85 *
+                      (1 + effectiveMarkupPct(product) / 100) *
+                      1.30, // rough: 10% duty + 15% VAT + 5% AIT average for 7 categories
+                  );
+                  return (
+                    <tr
+                      key={i}
+                      className={isCurrent ? "bg-cyan-50/60" : ""}
+                    >
+                      <td>
+                        <span className="font-mono tnum">
+                          {tier.qty_min}
+                          {tier.qty_max === 9999 ? "+" : `–${tier.qty_max}`}
+                        </span>
                       {isCurrent && (
                         <span className="ml-2 text-[10px] uppercase tracking-wider text-cyan-700 font-medium">
                           current
@@ -348,6 +415,7 @@ export function ProductDetail({ product }: { product: Product }) {
               })}
             </tbody>
           </table>
+          </div>
           <p className="mt-2 text-[11px] text-fg-subtle">
             ৳ prices are landed-in-Dhaka estimates (incl. shipping, duty, VAT, AIT).
             Exact total shown in the quote panel — pay 100% at order confirm →
@@ -386,7 +454,7 @@ export function ProductDetail({ product }: { product: Product }) {
       </div>
 
       {/* ───── Buy panel (sticky) ───── */}
-      <div className="lg:col-span-5">
+      <div className="lg:col-span-5 min-w-0">
         <div className="lg:sticky lg:top-24 space-y-6">
           <div>
             <div className="text-[11.5px] text-fg-muted font-mono tnum tracking-[0.06em]">
@@ -425,7 +493,7 @@ export function ProductDetail({ product }: { product: Product }) {
               <div className="mt-2 flex items-center gap-2">
                 <button
                   onClick={() => setQty(Math.max(product.factory_moq, qty - 1))}
-                  className="w-10 h-10 border border-border rounded-md hover:bg-slate-50 transition-colors text-fg-muted"
+                  className="min-w-[44px] min-h-[44px] w-11 h-11 border border-border rounded-md hover:bg-slate-50 transition-colors text-fg-muted"
                   aria-label="Decrease"
                 >
                   −
@@ -446,7 +514,7 @@ export function ProductDetail({ product }: { product: Product }) {
                 />
                 <button
                   onClick={() => setQty(qty + 1)}
-                  className="w-10 h-10 border border-border rounded-md hover:bg-slate-50 transition-colors text-fg-muted"
+                  className="min-w-[44px] min-h-[44px] w-11 h-11 border border-border rounded-md hover:bg-slate-50 transition-colors text-fg-muted"
                   aria-label="Increase"
                 >
                   +
@@ -472,7 +540,7 @@ export function ProductDetail({ product }: { product: Product }) {
                   <button
                     key={m}
                     onClick={() => setMode(m)}
-                    className={`h-10 px-3 text-[13px] font-medium rounded-md border transition-colors ${
+                    className={`h-11 px-3 text-[13px] font-medium rounded-md border transition-colors min-w-[44px] ${
                       mode === m
                         ? "bg-slate-900 text-white border-slate-900"
                         : "bg-bg text-fg border-border hover:border-border-strong"

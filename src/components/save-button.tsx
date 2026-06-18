@@ -115,7 +115,7 @@ export function SaveButton({ sourceId, variant = "lg", className = "" }: Props) 
         }}
         aria-label={saved ? "Remove from watchlist" : "Save to watchlist"}
         aria-pressed={saved}
-        className={`h-9 w-9 rounded-full bg-bg/90 backdrop-blur-sm border border-border shadow-sm flex items-center justify-center transition-all hover:scale-105 ${
+        className={`h-11 w-11 rounded-full bg-bg/90 backdrop-blur-sm border border-border shadow-sm flex items-center justify-center transition-all hover:scale-105 ${
           saved ? "text-rose-600" : "text-fg-muted hover:text-rose-600"
         } ${className}`}
       >
