@@ -52,22 +52,63 @@ export function PortalShell({
   topbar?: ReactNode;
 }) {
   const pathname = usePathname();
+  // Mobile (< lg) defaults to collapsed icon rail so the main
+  // content gets the screen. Desktop (>= lg) defaults to the
+  // full 256px sidebar. The state is one boolean; what changes
+  // is HOW it's rendered (overlay drawer on mobile vs inline
+  // sidebar on desktop). See `isMobile` below.
   const [expanded, setExpanded] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Cmd/Ctrl + B to toggle the sidebar
+  // Detect mobile viewport after mount (avoids SSR mismatch).
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const apply = () => {
+      setIsMobile(mq.matches);
+      if (mq.matches) setExpanded(false);
+    };
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  // Cmd/Ctrl + B to toggle the sidebar (desktop only — on
+  // mobile the sidebar is a drawer and is closed by tapping
+  // outside or pressing Esc).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
         e.preventDefault();
         setExpanded((v) => !v);
+      } else if (e.key === "Escape" && isMobile && expanded) {
+        setExpanded(false);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [isMobile, expanded]);
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    if (isMobile) setExpanded(false);
+  }, [pathname, isMobile]);
+
+  // Lock body scroll while mobile drawer is open
+  useEffect(() => {
+    if (!isMobile || !expanded) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isMobile, expanded]);
 
   const railWidth = 64;
   const fullWidth = 256;
+  // On mobile, the sidebar is always full-width when open (256px)
+  // and floats over the content as a drawer. On desktop it's an
+  // inline column that either pushes the main (256) or shrinks to
+  // the rail (64).
   const sidebarWidth = expanded ? fullWidth : railWidth;
 
   return (
@@ -75,8 +116,22 @@ export function PortalShell({
       <div className="flex flex-1 min-h-0">
         {/* ───────────────────  SIDEBAR  ─────────────────── */}
         <aside
-          className="shrink-0 border-r border-border bg-bg-soft flex flex-col transition-[width] duration-200"
-          style={{ width: sidebarWidth }}
+          className={cn(
+            "shrink-0 border-r border-border bg-bg-soft flex flex-col transition-[width] duration-200",
+            // On mobile, the sidebar is an OVERLAY drawer — pull
+            // it out of flow with absolute positioning and a
+            // backdrop. The width is the full 256px when open.
+            isMobile &&
+              "absolute inset-y-0 left-0 z-40 shadow-xl transition-transform",
+            isMobile && (expanded ? "translate-x-0" : "-translate-x-full"),
+            isMobile && "w-64",
+            // On desktop it's an inline column
+            !isMobile && "relative",
+          )}
+          style={!isMobile ? { width: sidebarWidth } : undefined}
+          role={isMobile ? "dialog" : undefined}
+          aria-modal={isMobile ? "true" : undefined}
+          aria-label={isMobile ? "Navigation menu" : undefined}
         >
           {/* Brand row */}
           <div
@@ -88,13 +143,13 @@ export function PortalShell({
             <Link
               href="/"
               className={cn(
-                "flex items-center gap-2.5 group",
+                "flex items-center gap-2.5 group min-h-[44px]",
                 expanded ? "" : "justify-center",
               )}
             >
               <div
                 className={cn(
-                  "w-8 h-8 rounded-md bg-cyan-600 text-white font-semibold text-[14px] shrink-0 flex items-center justify-center",
+                  "w-9 h-9 rounded-md bg-cyan-600 text-white font-semibold text-[14px] shrink-0 flex items-center justify-center",
                 )}
               >
                 BS
@@ -113,7 +168,7 @@ export function PortalShell({
           </div>
 
           {/* Toggle button (only shown when expanded so the rail is self-contained) */}
-          {expanded && (
+          {expanded && !isMobile && (
             <button
               onClick={() => setExpanded(false)}
               className="absolute mt-2 ml-[228px] z-10 w-6 h-6 rounded-full bg-bg border border-border hover:bg-bg-soft hidden lg:flex items-center justify-center text-fg-muted"
@@ -149,7 +204,7 @@ export function PortalShell({
                         <Link
                           href={item.href}
                           className={cn(
-                            "flex items-center gap-2.5 rounded-md h-9 px-2.5 text-[13px] transition-colors group",
+                            "flex items-center gap-2.5 rounded-md min-h-[44px] min-w-[44px] h-11 px-2.5 text-[13px] transition-colors group",
                             expanded ? "" : "justify-center",
                             active
                               ? "bg-cyan-50 text-cyan-800 font-medium"
@@ -200,7 +255,7 @@ export function PortalShell({
             {switchToHref && expanded && (
               <Link
                 href={switchToHref}
-                className="flex items-center gap-2.5 rounded-md h-9 px-2.5 text-[13px] text-fg-muted hover:bg-bg hover:text-fg transition-colors"
+                className="flex items-center gap-2.5 rounded-md min-h-[44px] min-w-[44px] h-11 px-2.5 text-[13px] text-fg-muted hover:bg-bg hover:text-fg transition-colors"
               >
                 <span className="w-5 h-5 flex items-center justify-center text-fg-subtle">
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -238,11 +293,43 @@ export function PortalShell({
           </div>
         </aside>
 
+        {/* Mobile drawer backdrop. Clicking it closes the
+            drawer. Only rendered when isMobile + expanded. */}
+        {isMobile && expanded && (
+          <button
+            type="button"
+            aria-label="Close navigation"
+            onClick={() => setExpanded(false)}
+            className="absolute inset-0 z-30 bg-black/40 cursor-default"
+          />
+        )}
+
         {/* ───────────────────  MAIN  ─────────────────── */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 relative">
           {/* Top bar */}
-          <header className="h-14 border-b border-border bg-bg flex items-center px-5 shrink-0 gap-3">
-            {topbar}
+          <header className="h-14 border-b border-border bg-bg flex items-center px-3 md:px-5 shrink-0 gap-3">
+            {/* Hamburger — only on mobile, opens the sidebar drawer */}
+            {isMobile && (
+              <button
+                type="button"
+                onClick={() => setExpanded(true)}
+                className="min-w-[44px] min-h-[44px] -ml-1 rounded-md flex items-center justify-center text-fg-muted hover:bg-bg-soft hover:text-fg"
+                aria-label="Open navigation"
+                title="Open navigation"
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path
+                    d="M2 4h14M2 9h14M2 14h14"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            )}
+            <div className="flex-1 flex items-center gap-3 min-w-0">
+              {topbar}
+            </div>
           </header>
           {/* Page content — id matches the skip-link target
               in /app/layout.tsx so the skip-nav lands here. */}
@@ -274,7 +361,7 @@ function UserPanel({ user }: { user: User }) {
     <div className="relative" data-user-menu>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-2.5 rounded-md h-10 px-2 text-[12px] hover:bg-bg transition-colors"
+        className="w-full flex items-center gap-2.5 rounded-md min-h-[44px] h-11 px-2 text-[12px] hover:bg-bg transition-colors"
       >
         <div className="w-6 h-6 rounded-full bg-cyan-600 text-white flex items-center justify-center text-[10px] font-semibold">
           {(user?.fullName ?? user?.email ?? "?")

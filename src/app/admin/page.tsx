@@ -115,14 +115,14 @@ export default async function AdminDashboard() {
           <>
             <Link
               href="/admin/products/new"
-              className="px-3 py-1.5 text-[12px] border border-emerald-300 text-emerald-700 bg-emerald-50 rounded-md hover:bg-emerald-100"
+              className="inline-flex items-center min-h-[44px] px-3 text-[12px] border border-emerald-300 text-emerald-700 bg-emerald-50 rounded-md hover:bg-emerald-100"
             >
               + Add product
             </Link>
             <Link
               href="/"
               target="_blank"
-              className="px-3 py-1.5 text-[12px] text-fg-muted hover:text-fg"
+              className="inline-flex items-center min-h-[44px] px-3 text-[12px] text-fg-muted hover:text-fg rounded-md hover:bg-bg-soft"
             >
               ↗ Public site
             </Link>

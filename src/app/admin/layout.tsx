@@ -93,21 +93,24 @@ export default async function AdminLayout({
       switchToLabel="Switch to buyer view"
       topbar={
         <>
-          <TopbarSearch />
-          <div className="flex-1" />
+          <div className="hidden md:block flex-1 min-w-0">
+            <TopbarSearch />
+          </div>
+          <div className="flex-1 md:flex-initial" />
           <Link
             href="/admin/alerts"
-            className="h-9 w-9 rounded-md hover:bg-bg-soft flex items-center justify-center text-fg-muted hover:text-fg relative"
+            className="min-w-[44px] min-h-[44px] rounded-md hover:bg-bg-soft inline-flex items-center justify-center text-fg-muted hover:text-fg relative"
             title="Alerts"
+            aria-label="Alerts"
           >
             <IconBell size={16} />
             {counts.openAlerts > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500" />
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500" />
             )}
           </Link>
           <Link
             href="/"
-            className="text-[12px] text-fg-muted hover:text-fg h-9 px-3 rounded-md hover:bg-bg-soft flex items-center"
+            className="text-[12px] text-fg-muted hover:text-fg min-h-[44px] px-3 rounded-md hover:bg-bg-soft hidden sm:inline-flex items-center"
             target="_blank"
           >
             ↗ Public site

@@ -348,7 +348,7 @@ export function CheckoutClient() {
                 </span>
                 <a
                   href="/buyer/addresses?action=new"
-                  className="shrink-0 text-[11.5px] font-medium text-cyan-700 hover:underline"
+                  className="shrink-0 min-h-[44px] min-w-[44px] inline-flex items-center px-2 text-[12px] font-medium text-cyan-700 hover:underline"
                 >
                   Save now →
                 </a>

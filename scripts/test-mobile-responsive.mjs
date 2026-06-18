@@ -78,6 +78,19 @@ async function main() {
     "/blog",
     "/cart",
     "/login",
+    // Phase 51: authenticated pages (signed in as test+phase3 admin)
+    "/checkout",
+    "/admin",
+    "/admin/products",
+    "/admin/orders",
+    "/admin/group-buys",
+    "/admin/alerts",
+    "/admin/settings",
+    "/admin/import",
+    "/admin/products/new",
+    "/buyer",
+    "/buyer/group-buys",
+    "/buyer/addresses",
   ];
 
   console.log("[1] No horizontal overflow on any public page (375px viewport)");
@@ -218,6 +231,232 @@ async function main() {
     "LangToggle NOT visible in topbar on mobile (moved to drawer)",
     !langData.visibleInTopbar,
     `topbar-visible=${langData.visibleInTopbar} drawer=${langData.inDrawer}`,
+  );
+
+  // ────────────────────────────────────────────────────────────
+  // Phase 51: authenticated pages (admin + buyer + cart + checkout)
+  // ────────────────────────────────────────────────────────────
+  console.log("\n[8] Sign in as test+phase3 admin (Phase 51 audit)");
+  mavisCall("browser_navigate", { url: `${URL}/login?redirect=%2Fadmin` });
+  await new Promise((r) => setTimeout(r, 1000));
+  // The login page shows the "already signed in" card when the
+  // user is already authenticated. Skip the form fill in that
+  // case and just navigate to /admin.
+  const signinCheck = mavisCall("browser_evaluate", {
+    function: `() => {
+      const email = document.querySelector('input[type=email]');
+      const pwd = document.querySelector('input[type=password]');
+      if (!email || !pwd) return { found: false, alreadySignedIn: true };
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+      setter.call(email, 'test+phase3@banglasource.bd');
+      email.dispatchEvent(new Event('input', { bubbles: true }));
+      setter.call(pwd, 'TestPass123!');
+      pwd.dispatchEvent(new Event('input', { bubbles: true }));
+      document.querySelector('button[type=submit]').click();
+      return { found: true, submitted: true };
+    }`,
+  });
+  const signinData = JSON.parse(signinCheck);
+  check(
+    "admin login form present OR already signed in",
+    signinData.found || signinData.alreadySignedIn,
+    JSON.stringify(signinData),
+  );
+  // Give the redirect time to land
+  await new Promise((r) => setTimeout(r, 3000));
+  // If still on /login (already-signed-in card), click its CTA to go to /admin
+  const currentUrlCheck = mavisCall("browser_evaluate", {
+    function: `() => ({ url: location.href })`,
+  });
+  if (JSON.parse(currentUrlCheck).url.includes("/login")) {
+    // The signed-in card has a "Go to admin" / "Go to your portal" link
+    mavisCall("browser_evaluate", {
+      function: `() => { const link = Array.from(document.querySelectorAll('a')).find(a => a.getAttribute('href')?.includes('/admin')); if (link) link.click(); return { clicked: !!link }; }`,
+    });
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  // Verify we landed on /admin (or close to it)
+  const postSignin = mavisCall("browser_evaluate", {
+    function: `() => ({ url: location.href })`,
+  });
+  const postData = JSON.parse(postSignin);
+  check(
+    "landed on /admin after sign-in",
+    postData.url.includes("/admin"),
+    `url=${postData.url}`,
+  );
+
+  console.log("\n[9] Admin/buyer/cart/checkout — no horizontal overflow at 375px");
+  const authedPaths = [
+    "/admin",
+    "/admin/products",
+    "/admin/orders",
+    "/admin/group-buys",
+    "/admin/alerts",
+    "/admin/settings",
+    "/admin/import",
+    "/admin/products/new",
+    "/buyer",
+    "/buyer/group-buys",
+    "/buyer/addresses",
+    "/cart",
+    "/checkout",
+  ];
+  for (const path of authedPaths) {
+    mavisCall("browser_navigate", { url: `${URL}${path}` });
+    await new Promise((r) => setTimeout(r, 600));
+    const r = mavisCall("browser_evaluate", {
+      function: `() => {
+        const sw = document.documentElement.scrollWidth;
+        const cw = document.documentElement.clientWidth;
+        return { path: ${JSON.stringify(path)}, sw, cw, diff: sw - cw };
+      }`,
+    });
+    const data = JSON.parse(r);
+    check(
+      `${path}: scrollWidth (${data.sw}) ≤ clientWidth (${data.cw})`,
+      data.diff <= 1,
+      `diff=${data.diff}`,
+    );
+  }
+
+  console.log("\n[10] Admin sidebar drawer — hamburger toggles, all nav links 44px");
+  mavisCall("browser_navigate", { url: `${URL}/admin` });
+  await new Promise((r) => setTimeout(r, 500));
+  const burgerCheck = mavisCall("browser_evaluate", {
+    function: `() => {
+      const burger = document.querySelector('button[aria-label="Open navigation"]');
+      if (!burger) return { found: false };
+      const r = burger.getBoundingClientRect();
+      const s = window.getComputedStyle(burger);
+      return {
+        found: true,
+        visible: r.width > 0 && r.height > 0 && s.display !== 'none',
+        w: Math.round(r.width),
+        h: Math.round(r.height),
+      };
+    }`,
+  });
+  const burgerData = JSON.parse(burgerCheck);
+  check(
+    "admin hamburger button visible on mobile",
+    burgerData.visible,
+    JSON.stringify(burgerData),
+  );
+  check(
+    "admin hamburger ≥ 44x44",
+    burgerData.w >= 44 && burgerData.h >= 44,
+    `got ${burgerData.w}x${burgerData.h}`,
+  );
+
+  // Open the drawer
+  mavisCall("browser_evaluate", {
+    function: `() => { document.querySelector('button[aria-label="Open navigation"]')?.click(); return { clicked: true }; }`,
+  });
+  await new Promise((r) => setTimeout(r, 400));
+  const drawerCheck = mavisCall("browser_evaluate", {
+    function: `() => {
+      const aside = document.querySelector('aside[role="dialog"]');
+      if (!aside) return { found: false };
+      const links = Array.from(aside.querySelectorAll('a[href^="/"]'));
+      const minHeight = links.reduce((min, a) => {
+        const r = a.getBoundingClientRect();
+        return Math.min(min, r.height);
+      }, Infinity);
+      return { found: true, linkCount: links.length, minHeight: Math.round(minHeight) };
+    }`,
+  });
+  const drawerData = JSON.parse(drawerCheck);
+  check("admin drawer opens on hamburger tap", drawerData.found);
+  check(
+    `admin drawer has ≥ 7 nav links — ${drawerData.linkCount} links`,
+    drawerData.linkCount >= 7,
+  );
+  check(
+    "every admin drawer nav link ≥ 44px tall",
+    drawerData.minHeight >= 44,
+    `min h: ${drawerData.minHeight}px`,
+  );
+
+  // Backdrop closes drawer
+  mavisCall("browser_evaluate", {
+    function: `() => { document.querySelector('button[aria-label="Close navigation"]')?.click(); return { closed: true }; }`,
+  });
+  await new Promise((r) => setTimeout(r, 800));
+  // The mobile drawer is an `<aside role="dialog">` that's
+  // translated off-screen with `-translate-x-full` when closed.
+  // The dialog ELEMENT is always in the DOM (so `querySelector`
+  // would find it even when closed) — what changes is its
+  // transform. Check visibility via the backdrop button, which
+  // is only rendered when the drawer is open.
+  const backdropCheck = mavisCall("browser_evaluate", {
+    function: `() => ({ backdropInDom: !!document.querySelector('button[aria-label="Close navigation"]') })`,
+  });
+  check("admin drawer closes on backdrop tap", !JSON.parse(backdropCheck).backdropInDom);
+
+  console.log("\n[11] Topbar buttons ≥ 44x44 on admin (after Phase 51 fix)");
+  const topbarCheck = mavisCall("browser_evaluate", {
+    function: `() => {
+      const header = document.querySelector('header');
+      if (!header) return { found: false };
+      const buttons = Array.from(header.querySelectorAll('button, a'));
+      const small = buttons.filter((b) => {
+        const r = b.getBoundingClientRect();
+        const s = window.getComputedStyle(b);
+        if (s.display === 'none' || s.visibility === 'hidden' || r.width === 0) return false;
+        return r.width < 44 || r.height < 44;
+      });
+      return { found: true, total: buttons.length, smallCount: small.length, smallSample: small.slice(0, 3).map((b) => ({ txt: (b.innerText || b.getAttribute('aria-label') || '').slice(0, 25), w: Math.round(b.getBoundingClientRect().width), h: Math.round(b.getBoundingClientRect().height) })) };
+    }`,
+  });
+  const topbarData = JSON.parse(topbarCheck);
+  check(
+    `admin topbar: all buttons ≥ 44x44 (${topbarData.smallCount} small out of ${topbarData.total})`,
+    topbarData.smallCount === 0,
+    topbarData.smallCount > 0 ? JSON.stringify(topbarData.smallSample) : "all OK",
+  );
+
+  console.log("\n[12] /cart and /checkout — qty + remove + shipping buttons 44x44");
+  mavisCall("browser_navigate", { url: `${URL}/cart` });
+  await new Promise((r) => setTimeout(r, 600));
+  const cartBtnCheck = mavisCall("browser_evaluate", {
+    function: `() => {
+      const main = document.querySelector('main');
+      const small = Array.from(main.querySelectorAll('button, a')).filter((b) => {
+        const r = b.getBoundingClientRect();
+        const s = window.getComputedStyle(b);
+        if (s.display === 'none' || s.visibility === 'hidden' || r.width === 0) return false;
+        return r.width < 44 || r.height < 44;
+      });
+      return { smallCount: small.length, samples: small.slice(0, 3).map((b) => ({ txt: (b.innerText || b.getAttribute('aria-label') || '').slice(0, 25), w: Math.round(b.getBoundingClientRect().width), h: Math.round(b.getBoundingClientRect().height) })) };
+    }`,
+  });
+  const cartBtnData = JSON.parse(cartBtnCheck);
+  check(
+    `cart page: all buttons ≥ 44x44 (${cartBtnData.smallCount} small)`,
+    cartBtnData.smallCount === 0,
+    cartBtnData.smallCount > 0 ? JSON.stringify(cartBtnData.samples) : "all OK",
+  );
+
+  mavisCall("browser_navigate", { url: `${URL}/checkout` });
+  await new Promise((r) => setTimeout(r, 600));
+  const coBtnCheck = mavisCall("browser_evaluate", {
+    function: `() => {
+      const main = document.querySelector('main');
+      const small = Array.from(main.querySelectorAll('button, a')).filter((b) => {
+        const r = b.getBoundingClientRect();
+        const s = window.getComputedStyle(b);
+        if (s.display === 'none' || s.visibility === 'hidden' || r.width === 0) return false;
+        return r.width < 44 || r.height < 44;
+      });
+      return { smallCount: small.length, samples: small.slice(0, 3).map((b) => ({ txt: (b.innerText || b.getAttribute('aria-label') || '').slice(0, 25), w: Math.round(b.getBoundingClientRect().width), h: Math.round(b.getBoundingClientRect().height) })) };
+    }`,
+  });
+  const coBtnData = JSON.parse(coBtnCheck);
+  check(
+    `checkout page: all buttons ≥ 44x44 (${coBtnData.smallCount} small)`,
+    coBtnData.smallCount === 0,
+    coBtnData.smallCount > 0 ? JSON.stringify(coBtnData.samples) : "all OK",
   );
 
   console.log(`\n${pass} passed, ${fail} failed`);

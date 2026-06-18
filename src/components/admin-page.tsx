@@ -81,8 +81,8 @@ export function AdminPageHeader({
   }[dotColor];
   return (
     <div className="mb-8 pb-6 border-b border-border">
-      <div className="flex items-end justify-between gap-4">
-        <div className="min-w-0">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2.5">
             <span
               className={`inline-block w-2 h-2 rounded-full ${dotClass}`}
@@ -94,7 +94,7 @@ export function AdminPageHeader({
               {eyebrow}
             </p>
           </div>
-          <h1 className="mt-3 text-[32px] md:text-[40px] leading-[1.05] font-semibold tracking-[-0.02em]">
+          <h1 className="mt-3 text-[28px] md:text-[40px] leading-[1.05] font-semibold tracking-[-0.02em]">
             {title}
           </h1>
           {subtitle && (
@@ -103,7 +103,11 @@ export function AdminPageHeader({
             </p>
           )}
         </div>
-        {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
+        {actions && (
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            {actions}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -151,9 +151,9 @@ export function CartClient() {
       </h1>
 
       <div className="mt-6 grid lg:grid-cols-12 gap-8">
-        <ul className="lg:col-span-8 divide-y divide-border card">
+        <ul className="lg:col-span-8 divide-y divide-border card min-w-0">
           {enriched.map(({ item, product }) => (
-            <li key={item.productId} className="p-5 flex gap-4">
+            <li key={item.productId} className="p-5 flex gap-4 min-w-0">
               <Link
                 href={`/products/${item.productId}`}
                 className="relative w-24 h-24 rounded-md overflow-hidden bg-slate-50 border border-border shrink-0"
@@ -189,17 +189,17 @@ export function CartClient() {
                   <div className="flex items-center border border-border rounded-md">
                     <button
                       onClick={() => updateQty(item.productId, item.qty - 1)}
-                      className="w-8 h-8 text-fg-muted hover:bg-slate-50"
+                      className="min-w-[44px] min-h-[44px] w-11 h-11 text-fg-muted hover:bg-slate-50 active:bg-slate-100 inline-flex items-center justify-center"
                       aria-label="Decrease"
                     >
                       −
                     </button>
-                    <span className="w-10 h-8 text-center text-[13px] price-tag font-medium flex items-center justify-center">
+                    <span className="min-h-[44px] min-w-[44px] text-center text-[13px] price-tag font-medium flex items-center justify-center">
                       {item.qty}
                     </span>
                     <button
                       onClick={() => updateQty(item.productId, item.qty + 1)}
-                      className="w-8 h-8 text-fg-muted hover:bg-slate-50"
+                      className="min-w-[44px] min-h-[44px] w-11 h-11 text-fg-muted hover:bg-slate-50 active:bg-slate-100 inline-flex items-center justify-center"
                       aria-label="Increase"
                     >
                       +
@@ -213,7 +213,7 @@ export function CartClient() {
               <button
                 onClick={() => remove(item.productId)}
                 aria-label={t("cart.remove")}
-                className="self-start text-fg-subtle hover:text-fg"
+                className="self-start min-w-[44px] min-h-[44px] -mr-2 -mt-2 text-fg-subtle hover:text-fg hover:bg-bg-soft rounded-md inline-flex items-center justify-center"
               >
                 ✕
               </button>
@@ -221,7 +221,7 @@ export function CartClient() {
           ))}
         </ul>
 
-        <aside className="lg:col-span-4 space-y-4">
+        <aside className="lg:col-span-4 space-y-4 min-w-0">
           <div className="card p-5">
             {/* Phase 14: the buyer only sees the product subtotal on
                 the cart page. The landed cost (shipping + customs +
@@ -249,7 +249,7 @@ export function CartClient() {
                   <button
                     key={m}
                     onClick={() => setMode(m)}
-                    className={`h-10 px-3 text-[13px] font-medium rounded-md border transition-colors ${
+                    className={`min-w-[44px] min-h-[44px] px-3 text-[13px] font-medium rounded-md border transition-colors inline-flex items-center justify-center ${
                       mode === m
                         ? "bg-slate-900 text-white border-slate-900"
                         : "bg-bg text-fg border-border hover:border-border-strong"

@@ -98,7 +98,7 @@ export default async function BuyerLayout({
       switchToLabel={user.isAdmin ? "Switch to admin" : undefined}
       topbar={
         <>
-          <div className="flex-1 max-w-md">
+          <div className="hidden md:block flex-1 min-w-0 max-w-md">
             <div className="flex items-center gap-2 h-9 px-3 rounded-md bg-bg-soft border border-border focus-within:border-border-strong transition-colors">
               <span className="text-fg-subtle">
                 <IconSearch size={14} />
@@ -113,11 +113,12 @@ export default async function BuyerLayout({
               </span>
             </div>
           </div>
-          <div className="flex-1" />
+          <div className="flex-1 md:flex-initial" />
           <Link
             href="/cart"
-            className="h-9 w-9 rounded-md hover:bg-bg-soft flex items-center justify-center text-fg-muted hover:text-fg"
+            className="min-w-[44px] min-h-[44px] rounded-md hover:bg-bg-soft inline-flex items-center justify-center text-fg-muted hover:text-fg"
             title="Cart"
+            aria-label="Cart"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
               <path d="M2 2h2l1.6 8.4a1 1 0 001 .8h5.5a1 1 0 001-.78L14 5H4.2" />
@@ -127,8 +128,9 @@ export default async function BuyerLayout({
           </Link>
           <Link
             href="/buyer/quotes"
-            className="h-9 w-9 rounded-md hover:bg-bg-soft flex items-center justify-center text-fg-muted hover:text-fg"
+            className="hidden sm:inline-flex min-w-[44px] min-h-[44px] rounded-md hover:bg-bg-soft items-center justify-center text-fg-muted hover:text-fg"
             title="Quotes"
+            aria-label="Quotes"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 4h10v8H3z" />
@@ -138,7 +140,7 @@ export default async function BuyerLayout({
           <NotificationsBell />
           <Link
             href="/"
-            className="text-[12px] text-fg-muted hover:text-fg h-9 px-3 rounded-md hover:bg-bg-soft flex items-center"
+            className="hidden sm:inline-flex text-[12px] text-fg-muted hover:text-fg min-h-[44px] px-3 rounded-md hover:bg-bg-soft items-center"
             target="_blank"
           >
             ↗ Public site
