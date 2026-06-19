@@ -73,7 +73,7 @@ export const adminNav = (counts: {
         icon: <IconPlus />,
       },
       {
-        label: "Import URL",
+        label: "Import URL / screenshot",
         href: "/admin/import",
         icon: <IconLink />,
       },
