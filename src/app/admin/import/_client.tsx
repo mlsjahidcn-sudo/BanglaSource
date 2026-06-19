@@ -28,7 +28,7 @@ import { CATEGORIES } from "@/lib/catalog-categories";
 type Draft = {
   sourceId: string;
   sourceUrl: string;
-  sourcePlatform: "taobao" | "tmall" | "world_taobao" | "screenshot";
+  sourcePlatform: "taobao" | "tmall" | "world_taobao" | "1688" | "world_1688" | "screenshot";
   apifyRunId?: string;
   scrapedAt: string;
   titleZh: string | null;
@@ -42,12 +42,15 @@ type Draft = {
   images: string[];
   notes?: string | null;
   model?: string;
+  provider?: string;
 };
 
 const PLATFORM_LABEL: Record<Draft["sourcePlatform"], string> = {
   taobao: "Taobao",
   tmall: "Tmall",
   world_taobao: "World Taobao",
+  "1688": "1688",
+  world_1688: "World 1688",
   screenshot: "Screenshot",
 };
 
@@ -285,7 +288,7 @@ export function ImportClient() {
             setScreenshotPreview(null);
           }}
         >
-          From URL (Taobao / Tmall)
+          From URL (Taobao / Tmall / 1688)
         </TabButton>
         <TabButton
           active={tab === "screenshot"}
@@ -307,14 +310,14 @@ export function ImportClient() {
         >
           <label className="block">
             <span className="text-[12px] font-medium text-fg">
-              Taobao / Tmall product URL
+              Taobao / Tmall / 1688 product URL
             </span>
             <div className="mt-1.5 flex items-stretch gap-2">
               <input
                 type="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://item.taobao.com/item.htm?id=123456789012"
+                placeholder="https://item.taobao.com/item.htm?id=123456789012  •  https://detail.1688.com/offer/123456789.html"
                 required
                 autoComplete="off"
                 className="flex-1 px-3 py-2 border border-border rounded text-[13.5px] font-mono focus:outline-none focus:border-cyan-500"
@@ -324,9 +327,10 @@ export function ImportClient() {
               </Button>
             </div>
             <span className="text-[11px] text-fg-subtle mt-1.5 block">
-              Scraping takes 5-20 seconds via Apify. Pinduoduo URLs
-              aren't supported — switch to the screenshot tab or use
-              manual entry.
+              Taobao/Tmall: 5-20s via Apify. 1688: 10-30s — opens
+              the URL in your local browser, screenshots the page,
+              and extracts via vision OCR (bypasses 1688's bot
+              detection). Pinduoduo URLs aren't supported.
             </span>
           </label>
 

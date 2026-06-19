@@ -363,7 +363,7 @@ async function main() {
   );
   check(
     "page contains both URL tab and Screenshot tab labels",
-    html.includes("From URL (Taobao / Tmall)") &&
+    html.includes("From URL (Taobao / Tmall / 1688)") &&
       html.includes("From screenshot"),
   );
   // NOTE: the file input lives inside the screenshot tab, which
